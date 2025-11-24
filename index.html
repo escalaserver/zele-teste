@@ -3138,88 +3138,92 @@
                         }
                         
                         html += `
-                            <div class="border-l-4 ${isBlocked ? 'border-red-500 bg-red-50' : (isUserSuperAdmin ? 'border-purple-500 bg-purple-50' : (isUserAdmin ? 'border-yellow-500 bg-yellow-50' : 'border-gray-300 bg-gray-50'))} rounded-lg p-4 mb-3">
-                                <div class="flex items-start gap-4">
-                                    <!-- Foto -->
-                                    <img src="${photoURL}" alt="${displayName}" class="w-16 h-16 rounded-full object-cover flex-shrink-0 ${isBlocked ? 'opacity-50 grayscale' : ''}">
+                            <div class="border-l-4 ${isBlocked ? 'border-red-500 bg-red-50' : (isUserSuperAdmin ? 'border-purple-500 bg-purple-50' : (isUserAdmin ? 'border-yellow-500 bg-yellow-50' : 'border-gray-300 bg-gray-50'))} rounded-lg p-3 mb-3">
+                                <!-- LINHA 1: Foto + Nome/Email -->
+                                <div class="flex items-center gap-3 mb-3">
+                                    <img src="${photoURL}" alt="${displayName}" class="w-14 h-14 rounded-full object-cover flex-shrink-0 ${isBlocked ? 'opacity-50 grayscale' : ''}">
                                     
-                                    <!-- Informações -->
                                     <div class="flex-1 min-w-0">
-                                        <div class="flex items-center gap-2 mb-1">
-                                            <p class="font-bold text-gray-800 truncate">
-                                                ${displayName}
-                                                ${roleBadge}
-                                                ${isBlocked ? '<span class="text-red-600">🚫</span>' : ''}
-                                                ${isCurrentUser ? '<span class="text-xs text-gray-500">(você)</span>' : ''}
-                                            </p>
-                                        </div>
-                                        <p class="text-sm text-gray-600 truncate">${email}</p>
-                                        <p class="text-xs text-gray-500 mt-1">ID: <code class="bg-gray-200 px-1 rounded">${user.id}</code></p>
-                                        <p class="text-xs text-gray-600 mt-2">
-                                            <strong>🕐 Último acesso:</strong> ${lastLogin}
+                                        <p class="font-bold text-gray-800 text-sm leading-tight mb-1">
+                                            ${displayName}
+                                            ${roleBadge}
+                                            ${isBlocked ? '<span class="text-red-600">🚫</span>' : ''}
+                                            ${isCurrentUser ? '<span class="text-xs text-gray-500">(você)</span>' : ''}
                                         </p>
-                                        ${isUserSuperAdmin ? '<p class="text-xs text-purple-600 font-bold mt-1">👑 Super Administrador</p>' : ''}
-                                        ${isUserAdmin && !isUserSuperAdmin ? '<p class="text-xs text-yellow-600 font-bold mt-1">👑 Administrador</p>' : ''}
-                                        ${isBlocked ? '<p class="text-xs text-red-600 font-bold mt-1">⚠️ Usuário bloqueado</p>' : ''}
+                                        <p class="text-xs text-gray-600 break-all">${email}</p>
                                     </div>
-                                    
-                                    <!-- Botões de Ação -->
-                                    ${!isCurrentUser ? `
-                                        <div class="flex flex-col gap-2 flex-shrink-0">
-                                            <!-- Promover/Rebaixar Admin/SuperAdmin -->
-                                            ${isUserSuperAdmin ? `
-                                                <button 
-                                                    class="toggle-admin-btn px-3 py-1.5 rounded-lg font-semibold text-white text-xs transition bg-purple-600 hover:bg-purple-700"
-                                                    data-user-id="${user.id}"
-                                                    data-user-name="${displayName}"
-                                                    data-current-role="superadmin"
-                                                    title="Rebaixar para Administrador">
-                                                    👑👑 → 👑 Rebaixar
-                                                </button>
-                                            ` : isUserAdmin ? `
-                                                <button 
-                                                    class="toggle-admin-btn px-3 py-1.5 rounded-lg font-semibold text-white text-xs transition bg-yellow-600 hover:bg-yellow-700"
-                                                    data-user-id="${user.id}"
-                                                    data-user-name="${displayName}"
-                                                    data-current-role="admin"
-                                                    title="Promover para Super Admin ou Remover Admin">
-                                                    👑 Gerenciar
-                                                </button>
-                                            ` : `
-                                                <button 
-                                                    class="toggle-admin-btn px-3 py-1.5 rounded-lg font-semibold text-white text-xs transition bg-green-500 hover:bg-green-600"
-                                                    data-user-id="${user.id}"
-                                                    data-user-name="${displayName}"
-                                                    data-current-role="user"
-                                                    title="Tornar Administrador">
-                                                    👑 Tornar Admin
-                                                </button>
-                                            `}
-                                            
-                                            <!-- Bloquear/Desbloquear -->
+                                </div>
+                                
+                                <!-- LINHA 2: Informações detalhadas -->
+                                <div class="mb-3 space-y-1">
+                                    <p class="text-xs text-gray-500">
+                                        <strong>ID:</strong> <code class="bg-gray-200 px-1 rounded text-xs break-all">${user.id}</code>
+                                    </p>
+                                    <p class="text-xs text-gray-600">
+                                        <strong>🕐 Último acesso:</strong><br>
+                                        <span class="ml-4">${lastLogin}</span>
+                                    </p>
+                                    ${isUserSuperAdmin ? '<p class="text-xs text-purple-600 font-bold">👑 Super Administrador</p>' : ''}
+                                    ${isUserAdmin && !isUserSuperAdmin ? '<p class="text-xs text-yellow-600 font-bold">👑 Administrador</p>' : ''}
+                                    ${isBlocked ? '<p class="text-xs text-red-600 font-bold">⚠️ Usuário bloqueado</p>' : ''}
+                                </div>
+                                
+                                <!-- LINHA 3: Botões de Ação -->
+                                ${!isCurrentUser ? `
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <!-- Promover/Rebaixar Admin/SuperAdmin -->
+                                        ${isUserSuperAdmin ? `
                                             <button 
-                                                class="toggle-block-btn px-3 py-1.5 rounded-lg font-semibold text-white text-xs transition ${isBlocked ? 'bg-blue-500 hover:bg-blue-600' : 'bg-red-500 hover:bg-red-600'}"
+                                                class="toggle-admin-btn px-3 py-2 rounded-lg font-semibold text-white text-xs transition bg-purple-600 hover:bg-purple-700 col-span-2"
                                                 data-user-id="${user.id}"
                                                 data-user-name="${displayName}"
-                                                data-is-blocked="${isBlocked}"
-                                                data-user-role="${user.role}"
-                                                title="${isBlocked ? 'Desbloquear acesso' : 'Bloquear acesso'}">
-                                                ${isBlocked ? '🔓 Desbloquear' : '🔒 Bloquear'}
+                                                data-current-role="superadmin"
+                                                title="Rebaixar para Administrador">
+                                                👑👑 → 👑 Rebaixar
                                             </button>
-                                            
-                                            <!-- Excluir (só se bloqueado) -->
-                                            ${isBlocked ? `
-                                                <button 
-                                                    class="delete-user-btn px-3 py-1.5 rounded-lg font-semibold text-white text-xs transition bg-red-700 hover:bg-red-800"
-                                                    data-user-id="${user.id}"
-                                                    data-user-name="${displayName}"
-                                                    title="Excluir usuário permanentemente">
-                                                    🗑️ Excluir
-                                                </button>
-                                            ` : ''}
-                                        </div>
-                                    ` : '<span class="text-xs text-gray-500 text-center">Você não pode<br>alterar seu<br>próprio status</span>'}
-                                </div>
+                                        ` : isUserAdmin ? `
+                                            <button 
+                                                class="toggle-admin-btn px-3 py-2 rounded-lg font-semibold text-white text-xs transition bg-yellow-600 hover:bg-yellow-700 col-span-2"
+                                                data-user-id="${user.id}"
+                                                data-user-name="${displayName}"
+                                                data-current-role="admin"
+                                                title="Promover para Super Admin ou Remover Admin">
+                                                👑 Gerenciar Permissões
+                                            </button>
+                                        ` : `
+                                            <button 
+                                                class="toggle-admin-btn px-3 py-2 rounded-lg font-semibold text-white text-xs transition bg-green-500 hover:bg-green-600 col-span-2"
+                                                data-user-id="${user.id}"
+                                                data-user-name="${displayName}"
+                                                data-current-role="user"
+                                                title="Tornar Administrador">
+                                                👑 Tornar Admin
+                                            </button>
+                                        `}
+                                        
+                                        <!-- Bloquear/Desbloquear -->
+                                        <button 
+                                            class="toggle-block-btn px-3 py-2 rounded-lg font-semibold text-white text-xs transition ${isBlocked ? 'bg-blue-500 hover:bg-blue-600' : 'bg-red-500 hover:bg-red-600'} ${isBlocked ? '' : 'col-span-2'}"
+                                            data-user-id="${user.id}"
+                                            data-user-name="${displayName}"
+                                            data-is-blocked="${isBlocked}"
+                                            data-user-role="${user.role}"
+                                            title="${isBlocked ? 'Desbloquear acesso' : 'Bloquear acesso'}">
+                                            ${isBlocked ? '🔓 Desbloquear' : '🔒 Bloquear'}
+                                        </button>
+                                        
+                                        <!-- Excluir (só se bloqueado) -->
+                                        ${isBlocked ? `
+                                            <button 
+                                                class="delete-user-btn px-3 py-2 rounded-lg font-semibold text-white text-xs transition bg-red-700 hover:bg-red-800"
+                                                data-user-id="${user.id}"
+                                                data-user-name="${displayName}"
+                                                title="Excluir usuário permanentemente">
+                                                🗑️ Excluir
+                                            </button>
+                                        ` : ''}
+                                    </div>
+                                ` : '<p class="text-xs text-gray-500 text-center py-2 bg-gray-100 rounded">Você não pode alterar seu próprio status</p>'}
                             </div>
                         `;
                     });
