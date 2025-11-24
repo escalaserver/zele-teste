@@ -3042,8 +3042,13 @@
 
             // Carregar lista de todos os usuários (apenas superadmin)
             async function loadUsersList() {
+                console.log('🔍 loadUsersList chamada');
+                console.log('🔍 isSuperAdmin:', isSuperAdmin);
+                console.log('🔍 currentUser:', currentUser?.email, currentUser?.uid);
+                
                 // Verificar se é super admin
                 if (!isSuperAdmin) {
+                    console.log('❌ Usuário não é super admin');
                     document.getElementById('users-list').innerHTML = 
                         '<p class="text-center text-red-500 py-8">⚠️ Acesso negado. Apenas Super Administradores podem gerenciar usuários.</p>';
                     return;
@@ -3053,11 +3058,15 @@
                     const { collection, getDocs } = window.firestoreMethods;
                     const usersList = document.getElementById('users-list');
                     
+                    console.log('📋 Iniciando busca de usuários no Firestore...');
+                    
                     // Mostrar loading
                     usersList.innerHTML = '<div class="text-center py-8"><div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 mx-auto"></div><p class="text-gray-600 mt-4">Carregando usuários...</p></div>';
                     
                     // Buscar APENAS usuários da coleção users (fonte única e confiável)
+                    console.log('🔍 Executando getDocs...');
                     const usersSnapshot = await getDocs(collection(window.firebaseDb, 'users'));
+                    console.log('✅ getDocs completado. Documentos encontrados:', usersSnapshot.size);
                     
                     if (usersSnapshot.empty) {
                         usersList.innerHTML = '<p class="text-center text-gray-500 py-8">Nenhum usuário encontrado no sistema.</p>';
