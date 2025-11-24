@@ -3054,18 +3054,37 @@
                     return;
                 }
                 
+                // VERIFICAÇÃO CRÍTICA: Garantir que o usuário está autenticado
+                const auth = window.firebaseAuth;
+                const currentAuthUser = auth.currentUser;
+                
+                if (!currentAuthUser) {
+                    console.error('❌ ERRO: Nenhum usuário autenticado no Firebase Auth!');
+                    document.getElementById('users-list').innerHTML = 
+                        '<p class="text-center text-red-500 py-8">❌ Erro: Usuário não autenticado. Faça logout e login novamente.</p>';
+                    return;
+                }
+                
+                console.log('✅ Firebase Auth - Usuário autenticado:', currentAuthUser.email, currentAuthUser.uid);
+                
                 try {
-                    const { collection, getDocs } = window.firestoreMethods;
+                    const { collection, getDocs, query, orderBy } = window.firestoreMethods;
                     const usersList = document.getElementById('users-list');
                     
                     console.log('📋 Iniciando busca de usuários no Firestore...');
+                    console.log('🔍 Firestore DB:', window.firebaseDb);
+                    console.log('🔍 Firestore projectId:', window.firebaseDb._databaseId?.projectId);
                     
                     // Mostrar loading
                     usersList.innerHTML = '<div class="text-center py-8"><div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 mx-auto"></div><p class="text-gray-600 mt-4">Carregando usuários...</p></div>';
                     
-                    // Buscar APENAS usuários da coleção users (fonte única e confiável)
-                    console.log('🔍 Executando getDocs...');
-                    const usersSnapshot = await getDocs(collection(window.firebaseDb, 'users'));
+                    // TENTATIVA 1: Buscar com query ordenada
+                    console.log('🔍 Tentativa 1: Buscando com query ordenada...');
+                    const usersRef = collection(window.firebaseDb, 'users');
+                    const q = query(usersRef, orderBy('email', 'asc'));
+                    
+                    console.log('🔍 Query criada. Executando getDocs...');
+                    const usersSnapshot = await getDocs(q);
                     console.log('✅ getDocs completado. Documentos encontrados:', usersSnapshot.size);
                     
                     if (usersSnapshot.empty) {
@@ -3237,8 +3256,37 @@
                     
                 } catch (error) {
                     console.error('❌ Erro ao carregar usuários:', error);
+                    console.error('❌ Tipo de erro:', error.constructor.name);
+                    console.error('❌ Código de erro:', error.code);
+                    console.error('❌ Mensagem completa:', error.message);
+                    console.error('❌ Stack trace:', error.stack);
+                    
+                    // Tentar ler o próprio documento do usuário para testar permissões
+                    console.log('🔍 Testando leitura do próprio documento do usuário...');
+                    try {
+                        const { doc, getDoc } = window.firestoreMethods;
+                        const userDocRef = doc(window.firebaseDb, 'users', currentUser.uid);
+                        const userDocSnap = await getDoc(userDocRef);
+                        
+                        if (userDocSnap.exists()) {
+                            console.log('✅ Consegui ler MEU próprio documento!');
+                            console.log('📄 Dados do meu documento:', userDocSnap.data());
+                        } else {
+                            console.error('❌ Meu próprio documento não existe!');
+                        }
+                    } catch (testError) {
+                        console.error('❌ Erro ao tentar ler meu próprio documento:', testError);
+                    }
+                    
                     document.getElementById('users-list').innerHTML = 
-                        '<p class="text-center text-red-500 py-8">Erro ao carregar usuários. Tente novamente.</p>';
+                        `<div class="text-center text-red-500 py-8">
+                            <p class="font-bold mb-2">❌ Erro ao carregar usuários</p>
+                            <p class="text-sm mb-2">Código: ${error.code || 'desconhecido'}</p>
+                            <p class="text-xs text-gray-600">${error.message}</p>
+                            <button onclick="loadUsersList()" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                                🔄 Tentar novamente
+                            </button>
+                        </div>`;
                 }
             }
 
