@@ -1455,7 +1455,7 @@
                 document.getElementById('photo-upload-input').click();
             });
 
-            // Upload de foto de perfil
+            // Upload de foto de perfil (usando Base64 no Firestore - Grátis)
             document.getElementById('photo-upload-input')?.addEventListener('change', async (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
@@ -1467,49 +1467,43 @@
                     return;
                 }
                 
-                // Validar tamanho (máximo 5MB)
-                if (file.size > 5 * 1024 * 1024) {
-                    showModal('❌ A imagem deve ter no máximo 5MB.');
+                // Validar tamanho (máximo 500KB para Base64)
+                if (file.size > 500 * 1024) {
+                    showModal('❌ A imagem deve ter no máximo 500KB. Tente uma imagem menor ou use um compressor online.');
                     e.target.value = '';
                     return;
                 }
                 
                 try {
                     showLoading();
-                    console.log('📸 Fazendo upload da foto...');
+                    console.log('📸 Processando foto...');
                     
-                    // Verificar se Firebase Storage está disponível
-                    if (!window.firebaseStorage || !window.firebaseStorageMethods) {
-                        throw new Error('Firebase Storage não inicializado');
-                    }
+                    // Converter imagem para Base64
+                    const photoBase64 = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(file);
+                    });
                     
-                    // Upload para Firebase Storage
-                    const { ref, uploadBytes, getDownloadURL } = window.firebaseStorageMethods;
-                    const storageRef = ref(window.firebaseStorage, `profile-photos/${currentUser.uid}/${Date.now()}_${file.name}`);
-                    
-                    console.log('📤 Enviando arquivo...');
-                    await uploadBytes(storageRef, file);
-                    console.log('🔗 Obtendo URL...');
-                    const photoURL = await getDownloadURL(storageRef);
-                    
-                    console.log('✅ Foto enviada:', photoURL);
+                    console.log('✅ Foto convertida para Base64');
                     
                     // Atualizar perfil no Firebase Auth
                     console.log('🔄 Atualizando perfil Auth...');
                     const { updateProfile } = window.firebaseAuthMethods;
-                    await updateProfile(currentUser, { photoURL });
+                    await updateProfile(currentUser, { photoURL: photoBase64 });
                     
                     // Atualizar no Firestore
                     console.log('💾 Salvando no Firestore...');
                     const { doc, updateDoc } = window.firestoreMethods;
                     await updateDoc(doc(window.firebaseDb, 'users', currentUser.uid), {
-                        photoURL: photoURL,
+                        photoURL: photoBase64,
                         updatedAt: new Date().toISOString()
                     });
                     
                     // Atualizar UI
-                    if (elements.userPhoto) elements.userPhoto.src = photoURL;
-                    if (elements.menuUserPhoto) elements.menuUserPhoto.src = photoURL;
+                    if (elements.userPhoto) elements.userPhoto.src = photoBase64;
+                    if (elements.menuUserPhoto) elements.menuUserPhoto.src = photoBase64;
                     
                     console.log('✅ Foto de perfil atualizada com sucesso');
                     
