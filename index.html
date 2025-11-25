@@ -630,7 +630,13 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Gráfico 1: Times com Menos de 5 Voluntários (ALERTA) -->
                 <div class="card-float rounded-xl p-6">
-                    <h3 class="font-bold text-lg mb-4" style="color: #151b29;">🚨 Times com Menos de 5 Voluntários</h3>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-lg" style="color: #151b29;">🚨 Times com Menos de 5 Voluntários</h3>
+                        <div class="flex gap-2">
+                            <button id="chart4-prev" class="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm" title="Anterior">←</button>
+                            <button id="chart4-next" class="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm" title="Próximo">→</button>
+                        </div>
+                    </div>
                     <div class="h-64 cursor-pointer" title="Clique nas barras para ver detalhes">
                         <canvas id="chart-empty-teams"></canvas>
                     </div>
@@ -640,14 +646,22 @@
                         <span class="inline-block w-3 h-3 rounded mr-1 ml-3" style="background-color: rgba(249, 115, 22, 0.8);"></span> 3 times
                         <span class="inline-block w-3 h-3 rounded mr-1 ml-3" style="background-color: rgba(239, 68, 68, 0.8);"></span> 4 times
                     </p>
+                    <p class="text-xs text-gray-400 mt-2 text-center">← Use as setas para navegar →</p>
                 </div>
 
-                <!-- Gráfico 2: Eventos com Mais Voluntários -->
+                <!-- Gráfico 2: Quantidade de Voluntários por Dia -->
                 <div class="card-float rounded-xl p-6">
-                    <h3 class="font-bold text-lg mb-4" style="color: #151b29;">🎉 Eventos com Mais Voluntários</h3>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-lg" style="color: #151b29;">📆 Quantidade de Voluntários por Dia</h3>
+                        <div class="flex gap-2">
+                            <button id="chart3-prev" class="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm" title="Anterior">←</button>
+                            <button id="chart3-next" class="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm" title="Próximo">→</button>
+                        </div>
+                    </div>
                     <div class="h-64">
                         <canvas id="chart-events"></canvas>
                     </div>
+                    <p class="text-xs text-gray-400 mt-2 text-center">← Use as setas para navegar →</p>
                 </div>
 
                 <!-- Gráfico 3: Voluntários Únicos por Time -->
@@ -658,9 +672,9 @@
                     </div>
                 </div>
 
-                <!-- Gráfico 4: Top 10 Voluntários Mais Ativos -->
+                <!-- Gráfico 4: Ranking de Voluntários com mais Escalas -->
                 <div class="card-float rounded-xl p-6">
-                    <h3 class="font-bold text-lg mb-4" style="color: #151b29;">🏆 Top 10 Voluntários Mais Ativos</h3>
+                    <h3 class="font-bold text-lg mb-4" style="color: #151b29;">📈 Ranking de Voluntários com mais Escalas</h3>
                     <div class="h-64">
                         <canvas id="chart-volunteers"></canvas>
                     </div>
@@ -1607,7 +1621,7 @@
             // Função para animar botões dos times em sequência (horário)
             function animateTeamButtonsSequence() {
                 const teamOrder = ['welcome', 'backstage', 'parking', 'kids'];
-                const delay = 200; // tempo total da animação (1 piscada x 0.2s = 0.2s)
+                const delay = 350; // tempo entre cada animação
                 
                 teamOrder.forEach((teamName, index) => {
                     setTimeout(() => {
@@ -1616,7 +1630,7 @@
                             btn.classList.add('pulse-team');
                             setTimeout(() => {
                                 btn.classList.remove('pulse-team');
-                            }, 400); // 1 piscada x 0.4s = 0.4s
+                            }, 600); // duração da animação
                         }
                     }, index * delay);
                 });
@@ -3530,7 +3544,10 @@
                     await generateChart1_TeamParticipation(escalas);
                     await generateChart2_TopVolunteers(escalas);
                     await generateChart3_EventsWithMostVolunteers(escalas);
-                    await generateChart4_EventsWithEmptyTeams();
+                    await generateChart4_EventsWithEmptyTeams(dateFrom, dateTo);
+                    
+                    // Configurar navegação dos gráficos com scroll
+                    setupChartNavigation();
                     
                     console.log('✅ Dashboard carregado com sucesso!');
                     
@@ -3616,7 +3633,7 @@
                 });
             }
 
-            // Gráfico 2: Top 10 Voluntários Mais Ativos
+            // Gráfico 2: Ranking de Voluntários com mais Escalas
             async function generateChart2_TopVolunteers(escalas) {
                 const volunteerCount = {};
                 
@@ -3672,7 +3689,7 @@
                 });
             }
 
-            // Gráfico 3: Eventos com Mais Voluntários
+            // Gráfico 3: Quantidade de Voluntários por Dia
             async function generateChart3_EventsWithMostVolunteers(escalas) {
                 const eventCount = {};
                 
@@ -3720,12 +3737,20 @@
                             }
                         },
                         scales: {
+                            x: {
+                                min: 0,
+                                max: Math.min(9, labels.length - 1), // Mostrar apenas 10 barras por vez
+                            },
                             y: {
                                 beginAtZero: true,
                                 ticks: {
                                     stepSize: 1
                                 }
                             }
+                        },
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
                         }
                     }
                 });
@@ -3734,22 +3759,22 @@
             // Gráfico 4: Times com Menos de 5 Voluntários (ALERTA)
             const chart4EventDetails = []; // Armazena detalhes de cada evento para o popup
             
-            async function generateChart4_EventsWithEmptyTeams() {
+            async function generateChart4_EventsWithEmptyTeams(dateFrom, dateTo) {
                 try {
                     // Limpar detalhes anteriores
                     chart4EventDetails.length = 0;
                     
-                    // Buscar eventos futuros
-                    const futureEvents = availableDates.filter(date => {
-                        const eventDate = new Date(date.value.split('|')[0]);
-                        return eventDate >= new Date();
-                    }).slice(0, 10); // Próximos 10 eventos
+                    // Filtrar eventos no período selecionado
+                    const filteredEvents = availableDates.filter(date => {
+                        const eventDate = new Date(date.value.split('|')[0] + 'T00:00:00');
+                        return eventDate >= dateFrom && eventDate <= dateTo;
+                    }).slice(0, 30); // Máximo 30 eventos
                     
                     const labels = [];
                     const underStaffedCount = [];
                     const backgroundColors = [];
                     
-                    for (const event of futureEvents) {
+                    for (const event of filteredEvents) {
                         const [dateStr, timeStr, ...eventParts] = event.value.split('|');
                         const eventName = eventParts.join('|');
                         
@@ -3836,9 +3861,19 @@
                             plugins: {
                                 legend: {
                                     display: false
+                                },
+                                tooltip: {
+                                    enabled: true,
+                                    callbacks: {
+                                        afterLabel: () => 'Clique para ver detalhes'
+                                    }
                                 }
                             },
                             scales: {
+                                x: {
+                                    min: 0,
+                                    max: Math.min(9, labels.length - 1), // Mostrar apenas 10 barras por vez
+                                },
                                 y: {
                                     beginAtZero: true,
                                     max: 4,
@@ -3852,6 +3887,10 @@
                                     const index = activeElements[0].index;
                                     showChart4Popup(index);
                                 }
+                            },
+                            interaction: {
+                                mode: 'index',
+                                intersect: false
                             }
                         }
                     });
@@ -3876,7 +3915,7 @@
                 
                 const teamEmojis = {
                     'Recepção': '👋',
-                    'Backstage': '🎭',
+                    'Backstage': '🤝',
                     'Estacionamento': '🚗',
                     'Kids': '👶'
                 };
@@ -3929,6 +3968,63 @@
                     document.getElementById('chart4-popup-overlay').classList.add('hidden');
                 }
             });
+
+            // Função para configurar navegação dos gráficos
+            function setupChartNavigation() {
+                // Navegação do Gráfico 3 (Quantidade de Voluntários por Dia)
+                const chart3PrevBtn = document.getElementById('chart3-prev');
+                const chart3NextBtn = document.getElementById('chart3-next');
+                
+                if (chart3PrevBtn && chart3NextBtn && dashboardCharts.events) {
+                    const chart3 = dashboardCharts.events;
+                    const totalLabels3 = chart3.data.labels.length;
+                    
+                    chart3PrevBtn.addEventListener('click', () => {
+                        const currentMin = chart3.options.scales.x.min || 0;
+                        if (currentMin > 0) {
+                            chart3.options.scales.x.min = Math.max(0, currentMin - 5);
+                            chart3.options.scales.x.max = Math.max(9, currentMin + 4);
+                            chart3.update();
+                        }
+                    });
+                    
+                    chart3NextBtn.addEventListener('click', () => {
+                        const currentMax = chart3.options.scales.x.max || 9;
+                        if (currentMax < totalLabels3 - 1) {
+                            chart3.options.scales.x.max = Math.min(totalLabels3 - 1, currentMax + 5);
+                            chart3.options.scales.x.min = Math.max(0, currentMax - 4);
+                            chart3.update();
+                        }
+                    });
+                }
+                
+                // Navegação do Gráfico 4 (Times com Menos de 5 Voluntários)
+                const chart4PrevBtn = document.getElementById('chart4-prev');
+                const chart4NextBtn = document.getElementById('chart4-next');
+                
+                if (chart4PrevBtn && chart4NextBtn && dashboardCharts.emptyTeams) {
+                    const chart4 = dashboardCharts.emptyTeams;
+                    const totalLabels4 = chart4.data.labels.length;
+                    
+                    chart4PrevBtn.addEventListener('click', () => {
+                        const currentMin = chart4.options.scales.x.min || 0;
+                        if (currentMin > 0) {
+                            chart4.options.scales.x.min = Math.max(0, currentMin - 5);
+                            chart4.options.scales.x.max = Math.max(9, currentMin + 4);
+                            chart4.update();
+                        }
+                    });
+                    
+                    chart4NextBtn.addEventListener('click', () => {
+                        const currentMax = chart4.options.scales.x.max || 9;
+                        if (currentMax < totalLabels4 - 1) {
+                            chart4.options.scales.x.max = Math.min(totalLabels4 - 1, currentMax + 5);
+                            chart4.options.scales.x.min = Math.max(0, currentMax - 4);
+                            chart4.update();
+                        }
+                    });
+                }
+            }
 
             // ===== GERENCIAMENTO DE ADMINISTRADORES =====
 
