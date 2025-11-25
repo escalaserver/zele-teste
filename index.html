@@ -24,6 +24,9 @@
     <!-- EmailJS SDK -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     
+    <!-- Chart.js para Dashboards -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
@@ -568,6 +571,96 @@
             </div>
         </main>
     </div>
+
+    <!-- Página de Dashboard -->
+    <div id="dashboard-page" class="hidden">
+        <!-- Header -->
+        <header class="zele-primary text-white" style="box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <button id="back-from-dashboard" class="zele-btn p-2 rounded-lg">
+                            <svg class="w-6 h-6" fill="none" stroke="white" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                            </svg>
+                        </button>
+                        <img src="Volunteers logo.png" alt="Logo" class="w-10 h-10 object-contain">
+                        <h1 class="text-2xl font-bold">Dashboard</h1>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Conteúdo -->
+        <main class="container mx-auto px-4 py-6 max-w-7xl">
+            <!-- Filtros -->
+            <div class="card-float rounded-xl p-4 mb-6">
+                <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+                    <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center flex-1">
+                        <label class="font-semibold text-gray-700 text-sm">📅 Período:</label>
+                        <select id="dashboard-period" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="7">Últimos 7 dias</option>
+                            <option value="30" selected>Últimos 30 dias</option>
+                            <option value="90">Últimos 3 meses</option>
+                            <option value="180">Últimos 6 meses</option>
+                            <option value="365">Último ano</option>
+                            <option value="all">Todo o período</option>
+                            <option value="custom">Personalizado</option>
+                        </select>
+                        
+                        <div id="custom-date-range" class="hidden flex gap-2 items-center">
+                            <input type="date" id="date-from" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
+                            <span class="text-gray-500">até</span>
+                            <input type="date" id="date-to" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    
+                    <button id="refresh-dashboard" class="zele-btn text-white font-bold py-2 px-6 rounded-lg text-sm whitespace-nowrap">
+                        🔄 Atualizar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Grid de Gráficos -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Gráfico 1: Participação por Time -->
+                <div class="card-float rounded-xl p-6">
+                    <h3 class="font-bold text-lg mb-4" style="color: #151b29;">📊 Participação por Time</h3>
+                    <div class="h-64">
+                        <canvas id="chart-teams"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico 2: Voluntários Mais Ativos -->
+                <div class="card-float rounded-xl p-6">
+                    <h3 class="font-bold text-lg mb-4" style="color: #151b29;">🏆 Top 10 Voluntários Mais Ativos</h3>
+                    <div class="h-64">
+                        <canvas id="chart-volunteers"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico 3: Eventos com Mais Voluntários -->
+                <div class="card-float rounded-xl p-6">
+                    <h3 class="font-bold text-lg mb-4" style="color: #151b29;">🎉 Eventos com Mais Voluntários</h3>
+                    <div class="h-64">
+                        <canvas id="chart-events"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico 4: Eventos com Times Vazios (ALERTA) -->
+                <div class="card-float rounded-xl p-6">
+                    <h3 class="font-bold text-lg mb-4" style="color: #151b29;">🚨 Eventos com Times Vazios</h3>
+                    <div class="h-64">
+                        <canvas id="chart-empty-teams"></canvas>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3">
+                        <span class="inline-block w-3 h-3 bg-green-500 rounded mr-1"></span> 0 times vazios
+                        <span class="inline-block w-3 h-3 bg-yellow-500 rounded mr-1 ml-3"></span> 1-2 times vazios
+                        <span class="inline-block w-3 h-3 bg-red-500 rounded mr-1 ml-3"></span> 3-4 times vazios
+                    </p>
+                </div>
+            </div>
+        </main>
     </div>
 
     <!-- Menu Lateral -->
@@ -629,6 +722,16 @@
                     <div>
                         <p class="font-semibold text-gray-800">Gerenciar Acesso</p>
                         <p class="text-xs text-gray-600">Gerenciar usuários e permissões</p>
+                    </div>
+                </button>
+
+                <button id="menu-dashboard-btn" class="w-full flex items-center gap-3 p-4 rounded-lg hover:bg-gray-100 transition text-left" style="display: none;">
+                    <svg class="w-6 h-6" style="color: #151b29;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                    <div>
+                        <p class="font-semibold text-gray-800">Dashboard</p>
+                        <p class="text-xs text-gray-600">Estatísticas e gráficos</p>
                     </div>
                 </button>
 
@@ -1131,6 +1234,27 @@
                 });
             }
 
+            // Navegação para página de Dashboard
+            const menuDashboardBtn = document.getElementById('menu-dashboard-btn');
+            const backFromDashboardBtn = document.getElementById('back-from-dashboard');
+            const dashboardPage = document.getElementById('dashboard-page');
+
+            if (menuDashboardBtn) {
+                menuDashboardBtn.addEventListener('click', () => {
+                    closeMenu();
+                    appContainer.classList.add('hidden');
+                    dashboardPage.classList.remove('hidden');
+                    loadDashboard(); // Carregar dashboard
+                });
+            }
+
+            if (backFromDashboardBtn) {
+                backFromDashboardBtn.addEventListener('click', () => {
+                    dashboardPage.classList.add('hidden');
+                    appContainer.classList.remove('hidden');
+                });
+            }
+
             // ===================================
             // DETECÇÃO E INSTALAÇÃO PWA
             // ===================================
@@ -1516,6 +1640,7 @@
                         isSuperAdmin = true;
                         document.getElementById('menu-admin-btn').style.display = 'block';
                         document.getElementById('menu-manage-admins-btn').style.display = 'block';
+                        document.getElementById('menu-dashboard-btn').style.display = 'block';
                         document.getElementById('menu-blocked-attempts-btn').style.display = 'block';
                         console.log('✅ Usuário É SUPER ADMINISTRADOR');
                         return true;
@@ -1531,6 +1656,7 @@
                             isSuperAdmin = true;
                             document.getElementById('menu-admin-btn').style.display = 'block';
                             document.getElementById('menu-manage-admins-btn').style.display = 'block';
+                            document.getElementById('menu-dashboard-btn').style.display = 'block';
                             document.getElementById('menu-blocked-attempts-btn').style.display = 'block';
                             console.log('✅ Usuário É SUPER ADMINISTRADOR');
                             return true;
@@ -1539,6 +1665,7 @@
                             isSuperAdmin = false;
                             document.getElementById('menu-admin-btn').style.display = 'block';
                             document.getElementById('menu-manage-admins-btn').style.display = 'none'; // Admin não gerencia usuários
+                            document.getElementById('menu-dashboard-btn').style.display = 'block';
                             document.getElementById('menu-blocked-attempts-btn').style.display = 'block';
                             console.log('✅ Usuário É ADMINISTRADOR');
                             return true;
@@ -1553,6 +1680,7 @@
                     isSuperAdmin = false;
                     document.getElementById('menu-admin-btn').style.display = 'none';
                     document.getElementById('menu-manage-admins-btn').style.display = 'none';
+                    document.getElementById('menu-dashboard-btn').style.display = 'none';
                     document.getElementById('menu-blocked-attempts-btn').style.display = 'none';
                     return false;
                 } catch (error) {
@@ -3172,6 +3300,385 @@
                             );
                         });
                     });
+                }
+            }
+
+            // ===== DASHBOARD E GRÁFICOS =====
+
+            let dashboardCharts = {
+                teams: null,
+                volunteers: null,
+                events: null,
+                emptyTeams: null
+            };
+
+            // Event listeners para filtros de Dashboard
+            const dashboardPeriodSelect = document.getElementById('dashboard-period');
+            const customDateRange = document.getElementById('custom-date-range');
+            const refreshDashboardBtn = document.getElementById('refresh-dashboard');
+
+            if (dashboardPeriodSelect) {
+                dashboardPeriodSelect.addEventListener('change', (e) => {
+                    if (e.target.value === 'custom') {
+                        customDateRange.classList.remove('hidden');
+                    } else {
+                        customDateRange.classList.add('hidden');
+                        loadDashboard(); // Recarregar automaticamente
+                    }
+                });
+            }
+
+            if (refreshDashboardBtn) {
+                refreshDashboardBtn.addEventListener('click', () => {
+                    loadDashboard();
+                });
+            }
+
+            // Função principal para carregar Dashboard
+            async function loadDashboard() {
+                try {
+                    console.log('📊 Carregando Dashboard...');
+                    
+                    // Obter período selecionado
+                    const period = dashboardPeriodSelect.value;
+                    let dateFrom, dateTo;
+                    
+                    const now = new Date();
+                    dateTo = now;
+                    
+                    if (period === 'custom') {
+                        const fromInput = document.getElementById('date-from').value;
+                        const toInput = document.getElementById('date-to').value;
+                        
+                        if (!fromInput || !toInput) {
+                            showModal('❌ Por favor, selecione as datas de início e fim.', false, null, true);
+                            return;
+                        }
+                        
+                        dateFrom = new Date(fromInput);
+                        dateTo = new Date(toInput);
+                    } else if (period === 'all') {
+                        dateFrom = new Date('2020-01-01'); // Data antiga o suficiente
+                    } else {
+                        const days = parseInt(period);
+                        dateFrom = new Date(now.getTime() - (days * 24 * 60 * 60 * 1000));
+                    }
+                    
+                    console.log('📅 Período:', dateFrom.toLocaleDateString(), 'até', dateTo.toLocaleDateString());
+                    
+                    // Buscar todas as escalas no período
+                    const { collection, query, where, getDocs } = window.firestoreMethods;
+                    const escalasRef = collection(window.firebaseDb, 'escalas');
+                    
+                    const q = query(
+                        escalasRef,
+                        where('date', '>=', dateFrom.toISOString().split('T')[0]),
+                        where('date', '<=', dateTo.toISOString().split('T')[0])
+                    );
+                    
+                    const querySnapshot = await getDocs(escalasRef); // Buscar todas e filtrar no cliente
+                    const escalas = [];
+                    
+                    querySnapshot.forEach(doc => {
+                        const data = doc.data();
+                        const escalaDate = new Date(data.date);
+                        if (escalaDate >= dateFrom && escalaDate <= dateTo) {
+                            escalas.push({ id: doc.id, ...data });
+                        }
+                    });
+                    
+                    console.log('📋 Escalas encontradas:', escalas.length);
+                    
+                    // Gerar dados dos gráficos
+                    await generateChart1_TeamParticipation(escalas);
+                    await generateChart2_TopVolunteers(escalas);
+                    await generateChart3_EventsWithMostVolunteers(escalas);
+                    await generateChart4_EventsWithEmptyTeams();
+                    
+                    console.log('✅ Dashboard carregado com sucesso!');
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao carregar Dashboard:', error);
+                    showModal('❌ Erro ao carregar Dashboard. Tente novamente.', false, null, true);
+                }
+            }
+
+            // Gráfico 1: Participação por Time
+            async function generateChart1_TeamParticipation(escalas) {
+                const teamCount = {
+                    welcome: 0,
+                    backstage: 0,
+                    parking: 0,
+                    kids: 0
+                };
+                
+                escalas.forEach(escala => {
+                    const team = escala.team?.toLowerCase();
+                    if (teamCount.hasOwnProperty(team)) {
+                        teamCount[team]++;
+                    }
+                });
+                
+                const ctx = document.getElementById('chart-teams');
+                
+                // Destruir gráfico anterior se existir
+                if (dashboardCharts.teams) {
+                    dashboardCharts.teams.destroy();
+                }
+                
+                dashboardCharts.teams = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['👋 Welcome', '🤝 Backstage', '🚗 Parking', '👶 Kids'],
+                        datasets: [{
+                            label: 'Total de Escalas',
+                            data: [teamCount.welcome, teamCount.backstage, teamCount.parking, teamCount.kids],
+                            backgroundColor: [
+                                'rgba(55, 125, 184, 0.7)', // Azul Welcome
+                                'rgba(128, 128, 128, 0.7)', // Cinza Backstage
+                                'rgba(248, 113, 113, 0.7)', // Vermelho Parking
+                                'rgba(251, 191, 36, 0.7)'   // Amarelo Kids
+                            ],
+                            borderColor: [
+                                'rgba(55, 125, 184, 1)',
+                                'rgba(128, 128, 128, 1)',
+                                'rgba(248, 113, 113, 1)',
+                                'rgba(251, 191, 36, 1)'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Gráfico 2: Top 10 Voluntários Mais Ativos
+            async function generateChart2_TopVolunteers(escalas) {
+                const volunteerCount = {};
+                
+                escalas.forEach(escala => {
+                    const name = escala.userName || 'Desconhecido';
+                    volunteerCount[name] = (volunteerCount[name] || 0) + 1;
+                });
+                
+                // Ordenar e pegar top 10
+                const sorted = Object.entries(volunteerCount)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 10);
+                
+                const labels = sorted.map(item => item[0]);
+                const data = sorted.map(item => item[1]);
+                
+                const ctx = document.getElementById('chart-volunteers');
+                
+                if (dashboardCharts.volunteers) {
+                    dashboardCharts.volunteers.destroy();
+                }
+                
+                dashboardCharts.volunteers = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Escalas Participadas',
+                            data: data,
+                            backgroundColor: 'rgba(34, 197, 94, 0.7)',
+                            borderColor: 'rgba(34, 197, 94, 1)',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y', // Horizontal
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Gráfico 3: Eventos com Mais Voluntários
+            async function generateChart3_EventsWithMostVolunteers(escalas) {
+                const eventCount = {};
+                
+                escalas.forEach(escala => {
+                    const eventKey = `${escala.date} - ${escala.eventName || 'Evento'}`;
+                    eventCount[eventKey] = (eventCount[eventKey] || 0) + 1;
+                });
+                
+                // Ordenar e pegar últimos 10 eventos
+                const sorted = Object.entries(eventCount)
+                    .sort((a, b) => new Date(a[0].split(' - ')[0]) - new Date(b[0].split(' - ')[0]))
+                    .slice(-10);
+                
+                const labels = sorted.map(item => {
+                    const date = item[0].split(' - ')[0];
+                    const dateObj = new Date(date);
+                    return `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}`;
+                });
+                const data = sorted.map(item => item[1]);
+                
+                const ctx = document.getElementById('chart-events');
+                
+                if (dashboardCharts.events) {
+                    dashboardCharts.events.destroy();
+                }
+                
+                dashboardCharts.events = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Total de Voluntários',
+                            data: data,
+                            backgroundColor: 'rgba(99, 102, 241, 0.7)',
+                            borderColor: 'rgba(99, 102, 241, 1)',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Gráfico 4: Eventos com Times Vazios (ALERTA)
+            async function generateChart4_EventsWithEmptyTeams() {
+                try {
+                    // Buscar eventos futuros
+                    const futureEvents = availableDates.filter(date => {
+                        const eventDate = new Date(date.value.split('|')[0]);
+                        return eventDate >= new Date();
+                    }).slice(0, 10); // Próximos 10 eventos
+                    
+                    const labels = [];
+                    const emptyTeamsCount = [];
+                    const backgroundColors = [];
+                    
+                    for (const event of futureEvents) {
+                        const [dateStr, timeStr, ...eventParts] = event.value.split('|');
+                        const eventName = eventParts.join('|');
+                        
+                        // Buscar escalas deste evento
+                        const { collection, query, where, getDocs } = window.firestoreMethods;
+                        const q = query(
+                            collection(window.firebaseDb, 'escalas'),
+                            where('date', '==', dateStr)
+                        );
+                        
+                        const querySnapshot = await getDocs(q);
+                        const teams = { welcome: 0, backstage: 0, parking: 0, kids: 0 };
+                        
+                        querySnapshot.forEach(doc => {
+                            const data = doc.data();
+                            const team = data.team?.toLowerCase();
+                            if (teams.hasOwnProperty(team)) {
+                                teams[team]++;
+                            }
+                        });
+                        
+                        // Contar times vazios
+                        const emptyCount = Object.values(teams).filter(count => count === 0).length;
+                        
+                        // Formatação da label
+                        const dateObj = new Date(dateStr);
+                        const day = dateObj.getDate().toString().padStart(2, '0');
+                        const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+                        labels.push(`${day}/${month}`);
+                        
+                        emptyTeamsCount.push(emptyCount);
+                        
+                        // Cor baseada na criticidade
+                        if (emptyCount === 0) {
+                            backgroundColors.push('rgba(34, 197, 94, 0.7)'); // Verde
+                        } else if (emptyCount <= 2) {
+                            backgroundColors.push('rgba(234, 179, 8, 0.7)'); // Amarelo
+                        } else {
+                            backgroundColors.push('rgba(239, 68, 68, 0.7)'); // Vermelho
+                        }
+                    }
+                    
+                    const ctx = document.getElementById('chart-empty-teams');
+                    
+                    if (dashboardCharts.emptyTeams) {
+                        dashboardCharts.emptyTeams.destroy();
+                    }
+                    
+                    dashboardCharts.emptyTeams = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Times Vazios',
+                                data: emptyTeamsCount,
+                                backgroundColor: backgroundColors,
+                                borderColor: backgroundColors.map(color => color.replace('0.7', '1')),
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 4,
+                                    ticks: {
+                                        stepSize: 1
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao gerar gráfico de times vazios:', error);
                 }
             }
 
