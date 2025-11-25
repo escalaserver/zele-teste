@@ -1499,15 +1499,12 @@
                     // Atualizar currentUser em memória
                     currentUser.photoURL = photoBase64;
                     
-                    // Atualizar UI
-                    if (elements.userPhoto) elements.userPhoto.src = photoBase64;
-                    if (elements.menuUserPhoto) elements.menuUserPhoto.src = photoBase64;
-                    
                     console.log('✅ Foto de perfil atualizada com sucesso');
                     
-                    // Fechar loading após modal ser fechado
+                    // Fechar loading e recarregar app após modal ser fechado
                     showModal('✅ Foto de perfil atualizada com sucesso!', false, null, false, () => {
                         hideLoading();
+                        window.location.reload();
                     });
                     
                 } catch (error) {
