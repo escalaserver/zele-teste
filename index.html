@@ -28,9 +28,9 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, updateProfile } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, query, where, getDocs, deleteDoc, orderBy, addDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, query, where, getDocs, deleteDoc, orderBy, addDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         
-        console.log('🔥 Firebase imports carregados - versão com orderBy e addDoc');
+        console.log('🔥 Firebase imports carregados - versão com orderBy, addDoc e updateDoc');
         
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -57,7 +57,7 @@
         window.firebaseDb = db;
         window.firebaseProvider = provider;
         window.firebaseAuthMethods = { signInWithPopup, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, updateProfile };
-        window.firestoreMethods = { doc, setDoc, getDoc, onSnapshot, collection, query, where, getDocs, deleteDoc, orderBy, addDoc };
+        window.firestoreMethods = { doc, setDoc, getDoc, onSnapshot, collection, query, where, getDocs, deleteDoc, orderBy, addDoc, updateDoc };
         
         console.log('✅ Firebase inicializado e exportado para window');
         window.firebaseReady = true;
@@ -2627,15 +2627,28 @@
                     const realIndex = availableDates.findIndex(d => d.value === date.value);
                     return `
                         <div class="flex items-center justify-between bg-white p-3 rounded border border-gray-200">
-                            <span class="text-sm">${date.text}</span>
-                            <button class="admin-delete-date text-red-600 hover:text-red-800 text-sm font-semibold hover:underline" data-index="${realIndex}">
-                                Remover
-                            </button>
+                            <span class="text-sm flex-1">${date.text}</span>
+                            <div class="flex gap-2">
+                                <button class="admin-edit-date text-blue-600 hover:text-blue-800 text-sm font-semibold hover:underline" data-index="${realIndex}">
+                                    ✏️ Editar
+                                </button>
+                                <button class="admin-delete-date text-red-600 hover:text-red-800 text-sm font-semibold hover:underline" data-index="${realIndex}">
+                                    🗑️ Remover
+                                </button>
+                            </div>
                         </div>
                     `;
                 }).join('');
                 
                 datesList.innerHTML = html;
+                
+                // Event listeners para editar data
+                document.querySelectorAll('.admin-edit-date').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const index = parseInt(e.currentTarget.dataset.index);
+                        editDate(index);
+                    });
+                });
                 
                 // Event listeners para deletar data
                 document.querySelectorAll('.admin-delete-date').forEach(btn => {
@@ -2898,6 +2911,130 @@
                 } catch (error) {
                     logger.error('❌ Erro ao criar backup:', error);
                     // Não bloquear operação se backup falhar
+                }
+            }
+
+            // Editar data/horário/evento (apenas admin)
+            async function editDate(index) {
+                try {
+                    const dateToEdit = availableDates[index];
+                    const [currentDate, currentTime, ...eventParts] = dateToEdit.value.split('|');
+                    const currentEvent = eventParts.join('|'); // Nome do evento pode conter |
+                    
+                    // Criar modal customizado para edição
+                    const modalHtml = `
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold mb-2">🗓️ Nova Data:</label>
+                                <input type="date" id="edit-date-input" value="${currentDate}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold mb-2">🕐 Novo Horário:</label>
+                                <input type="time" id="edit-time-input" value="${currentTime}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold mb-2">📝 Novo Nome do Evento:</label>
+                                <input type="text" id="edit-event-input" value="${currentEvent}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500" placeholder="Ex: Culto de Domingo">
+                            </div>
+                            <p class="text-xs text-gray-500">⚠️ As escalas existentes serão mantidas e atualizadas automaticamente.</p>
+                        </div>
+                    `;
+                    
+                    // Mostrar modal com formulário
+                    showModal(
+                        `<div class="text-left"><h3 class="font-bold text-lg mb-4">✏️ Editar Evento</h3>${modalHtml}</div>`,
+                        true,
+                        async () => {
+                            const newDate = document.getElementById('edit-date-input').value;
+                            const newTime = document.getElementById('edit-time-input').value;
+                            const newEvent = document.getElementById('edit-event-input').value.trim();
+                            
+                            if (!newDate || !newTime) {
+                                showModal('❌ Data e horário são obrigatórios!', false, null, true);
+                                return;
+                            }
+                            
+                            // Validar data futura
+                            const now = new Date();
+                            const eventDateTime = new Date(newDate + 'T' + newTime);
+                            const oneHourFromNow = new Date(now.getTime() + (60 * 60 * 1000));
+                            
+                            if (eventDateTime < oneHourFromNow) {
+                                showModal('❌ A data deve ser futura (mínimo 1 hora a partir de agora)!', false, null, true);
+                                return;
+                            }
+                            
+                            // Atualizar o evento
+                            const oldValue = dateToEdit.value;
+                            const oldDate = oldValue.split('|')[0];
+                            
+                            // Criar novo value
+                            const newValue = `${newDate}|${newTime}|${newEvent}`;
+                            
+                            // Formatar texto para exibição
+                            const dateObj = new Date(newDate + 'T' + newTime);
+                            const day = dateObj.getDate().toString().padStart(2, '0');
+                            const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+                            const weekday = dateObj.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
+                            const weekdayCapitalized = weekday.charAt(0).toUpperCase() + weekday.slice(1);
+                            const newText = `${day}/${month} ${weekdayCapitalized} | ${newEvent} (chegar ${newTime})`;
+                            
+                            // Atualizar no array
+                            availableDates[index] = {
+                                ...dateToEdit,
+                                value: newValue,
+                                text: newText,
+                                lastUpdated: new Date().toISOString(),
+                                updatedBy: currentUser?.email || 'unknown'
+                            };
+                            
+                            // Salvar no Firestore
+                            const { doc, setDoc, collection, query, where, getDocs, updateDoc } = window.firestoreMethods;
+                            
+                            // 1. Atualizar config/availableDates
+                            await setDoc(doc(window.firebaseDb, 'config', 'availableDates'), { 
+                                dates: availableDates,
+                                lastUpdated: new Date().toISOString()
+                            });
+                            
+                            // 2. Atualizar todas as escalas desta data
+                            const q = query(
+                                collection(window.firebaseDb, 'escalas'),
+                                where('date', '==', oldDate)
+                            );
+                            
+                            const querySnapshot = await getDocs(q);
+                            console.log('📋 Atualizando escalas:', querySnapshot.size);
+                            
+                            const updatePromises = [];
+                            querySnapshot.forEach((docSnapshot) => {
+                                const escalaRef = doc(window.firebaseDb, 'escalas', docSnapshot.id);
+                                updatePromises.push(updateDoc(escalaRef, {
+                                    date: newDate,
+                                    time: newTime,
+                                    eventName: newEvent,
+                                    culto: newText, // Atualizar campo culto também
+                                    updatedAt: new Date().toISOString()
+                                }));
+                            });
+                            
+                            await Promise.all(updatePromises);
+                            
+                            // Atualizar UI
+                            renderAdminDatesList();
+                            await loadUserEscalas();
+                            await loadAllEscalas();
+                            
+                            showModal('✅ Evento atualizado com sucesso!', false, null, true);
+                        },
+                        true,
+                        null,
+                        '✏️'
+                    );
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao editar evento:', error);
+                    showModal(`❌ Erro ao editar evento: ${error.message}`, false, null, true);
                 }
             }
 
