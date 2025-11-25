@@ -1505,8 +1505,10 @@
                     
                     console.log('✅ Foto de perfil atualizada com sucesso');
                     
-                    hideLoading();
-                    showModal('✅ Foto de perfil atualizada com sucesso!');
+                    // Fechar loading após modal ser fechado
+                    showModal('✅ Foto de perfil atualizada com sucesso!', false, null, false, () => {
+                        hideLoading();
+                    });
                     
                 } catch (error) {
                     console.error('❌ Erro ao fazer upload da foto:', error);
@@ -1666,16 +1668,23 @@
                     const userData = {
                         email: user.email,
                         displayName: user.displayName || user.email.split('@')[0],
-                        photoURL: user.photoURL || '',
                         lastLogin: new Date().toISOString(),
                         lastLoginFormatted: new Date().toLocaleString('pt-BR')
                     };
                     
                     if (userDoc.exists()) {
-                        // Atualizar apenas dados do perfil, mantendo role e blocked
+                        // Atualizar apenas dados do perfil, mantendo role, blocked e photoURL
                         const existingData = userDoc.data();
+                        
+                        // Se existe photoURL no Firestore, usar ele (Base64)
+                        // Se não, usar do Firebase Auth (Google login)
+                        if (existingData.photoURL) {
+                            user.photoURL = existingData.photoURL;
+                        }
+                        
                         await setDoc(userDocRef, {
                             ...userData,
+                            photoURL: existingData.photoURL || user.photoURL || '',
                             role: existingData.role || 'user', // Preservar role existente
                             blocked: existingData.blocked || false, // Preservar status de bloqueio
                             createdAt: existingData.createdAt || new Date().toISOString()
@@ -1685,6 +1694,7 @@
                         // Criar novo documento com role padrão
                         await setDoc(userDocRef, {
                             ...userData,
+                            photoURL: user.photoURL || '',
                             role: 'user',
                             blocked: false,
                             createdAt: new Date().toISOString()
