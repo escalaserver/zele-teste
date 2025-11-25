@@ -32,8 +32,9 @@
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, updateProfile } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, query, where, getDocs, deleteDoc, orderBy, addDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
         
-        console.log('🔥 Firebase imports carregados - versão com orderBy, addDoc e updateDoc');
+        console.log('🔥 Firebase imports carregados - versão com orderBy, addDoc, updateDoc e Storage');
         
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -49,6 +50,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const storage = getStorage(app);
         const provider = new GoogleAuthProvider();
         
         // Forçar seleção de conta ao fazer login
@@ -58,9 +60,11 @@
         
         window.firebaseAuth = auth;
         window.firebaseDb = db;
+        window.firebaseStorage = storage;
         window.firebaseProvider = provider;
         window.firebaseAuthMethods = { signInWithPopup, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, updateProfile };
         window.firestoreMethods = { doc, setDoc, getDoc, onSnapshot, collection, query, where, getDocs, deleteDoc, orderBy, addDoc, updateDoc };
+        window.firebaseStorageMethods = { ref, uploadBytes, getDownloadURL };
         
         console.log('✅ Firebase inicializado e exportado para window');
         window.firebaseReady = true;
@@ -182,8 +186,8 @@
             }
         }
         .blink-border {
-            animation: blink-border 0.5s ease-in-out 3;
-            -webkit-animation: blink-border 0.5s ease-in-out 3;
+            animation: blink-border 0.2s ease-in-out 4;
+            -webkit-animation: blink-border 0.2s ease-in-out 4;
         }
         @keyframes pulse-team {
             0%, 100% { border: 1px solid #e5e5e5; }
@@ -194,8 +198,8 @@
             50% { border: 10px solid #cdc8c0; }
         }
         .pulse-team {
-            animation: pulse-team 0.5s ease-in-out 1;
-            -webkit-animation: pulse-team 0.5s ease-in-out 1;
+            animation: pulse-team 0.8s ease-in-out 1;
+            -webkit-animation: pulse-team 0.8s ease-in-out 1;
         }
         @keyframes pulse-save {
             0%, 100% { border: 2px solid transparent; }
@@ -624,16 +628,17 @@
 
             <!-- Grid de Gráficos -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Gráfico 1: Eventos com Times Vazios (ALERTA) -->
+                <!-- Gráfico 1: Times com Menos de 5 Voluntários (ALERTA) -->
                 <div class="card-float rounded-xl p-6">
-                    <h3 class="font-bold text-lg mb-4" style="color: #151b29;">🚨 Eventos com Times Vazios</h3>
-                    <div class="h-64">
+                    <h3 class="font-bold text-lg mb-4" style="color: #151b29;">🚨 Times com Menos de 5 Voluntários</h3>
+                    <div class="h-64 cursor-pointer" title="Clique nas barras para ver detalhes">
                         <canvas id="chart-empty-teams"></canvas>
                     </div>
                     <p class="text-xs text-gray-500 mt-3">
-                        <span class="inline-block w-3 h-3 bg-green-500 rounded mr-1"></span> 0 times vazios
-                        <span class="inline-block w-3 h-3 bg-yellow-500 rounded mr-1 ml-3"></span> 1-2 times vazios
-                        <span class="inline-block w-3 h-3 bg-red-500 rounded mr-1 ml-3"></span> 3-4 times vazios
+                        <span class="inline-block w-3 h-3 rounded mr-1" style="background-color: rgba(254, 240, 138, 0.8);"></span> 1 time
+                        <span class="inline-block w-3 h-3 rounded mr-1 ml-3" style="background-color: rgba(234, 179, 8, 0.8);"></span> 2 times
+                        <span class="inline-block w-3 h-3 rounded mr-1 ml-3" style="background-color: rgba(249, 115, 22, 0.8);"></span> 3 times
+                        <span class="inline-block w-3 h-3 rounded mr-1 ml-3" style="background-color: rgba(239, 68, 68, 0.8);"></span> 4 times
                     </p>
                 </div>
 
@@ -662,6 +667,30 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Popup de Detalhes do Evento (Gráfico 4) -->
+    <div id="chart4-popup-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 relative">
+            <button id="chart4-popup-close" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+            
+            <h3 class="text-xl font-bold mb-2" style="color: #151b29;" id="chart4-popup-title">Detalhes do Evento</h3>
+            <p class="text-sm text-gray-600 mb-4" id="chart4-popup-date"></p>
+            
+            <div class="space-y-3" id="chart4-popup-teams">
+                <!-- Times serão inseridos aqui -->
+            </div>
+            
+            <div class="mt-6 pt-4 border-t border-gray-200">
+                <p class="text-xs text-gray-500 text-center">
+                    💡 Times com menos de 5 voluntários podem precisar de atenção
+                </p>
+            </div>
+        </div>
     </div>
 
     <!-- Menu Lateral -->
@@ -756,6 +785,16 @@
                     </div>
                 </button>
 
+                <button id="menu-change-photo-btn" class="w-full flex items-center gap-3 p-4 rounded-lg hover:bg-gray-100 transition text-left">
+                    <svg class="w-6 h-6" style="color: #151b29;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <div>
+                        <p class="font-semibold text-gray-800">Alterar Foto</p>
+                        <p class="text-xs text-gray-600">Escolher foto de perfil</p>
+                    </div>
+                </button>
+
                 <button id="menu-logout-btn" class="w-full flex items-center gap-3 p-4 rounded-lg hover:bg-gray-100 transition text-left">
                     <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
@@ -766,6 +805,9 @@
                     </div>
                 </button>
             </div>
+
+            <!-- Input oculto para upload de foto -->
+            <input type="file" id="photo-upload-input" accept="image/*" style="display: none;">
 
             <!-- Versão -->
             <div class="mt-8 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">
@@ -1407,6 +1449,84 @@
                 document.getElementById('ios-install-modal').classList.add('hidden');
             });
 
+            // Botão de alterar foto no menu
+            document.getElementById('menu-change-photo-btn')?.addEventListener('click', () => {
+                closeMenu();
+                document.getElementById('photo-upload-input').click();
+            });
+
+            // Upload de foto de perfil
+            document.getElementById('photo-upload-input')?.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                // Validar tipo de arquivo
+                if (!file.type.startsWith('image/')) {
+                    showModal('❌ Por favor, selecione uma imagem válida.');
+                    e.target.value = '';
+                    return;
+                }
+                
+                // Validar tamanho (máximo 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    showModal('❌ A imagem deve ter no máximo 5MB.');
+                    e.target.value = '';
+                    return;
+                }
+                
+                try {
+                    showLoading();
+                    console.log('📸 Fazendo upload da foto...');
+                    
+                    // Verificar se Firebase Storage está disponível
+                    if (!window.firebaseStorage || !window.firebaseStorageMethods) {
+                        throw new Error('Firebase Storage não inicializado');
+                    }
+                    
+                    // Upload para Firebase Storage
+                    const { ref, uploadBytes, getDownloadURL } = window.firebaseStorageMethods;
+                    const storageRef = ref(window.firebaseStorage, `profile-photos/${currentUser.uid}/${Date.now()}_${file.name}`);
+                    
+                    console.log('📤 Enviando arquivo...');
+                    await uploadBytes(storageRef, file);
+                    console.log('🔗 Obtendo URL...');
+                    const photoURL = await getDownloadURL(storageRef);
+                    
+                    console.log('✅ Foto enviada:', photoURL);
+                    
+                    // Atualizar perfil no Firebase Auth
+                    console.log('🔄 Atualizando perfil Auth...');
+                    const { updateProfile } = window.firebaseAuthMethods;
+                    await updateProfile(currentUser, { photoURL });
+                    
+                    // Atualizar no Firestore
+                    console.log('💾 Salvando no Firestore...');
+                    const { doc, updateDoc } = window.firestoreMethods;
+                    await updateDoc(doc(window.firebaseDb, 'users', currentUser.uid), {
+                        photoURL: photoURL,
+                        updatedAt: new Date().toISOString()
+                    });
+                    
+                    // Atualizar UI
+                    if (elements.userPhoto) elements.userPhoto.src = photoURL;
+                    if (elements.menuUserPhoto) elements.menuUserPhoto.src = photoURL;
+                    
+                    console.log('✅ Foto de perfil atualizada com sucesso');
+                    
+                    hideLoading();
+                    showModal('✅ Foto de perfil atualizada com sucesso!');
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao fazer upload da foto:', error);
+                    console.error('Stack:', error.stack);
+                    hideLoading();
+                    showModal(`❌ Erro ao atualizar foto: ${error.message}`);
+                }
+                
+                // Limpar input
+                e.target.value = '';
+            });
+
             // Seleção de time
             elements.teamBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -1496,7 +1616,7 @@
             // Função para animar botões dos times em sequência (horário)
             function animateTeamButtonsSequence() {
                 const teamOrder = ['welcome', 'backstage', 'parking', 'kids'];
-                const delay = 500; // tempo total da animação (1 piscada x 0.5s = 0.5s)
+                const delay = 200; // tempo total da animação (1 piscada x 0.2s = 0.2s)
                 
                 teamOrder.forEach((teamName, index) => {
                     setTimeout(() => {
@@ -1505,7 +1625,7 @@
                             btn.classList.add('pulse-team');
                             setTimeout(() => {
                                 btn.classList.remove('pulse-team');
-                            }, 500); // 1 piscada x 0.5s = 0.5s
+                            }, 400); // 1 piscada x 0.4s = 0.4s
                         }
                     }, index * delay);
                 });
@@ -2755,13 +2875,18 @@
                     // Encontrar o índice real no array original
                     const realIndex = availableDates.findIndex(d => d.value === date.value);
                     return `
-                        <div class="flex items-center justify-between bg-white p-3 rounded border border-gray-200">
-                            <span class="text-sm flex-1">${date.text}</span>
-                            <div class="flex gap-2">
-                                <button class="admin-edit-date text-blue-600 hover:text-blue-800 text-sm font-semibold hover:underline" data-index="${realIndex}">
+                        <div class="bg-white p-3 rounded border border-gray-200 space-y-2">
+                            <!-- Linha 1: Descrição do evento -->
+                            <div class="text-sm font-medium text-gray-800">
+                                ${date.text}
+                            </div>
+                            
+                            <!-- Linha 2: Botões de ação -->
+                            <div class="flex gap-2 pt-1">
+                                <button class="admin-edit-date flex-1 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold py-2 px-4 rounded text-sm transition border border-blue-200" data-index="${realIndex}">
                                     ✏️ Editar
                                 </button>
-                                <button class="admin-delete-date text-red-600 hover:text-red-800 text-sm font-semibold hover:underline" data-index="${realIndex}">
+                                <button class="admin-delete-date flex-1 bg-red-50 hover:bg-red-100 text-red-700 font-semibold py-2 px-4 rounded text-sm transition border border-red-200" data-index="${realIndex}">
                                     🗑️ Remover
                                 </button>
                             </div>
@@ -3560,7 +3685,7 @@
                 
                 const labels = sorted.map(item => {
                     const date = item[0].split(' - ')[0];
-                    const dateObj = new Date(date);
+                    const dateObj = new Date(date + 'T00:00:00');
                     return `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}`;
                 });
                 const data = sorted.map(item => item[1]);
@@ -3603,9 +3728,14 @@
                 });
             }
 
-            // Gráfico 4: Eventos com Times Vazios (ALERTA)
+            // Gráfico 4: Times com Menos de 5 Voluntários (ALERTA)
+            const chart4EventDetails = []; // Armazena detalhes de cada evento para o popup
+            
             async function generateChart4_EventsWithEmptyTeams() {
                 try {
+                    // Limpar detalhes anteriores
+                    chart4EventDetails.length = 0;
+                    
                     // Buscar eventos futuros
                     const futureEvents = availableDates.filter(date => {
                         const eventDate = new Date(date.value.split('|')[0]);
@@ -3613,7 +3743,7 @@
                     }).slice(0, 10); // Próximos 10 eventos
                     
                     const labels = [];
-                    const emptyTeamsCount = [];
+                    const underStaffedCount = [];
                     const backgroundColors = [];
                     
                     for (const event of futureEvents) {
@@ -3638,24 +3768,44 @@
                             }
                         });
                         
-                        // Contar times vazios
-                        const emptyCount = Object.values(teams).filter(count => count === 0).length;
+                        // Contar times com menos de 5 voluntários (0 a 4)
+                        const underStaffed = Object.values(teams).filter(count => count < 5).length;
+                        
+                        // Pular eventos com todos os times com 5 ou mais voluntários
+                        if (underStaffed === 0) {
+                            continue;
+                        }
                         
                         // Formatação da label
-                        const dateObj = new Date(dateStr);
+                        const dateObj = new Date(dateStr + 'T00:00:00');
                         const day = dateObj.getDate().toString().padStart(2, '0');
                         const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
                         labels.push(`${day}/${month}`);
                         
-                        emptyTeamsCount.push(emptyCount);
+                        // Armazenar detalhes para o popup
+                        chart4EventDetails.push({
+                            date: `${day}/${month}`,
+                            fullDate: dateStr,
+                            eventName: eventName,
+                            teams: {
+                                'Recepção': teams.welcome,
+                                'Backstage': teams.backstage,
+                                'Estacionamento': teams.parking,
+                                'Kids': teams.kids
+                            }
+                        });
                         
-                        // Cor baseada na criticidade
-                        if (emptyCount === 0) {
-                            backgroundColors.push('rgba(34, 197, 94, 0.7)'); // Verde
-                        } else if (emptyCount <= 2) {
-                            backgroundColors.push('rgba(234, 179, 8, 0.7)'); // Amarelo
-                        } else {
-                            backgroundColors.push('rgba(239, 68, 68, 0.7)'); // Vermelho
+                        underStaffedCount.push(underStaffed);
+                        
+                        // Cor baseada na criticidade (1 a 4 times com menos de 5 voluntários)
+                        if (underStaffed === 1) {
+                            backgroundColors.push('rgba(254, 240, 138, 0.8)'); // Amarelo claro
+                        } else if (underStaffed === 2) {
+                            backgroundColors.push('rgba(234, 179, 8, 0.8)'); // Amarelo
+                        } else if (underStaffed === 3) {
+                            backgroundColors.push('rgba(249, 115, 22, 0.8)'); // Laranja
+                        } else { // underStaffed === 4
+                            backgroundColors.push('rgba(239, 68, 68, 0.8)'); // Vermelho
                         }
                     }
                     
@@ -3670,10 +3820,10 @@
                         data: {
                             labels: labels,
                             datasets: [{
-                                label: 'Times Vazios',
-                                data: emptyTeamsCount,
+                                label: 'Times com Menos de 5',
+                                data: underStaffedCount,
                                 backgroundColor: backgroundColors,
-                                borderColor: backgroundColors.map(color => color.replace('0.7', '1')),
+                                borderColor: backgroundColors.map(color => color.replace('0.8', '1')),
                                 borderWidth: 2
                             }]
                         },
@@ -3693,6 +3843,12 @@
                                         stepSize: 1
                                     }
                                 }
+                            },
+                            onClick: (event, activeElements) => {
+                                if (activeElements.length > 0) {
+                                    const index = activeElements[0].index;
+                                    showChart4Popup(index);
+                                }
                             }
                         }
                     });
@@ -3701,6 +3857,75 @@
                     console.error('❌ Erro ao gerar gráfico de times vazios:', error);
                 }
             }
+
+            // Função para mostrar popup com detalhes do evento do gráfico 4
+            function showChart4Popup(index) {
+                const eventData = chart4EventDetails[index];
+                if (!eventData) return;
+                
+                // Preencher título e data
+                document.getElementById('chart4-popup-title').textContent = eventData.eventName || 'Evento';
+                document.getElementById('chart4-popup-date').textContent = `📅 ${eventData.date}`;
+                
+                // Preencher times
+                const teamsContainer = document.getElementById('chart4-popup-teams');
+                teamsContainer.innerHTML = '';
+                
+                const teamEmojis = {
+                    'Recepção': '👋',
+                    'Backstage': '🎭',
+                    'Estacionamento': '🚗',
+                    'Kids': '👶'
+                };
+                
+                Object.entries(eventData.teams).forEach(([teamName, count]) => {
+                    const emoji = teamEmojis[teamName] || '👥';
+                    let colorClass = '';
+                    let statusText = '';
+                    
+                    if (count === 0) {
+                        colorClass = 'bg-red-50 border-red-300';
+                        statusText = 'text-red-700';
+                    } else if (count >= 1 && count <= 2) {
+                        colorClass = 'bg-orange-50 border-orange-300';
+                        statusText = 'text-orange-700';
+                    } else if (count >= 3 && count <= 4) {
+                        colorClass = 'bg-yellow-50 border-yellow-300';
+                        statusText = 'text-yellow-700';
+                    } else {
+                        colorClass = 'bg-green-50 border-green-300';
+                        statusText = 'text-green-700';
+                    }
+                    
+                    const teamDiv = document.createElement('div');
+                    teamDiv.className = `flex items-center justify-between p-3 rounded-lg border-2 ${colorClass}`;
+                    teamDiv.innerHTML = `
+                        <div class="flex items-center gap-2">
+                            <span class="text-2xl">${emoji}</span>
+                            <span class="font-semibold text-gray-800">${teamName}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-2xl font-bold ${statusText}">${count}</span>
+                            <span class="text-xs text-gray-600 block">voluntário${count !== 1 ? 's' : ''}</span>
+                        </div>
+                    `;
+                    teamsContainer.appendChild(teamDiv);
+                });
+                
+                // Mostrar popup
+                document.getElementById('chart4-popup-overlay').classList.remove('hidden');
+            }
+            
+            // Event listeners do popup
+            document.getElementById('chart4-popup-close').addEventListener('click', () => {
+                document.getElementById('chart4-popup-overlay').classList.add('hidden');
+            });
+            
+            document.getElementById('chart4-popup-overlay').addEventListener('click', (e) => {
+                if (e.target.id === 'chart4-popup-overlay') {
+                    document.getElementById('chart4-popup-overlay').classList.add('hidden');
+                }
+            });
 
             // ===== GERENCIAMENTO DE ADMINISTRADORES =====
 
