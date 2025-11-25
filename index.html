@@ -599,11 +599,12 @@
                     <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center flex-1">
                         <label class="font-semibold text-gray-700 text-sm">📅 Período:</label>
                         <select id="dashboard-period" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <option value="7">Últimos 7 dias</option>
-                            <option value="30" selected>Últimos 30 dias</option>
-                            <option value="90">Últimos 3 meses</option>
-                            <option value="180">Últimos 6 meses</option>
-                            <option value="365">Último ano</option>
+                            <option value="-7">Últimos 7 dias</option>
+                            <option value="-30">Últimos 30 dias</option>
+                            <option value="30" selected>Próximos 30 dias</option>
+                            <option value="-90">Últimos 3 meses</option>
+                            <option value="-180">Últimos 6 meses</option>
+                            <option value="-365">Último ano</option>
                             <option value="all">Todo o período</option>
                             <option value="custom">Personalizado</option>
                         </select>
@@ -623,31 +624,7 @@
 
             <!-- Grid de Gráficos -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Gráfico 1: Participação por Time -->
-                <div class="card-float rounded-xl p-6">
-                    <h3 class="font-bold text-lg mb-4" style="color: #151b29;">📊 Participação por Time</h3>
-                    <div class="h-64">
-                        <canvas id="chart-teams"></canvas>
-                    </div>
-                </div>
-
-                <!-- Gráfico 2: Voluntários Mais Ativos -->
-                <div class="card-float rounded-xl p-6">
-                    <h3 class="font-bold text-lg mb-4" style="color: #151b29;">🏆 Top 10 Voluntários Mais Ativos</h3>
-                    <div class="h-64">
-                        <canvas id="chart-volunteers"></canvas>
-                    </div>
-                </div>
-
-                <!-- Gráfico 3: Eventos com Mais Voluntários -->
-                <div class="card-float rounded-xl p-6">
-                    <h3 class="font-bold text-lg mb-4" style="color: #151b29;">🎉 Eventos com Mais Voluntários</h3>
-                    <div class="h-64">
-                        <canvas id="chart-events"></canvas>
-                    </div>
-                </div>
-
-                <!-- Gráfico 4: Eventos com Times Vazios (ALERTA) -->
+                <!-- Gráfico 1: Eventos com Times Vazios (ALERTA) -->
                 <div class="card-float rounded-xl p-6">
                     <h3 class="font-bold text-lg mb-4" style="color: #151b29;">🚨 Eventos com Times Vazios</h3>
                     <div class="h-64">
@@ -658,6 +635,30 @@
                         <span class="inline-block w-3 h-3 bg-yellow-500 rounded mr-1 ml-3"></span> 1-2 times vazios
                         <span class="inline-block w-3 h-3 bg-red-500 rounded mr-1 ml-3"></span> 3-4 times vazios
                     </p>
+                </div>
+
+                <!-- Gráfico 2: Eventos com Mais Voluntários -->
+                <div class="card-float rounded-xl p-6">
+                    <h3 class="font-bold text-lg mb-4" style="color: #151b29;">🎉 Eventos com Mais Voluntários</h3>
+                    <div class="h-64">
+                        <canvas id="chart-events"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico 3: Voluntários Únicos por Time -->
+                <div class="card-float rounded-xl p-6">
+                    <h3 class="font-bold text-lg mb-4" style="color: #151b29;">📊 Voluntários Únicos por Time</h3>
+                    <div class="h-64">
+                        <canvas id="chart-teams"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico 4: Top 10 Voluntários Mais Ativos -->
+                <div class="card-float rounded-xl p-6">
+                    <h3 class="font-bold text-lg mb-4" style="color: #151b29;">🏆 Top 10 Voluntários Mais Ativos</h3>
+                    <div class="h-64">
+                        <canvas id="chart-volunteers"></canvas>
+                    </div>
                 </div>
             </div>
         </main>
@@ -3344,7 +3345,6 @@
                     let dateFrom, dateTo;
                     
                     const now = new Date();
-                    dateTo = now;
                     
                     if (period === 'custom') {
                         const fromInput = document.getElementById('date-from').value;
@@ -3359,9 +3359,18 @@
                         dateTo = new Date(toInput);
                     } else if (period === 'all') {
                         dateFrom = new Date('2020-01-01'); // Data antiga o suficiente
+                        dateTo = new Date(now.getTime() + (365 * 24 * 60 * 60 * 1000)); // 1 ano no futuro
                     } else {
                         const days = parseInt(period);
-                        dateFrom = new Date(now.getTime() - (days * 24 * 60 * 60 * 1000));
+                        if (days < 0) {
+                            // Período passado (Últimos X dias)
+                            dateFrom = new Date(now.getTime() + (days * 24 * 60 * 60 * 1000));
+                            dateTo = now;
+                        } else {
+                            // Período futuro (Próximos X dias)
+                            dateFrom = now;
+                            dateTo = new Date(now.getTime() + (days * 24 * 60 * 60 * 1000));
+                        }
                     }
                     
                     console.log('📅 Período:', dateFrom.toLocaleDateString(), 'até', dateTo.toLocaleDateString());
@@ -3403,21 +3412,32 @@
                 }
             }
 
-            // Gráfico 1: Participação por Time
+            // Gráfico 1: Participação por Time (voluntários únicos)
             async function generateChart1_TeamParticipation(escalas) {
-                const teamCount = {
-                    welcome: 0,
-                    backstage: 0,
-                    parking: 0,
-                    kids: 0
+                const teamVolunteers = {
+                    welcome: new Set(),
+                    backstage: new Set(),
+                    parking: new Set(),
+                    kids: new Set()
                 };
                 
+                // Adicionar userId único por time (Set garante unicidade)
                 escalas.forEach(escala => {
                     const team = escala.team?.toLowerCase();
-                    if (teamCount.hasOwnProperty(team)) {
-                        teamCount[team]++;
+                    const userId = escala.userId || escala.userName; // Usar userId ou nome como fallback
+                    
+                    if (teamVolunteers.hasOwnProperty(team) && userId) {
+                        teamVolunteers[team].add(userId);
                     }
                 });
+                
+                // Converter Sets para contagem
+                const teamCount = {
+                    welcome: teamVolunteers.welcome.size,
+                    backstage: teamVolunteers.backstage.size,
+                    parking: teamVolunteers.parking.size,
+                    kids: teamVolunteers.kids.size
+                };
                 
                 const ctx = document.getElementById('chart-teams');
                 
@@ -3431,7 +3451,7 @@
                     data: {
                         labels: ['👋 Welcome', '🤝 Backstage', '🚗 Parking', '👶 Kids'],
                         datasets: [{
-                            label: 'Total de Escalas',
+                            label: 'Voluntários Únicos',
                             data: [teamCount.welcome, teamCount.backstage, teamCount.parking, teamCount.kids],
                             backgroundColor: [
                                 'rgba(55, 125, 184, 0.7)', // Azul Welcome
