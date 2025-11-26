@@ -3698,10 +3698,9 @@
                     eventCount[eventKey] = (eventCount[eventKey] || 0) + 1;
                 });
                 
-                // Ordenar e pegar últimos 10 eventos
+                // Ordenar por data (crescente)
                 const sorted = Object.entries(eventCount)
-                    .sort((a, b) => new Date(a[0].split(' - ')[0]) - new Date(b[0].split(' - ')[0]))
-                    .slice(-10);
+                    .sort((a, b) => new Date(a[0].split(' - ')[0] + 'T00:00:00') - new Date(b[0].split(' - ')[0] + 'T00:00:00'));
                 
                 const labels = sorted.map(item => {
                     const date = item[0].split(' - ')[0];
@@ -3764,11 +3763,18 @@
                     // Limpar detalhes anteriores
                     chart4EventDetails.length = 0;
                     
-                    // Filtrar eventos no período selecionado
-                    const filteredEvents = availableDates.filter(date => {
-                        const eventDate = new Date(date.value.split('|')[0] + 'T00:00:00');
-                        return eventDate >= dateFrom && eventDate <= dateTo;
-                    }).slice(0, 30); // Máximo 30 eventos
+                    // Filtrar eventos no período selecionado e ordenar por data (crescente)
+                    const filteredEvents = availableDates
+                        .filter(date => {
+                            const eventDate = new Date(date.value.split('|')[0] + 'T00:00:00');
+                            return eventDate >= dateFrom && eventDate <= dateTo;
+                        })
+                        .sort((a, b) => {
+                            const dateA = new Date(a.value.split('|')[0] + 'T00:00:00');
+                            const dateB = new Date(b.value.split('|')[0] + 'T00:00:00');
+                            return dateA - dateB;
+                        })
+                        .slice(0, 30); // Máximo 30 eventos
                     
                     const labels = [];
                     const underStaffedCount = [];
