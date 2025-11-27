@@ -2741,11 +2741,19 @@
                 );
             }
             
-            // Carregar tentativas bloqueadas (apenas admin)
+            // Carregar tentativas bloqueadas (apenas superadmin)
             let blockedAttemptsUnsubscribe = null; // Guardar referência do listener
             
             async function loadBlockedAttempts() {
-                if (!isAdmin) return;
+                // Apenas superadmin pode ver tentativas bloqueadas
+                if (!isSuperAdmin) {
+                    console.log('⚠️ Usuário não é super admin. Acesso negado.');
+                    const listEl = document.getElementById('blocked-attempts-list');
+                    if (listEl) {
+                        listEl.innerHTML = '<p class="text-red-500 text-center py-8">⚠️ Apenas Super Administradores podem acessar esta área.</p>';
+                    }
+                    return;
+                }
                 
                 const listEl = document.getElementById('blocked-attempts-list');
                 if (!listEl) {
@@ -2765,7 +2773,7 @@
                 try {
                     console.log('🔍 Verificando métodos disponíveis:', Object.keys(window.firestoreMethods || {}));
                     
-                    const { collection, query, orderBy, onSnapshot } = window.firestoreMethods || {};
+                    const { collection, query, orderBy, onSnapshot, getDocs } = window.firestoreMethods || {};
                     
                     if (!collection) {
                         throw new Error('Métodos do Firestore não disponíveis. Recarregue a página.');
@@ -2801,12 +2809,31 @@
                             renderBlockedAttempts(attempts);
                         }, (error) => {
                             console.error('❌ Erro no listener:', error);
-                            listEl.innerHTML = `<p class="text-red-500 text-center py-8">❌ Erro ao monitorar dados.</p>`;
+                            console.error('❌ Código do erro:', error.code);
+                            console.error('❌ Mensagem:', error.message);
+                            
+                            // Erro de permissão
+                            if (error.code === 'permission-denied') {
+                                listEl.innerHTML = `
+                                    <div class="text-center py-8">
+                                        <p class="text-red-500 font-bold mb-2">🔒 Permissão Negada</p>
+                                        <p class="text-sm text-gray-600 mb-4">Você não tem permissão para acessar tentativas bloqueadas.</p>
+                                        <p class="text-xs text-gray-500">Configure as regras do Firestore para permitir leitura da coleção 'blockedAttempts' para super admins.</p>
+                                        <code class="text-xs bg-gray-100 p-3 rounded block text-left mt-4">
+                                            match /blockedAttempts/{document} {<br>
+                                            &nbsp;&nbsp;allow read: if request.auth != null;<br>
+                                            &nbsp;&nbsp;allow write: if request.auth != null;<br>
+                                            }
+                                        </code>
+                                    </div>
+                                `;
+                            } else {
+                                listEl.innerHTML = `<p class="text-red-500 text-center py-8">❌ Erro ao monitorar dados: ${error.message}</p>`;
+                            }
                         });
-                    } else {
+                    } else if (getDocs) {
                         // Fallback: usar getDocs (sem tempo real)
                         console.warn('⚠️ onSnapshot não disponível, usando getDocs');
-                        const { getDocs } = window.firestoreMethods;
                         const querySnapshot = await getDocs(q);
                         const attempts = [];
                         querySnapshot.forEach((doc) => {
@@ -2823,7 +2850,25 @@
                 } catch (error) {
                     console.error('❌ Erro ao carregar tentativas bloqueadas:', error);
                     console.error('❌ Detalhes do erro:', error.message);
-                    listEl.innerHTML = `<p class="text-red-500 text-center py-8">❌ ${error.message || 'Erro ao carregar dados.'}<br><small class="text-xs">Tente recarregar a página (Ctrl+Shift+R)</small></p>`;
+                    console.error('❌ Código:', error.code);
+                    
+                    if (error.code === 'permission-denied') {
+                        listEl.innerHTML = `
+                            <div class="text-center py-8">
+                                <p class="text-red-500 font-bold mb-2">🔒 Permissão Negada</p>
+                                <p class="text-sm text-gray-600 mb-4">Você não tem permissão para acessar tentativas bloqueadas.</p>
+                                <p class="text-xs text-gray-500 mb-4">Configure as regras do Firestore:</p>
+                                <code class="text-xs bg-gray-100 p-3 rounded block text-left">
+                                    match /blockedAttempts/{document} {<br>
+                                    &nbsp;&nbsp;allow read: if request.auth != null;<br>
+                                    &nbsp;&nbsp;allow write: if request.auth != null;<br>
+                                    }
+                                </code>
+                            </div>
+                        `;
+                    } else {
+                        listEl.innerHTML = `<p class="text-red-500 text-center py-8">❌ ${error.message || 'Erro ao carregar dados.'}<br><small class="text-xs">Tente recarregar a página (Ctrl+Shift+R)</small></p>`;
+                    }
                 }
             }
 
@@ -3483,14 +3528,15 @@
                     const dateStr = dateObj.toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
                     const eventName = data.eventName ? ` - ${data.eventName}` : '';
 
-                    // Função para renderizar voluntários com botão de deletar e transferir (para admins e líderes)
+                    // Função para renderizar voluntários com botão de deletar e transferir (apenas para líderes do time específico)
                     const renderVolunteers = (volunteers, teamName) => {
                         if (volunteers.length === 0) {
                             return '<div class="text-gray-400">Ninguém escalado</div>';
                         }
                         
                         const teamKey = teamName.toLowerCase();
-                        const canManageThisTeam = isAdmin || (isTeamLeader && userTeamLeadership.includes(teamKey));
+                        // Apenas líderes do time específico podem gerenciar
+                        const canManageThisTeam = isTeamLeader && userTeamLeadership.includes(teamKey);
                         
                         return volunteers.map(v => `
                             <div class="flex items-center justify-between group">
@@ -3553,18 +3599,17 @@
 
                 elements.adminView.innerHTML = html;
 
-                // Event listeners para admin/líder deletar escala
-                if (isAdmin || isTeamLeader) {
+                // Event listeners para líder deletar escala (apenas do seu time)
+                if (isTeamLeader) {
                     document.querySelectorAll('.admin-delete-escala').forEach(btn => {
                         btn.addEventListener('click', (e) => {
                             const escalaId = e.currentTarget.dataset.escalaId;
                             const currentTeam = e.currentTarget.dataset.currentTeam;
                             
-                            // Verificar permissão
-                            if (isAdmin || userTeamLeadership.includes(currentTeam)) {
-                                const roleText = isAdmin ? 'administrador' : 'líder do time';
+                            // Verificar permissão - apenas líder do time específico
+                            if (userTeamLeadership.includes(currentTeam)) {
                                 showModal(
-                                    `Como ${roleText}, deseja remover esta pessoa da escala?`,
+                                    `Como líder do time, deseja remover esta pessoa da escala?`,
                                     true,
                                     () => deleteEscala(escalaId),
                                     true
@@ -3575,7 +3620,7 @@
                         });
                     });
                     
-                    // Event listeners para transferir voluntário
+                    // Event listeners para transferir voluntário (apenas do seu time)
                     document.querySelectorAll('.transfer-volunteer-btn').forEach(btn => {
                         btn.addEventListener('click', (e) => {
                             const escalaId = e.currentTarget.dataset.escalaId;
@@ -3584,8 +3629,8 @@
                             const date = e.currentTarget.dataset.date;
                             const time = e.currentTarget.dataset.time;
                             
-                            // Verificar permissão
-                            if (isAdmin || userTeamLeadership.includes(currentTeam)) {
+                            // Verificar permissão - apenas líder do time específico
+                            if (userTeamLeadership.includes(currentTeam)) {
                                 openTransferModal(escalaId, volunteerName, currentTeam, date, time);
                             } else {
                                 showModal('❌ Você só pode transferir voluntários dos times que lidera.', false, null, true);
@@ -4371,6 +4416,7 @@
                             photoURL: data.photoURL || '',
                             role: data.role || 'user',
                             blocked: data.blocked || false,
+                            teamLeader: data.teamLeader || [],
                             lastLoginFormatted: data.lastLoginFormatted || 'Nunca acessou',
                             createdAt: data.createdAt || ''
                         });
@@ -4446,6 +4492,10 @@
                                     ${isUserSuperAdmin ? '<p class="text-xs text-purple-600 font-bold">👑 Super Administrador</p>' : ''}
                                     ${isUserAdmin && !isUserSuperAdmin ? '<p class="text-xs text-yellow-600 font-bold">👑 Administrador</p>' : ''}
                                     ${isBlocked ? '<p class="text-xs text-red-600 font-bold">⚠️ Usuário bloqueado</p>' : ''}
+                                    ${teamLeader.length > 0 ? `<p class="text-xs text-blue-600 font-bold">🏆 Líder de: ${teamLeader.map(t => {
+                                        const names = { welcome: 'Welcome', backstage: 'Backstage', parking: 'Parking', kids: 'Kids' };
+                                        return names[t];
+                                    }).join(', ')}</p>` : ''}
                                 </div>
                                 
                                 <!-- LINHA 3: Botões de Ação -->
