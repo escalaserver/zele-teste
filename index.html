@@ -2038,6 +2038,20 @@
                         newInfo.style.display = leadershipBadge ? 'block' : 'none';
                         elements.menuUserEmail.parentElement?.insertBefore(newInfo, elements.menuUserEmail.nextSibling);
                     }
+
+                    // Replicar exibição na barra superior abaixo do email
+                    const topLeadershipEl = document.getElementById('top-leadership-info');
+                    if (topLeadershipEl) {
+                        topLeadershipEl.textContent = leadershipBadge;
+                        topLeadershipEl.style.display = leadershipBadge ? 'inline-block' : 'none';
+                    } else if (elements && elements.userEmail) {
+                        const topInfo = document.createElement('div');
+                        topInfo.id = 'top-leadership-info';
+                        topInfo.className = 'text-xs text-gray-500';
+                        topInfo.textContent = leadershipBadge;
+                        topInfo.style.display = leadershipBadge ? 'inline-block' : 'none';
+                        elements.userEmail.parentElement?.insertBefore(topInfo, elements.userEmail.nextSibling);
+                    }
                 }
             }
 
