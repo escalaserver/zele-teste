@@ -2103,9 +2103,13 @@
                     // Verificar liderança de times
                     if (userDoc.exists()) {
                         const userData = userDoc.data();
+                        console.log('📄 Dados completos do usuário:', userData);
+                        console.log('📄 Campo teamLeader:', userData.teamLeader);
+                        console.log('📄 Tipo do campo teamLeader:', typeof userData.teamLeader);
                         userTeamLeadership = userData.teamLeader || [];
                         isTeamLeader = userTeamLeadership.length > 0;
                         console.log('🏆 Líder de times:', userTeamLeadership);
+                        console.log('🏆 isTeamLeader:', isTeamLeader);
                         
                         // Atualizar UI após carregar liderança
                         updateUserUI(user);
@@ -4203,10 +4207,11 @@
                         }
                         
                         const teamKey = teamName.toLowerCase();
-                        // Apenas admins/líderes podem gerenciar, mas SOMENTE nos times que lideram
-                        const canManageThisTeam = (isAdmin === true || isTeamLeader === true) && (userTeamLeadership && userTeamLeadership.includes(teamKey));
+                        // Superadmin pode gerenciar TODOS os times
+                        // Admin/líder pode gerenciar SOMENTE os times que lidera
+                        const canManageThisTeam = isSuperAdmin || ((isAdmin || isTeamLeader) && userTeamLeadership && userTeamLeadership.includes(teamKey));
                         
-                        console.log(`🔍 Team: ${teamKey}, isAdmin: ${isAdmin}, isTeamLeader: ${isTeamLeader}, leadership:`, userTeamLeadership, `canManage: ${canManageThisTeam}`);
+                        console.log(`🔍 Team: ${teamKey}, isSuperAdmin: ${isSuperAdmin}, isAdmin: ${isAdmin}, isTeamLeader: ${isTeamLeader}, leadership:`, userTeamLeadership, `canManage: ${canManageThisTeam}`);
                         
                         return volunteers.map(v => `
                             <div class="flex items-center justify-between group">
@@ -4269,16 +4274,18 @@
 
                 elements.adminView.innerHTML = html;
 
-                // Event listeners para deletar escala (apenas nos times que lidera)
+                // Event listeners para deletar escala (superadmin tem acesso total, outros apenas times que lideram)
                 document.querySelectorAll('.admin-delete-escala').forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         const escalaId = e.currentTarget.dataset.escalaId;
                         const currentTeam = e.currentTarget.dataset.currentTeam;
                         
-                        // Permissão: admin/líder apenas para os times que lidera
-                        if ((isAdmin === true || isTeamLeader === true) && userTeamLeadership && userTeamLeadership.includes(currentTeam)) {
+                        // Permissão: superadmin pode tudo, admin/líder apenas nos times que lidera
+                        const hasPermission = isSuperAdmin || ((isAdmin || isTeamLeader) && userTeamLeadership && userTeamLeadership.includes(currentTeam));
+                        
+                        if (hasPermission) {
                             showModal(
-                                `Como líder do time, deseja remover esta pessoa da escala?`,
+                                `Como ${isSuperAdmin ? 'super administrador' : 'líder do time'}, deseja remover esta pessoa da escala?`,
                                 true,
                                 () => deleteEscala(escalaId),
                                 true
@@ -4289,7 +4296,7 @@
                     });
                 });
                 
-                // Event listeners para transferir voluntário (apenas nos times que lidera)
+                // Event listeners para transferir voluntário (superadmin tem acesso total, outros apenas times que lideram)
                 document.querySelectorAll('.transfer-volunteer-btn').forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         const escalaId = e.currentTarget.dataset.escalaId;
@@ -4298,8 +4305,10 @@
                         const date = e.currentTarget.dataset.date;
                         const time = e.currentTarget.dataset.time;
                         
-                        // Permissão: admin/líder apenas para os times que lidera
-                        if ((isAdmin === true || isTeamLeader === true) && userTeamLeadership && userTeamLeadership.includes(currentTeam)) {
+                        // Permissão: superadmin pode tudo, admin/líder apenas nos times que lidera
+                        const hasPermission = isSuperAdmin || ((isAdmin || isTeamLeader) && userTeamLeadership && userTeamLeadership.includes(currentTeam));
+                        
+                        if (hasPermission) {
                             openTransferModal(escalaId, volunteerName, currentTeam, date, time);
                         } else {
                             showModal('❌ Você só pode transferir voluntários dos times que lidera.', false, null, true);
@@ -5077,6 +5086,7 @@
                     const users = [];
                     usersSnapshot.forEach(doc => {
                         const data = doc.data();
+                        console.log(`📋 Usuário ${data.email}: teamLeader =`, data.teamLeader);
                         users.push({
                             id: doc.id,
                             email: data.email || 'Sem email',
@@ -5666,22 +5676,39 @@
                     selectedTeams.push(checkbox.dataset.team);
                 });
                 
+                console.log('💾 Salvando liderança para usuário:', currentLeaderUserId);
+                console.log('💾 Times selecionados:', selectedTeams);
+                
                 try {
                     const { doc, setDoc, getDoc } = window.firestoreMethods;
                     const userDocRef = doc(window.firebaseDb, 'users', currentLeaderUserId);
                     const userDoc = await getDoc(userDocRef);
                     
+                    console.log('💾 Documento existe?', userDoc.exists());
+                    
                     if (userDoc.exists()) {
-                        await setDoc(userDocRef, {
+                        const updatedData = {
                             ...userDoc.data(),
                             teamLeader: selectedTeams,
                             updatedAt: new Date().toISOString()
-                        });
+                        };
+                        console.log('💾 Dados a serem salvos:', updatedData);
+                        await setDoc(userDocRef, updatedData);
+                        console.log('✅ Dados salvos com sucesso');
                     } else {
-                        await setDoc(userDocRef, {
+                        const newData = {
                             teamLeader: selectedTeams,
                             createdAt: new Date().toISOString()
-                        });
+                        };
+                        console.log('💾 Criando novo documento com:', newData);
+                        await setDoc(userDocRef, newData);
+                        console.log('✅ Novo documento criado');
+                    }
+                    
+                    // Verificar se foi salvo corretamente
+                    const verifyDoc = await getDoc(userDocRef);
+                    if (verifyDoc.exists()) {
+                        console.log('✅ Verificação - teamLeader salvo:', verifyDoc.data().teamLeader);
                     }
                     
                     document.getElementById('team-leader-modal').classList.remove('show');
