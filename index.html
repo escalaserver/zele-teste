@@ -1928,6 +1928,9 @@
                         userTeamLeadership = userData.teamLeader || [];
                         isTeamLeader = userTeamLeadership.length > 0;
                         console.log('🏆 Líder de times:', userTeamLeadership);
+                        
+                        // Atualizar UI após carregar liderança
+                        updateUserUI(user);
                     }
                     
                     // Super Admin hardcoded (primeiro super admin)
@@ -5522,6 +5525,17 @@
                     
                     // Recarregar lista de usuários
                     await loadUsersList();
+                    
+                    // Se for o próprio usuário logado, atualizar liderança e UI
+                    if (currentLeaderUserId === currentUser?.uid) {
+                        userTeamLeadership = selectedTeams;
+                        isTeamLeader = userTeamLeadership.length > 0;
+                        updateUserUI(currentUser);
+                        // Recarregar admin view se estiver aberta
+                        if (document.getElementById('admin-view').style.display !== 'none') {
+                            await renderAdminView();
+                        }
+                    }
                     
                 } catch (error) {
                     console.error('❌ Erro ao salvar liderança:', error);
