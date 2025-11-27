@@ -2145,13 +2145,16 @@
                         const timeStr = time;
                         const eventDisplay = eventName ? ` - ${eventName}` : '';
                         
+                        // Criar escala como pendente para aprovação do líder
+                        await saveEscalaToFirestore(escalaId, date, time, team, eventName, false, 'pending');
+                        
                         // Criar elemento de mensagem com HTML
                         const message = document.createElement('div');
                         message.innerHTML = `
                             <p>Obrigado pela sua disponibilidade! 😊</p>
                             <p>O time <strong>${teamNames[team]}</strong> já está com a escala completa para:</p>
                             <p class="mt-2 mb-2"><strong>${dateStr}${eventDisplay} às ${timeStr}</strong></p>
-                            <p>Por favor, escolha outro time para servir.</p>
+                            <p class="mt-2">⛔ Sua solicitação foi enviada para o líder para aprovação ou remanejamento de time.</p>
                         `;
                         
                         showModal(
@@ -2160,7 +2163,7 @@
                             null,
                             false,
                             null,
-                            '🙏'
+                            '⛔'
                         );
                         return;
                     }
@@ -2172,13 +2175,17 @@
                         if (existingTeam === team) {
                             // Mostrar confirmação antes de salvar
                             if (isPending) {
+                                // Salvar automaticamente sem botões SIM/NÃO
+                                await saveEscalaToFirestore(escalaId, date, time, team, eventName, true, 'pending');
                                 showModal(
-                                    `⛔ Atenção: faltam menos de 24 horas para o evento. Sua solicitação será enviada para aprovação do líder do time.`,
-                                    true,
-                                    async () => {
-                                        await saveEscalaToFirestore(escalaId, date, time, team, eventName, true, 'pending');
-                                    }
+                                    `⛔ Atenção: faltam menos de 24 horas para o evento. Sua solicitação foi enviada para aprovação do líder do time.`,
+                                    false,
+                                    null,
+                                    false,
+                                    null,
+                                    '⛔'
                                 );
+                                return;
                             } else {
                                 showModal(
                                     `Confirmar escala no time ${teamNames[team]}?`,
@@ -2191,13 +2198,17 @@
                         } else {
                             // Times diferentes - pedir confirmação
                             if (isPending) {
+                                // Salvar automaticamente sem botões SIM/NÃO
+                                await saveEscalaToFirestore(escalaId, date, time, team, eventName, false, 'pending');
                                 showModal(
-                                    `⛔ Você já está escalado no time ${teamNames[existingTeam]}. Como faltam menos de 24 horas para o evento, sua mudança para o time ${teamNames[team]} será enviada para aprovação.`,
-                                    true,
-                                    async () => {
-                                        await saveEscalaToFirestore(escalaId, date, time, team, eventName, false, 'pending');
-                                    }
+                                    `⛔ Você já está escalado no time ${teamNames[existingTeam]}. Como faltam menos de 24 horas para o evento, sua mudança para o time ${teamNames[team]} foi enviada para aprovação.`,
+                                    false,
+                                    null,
+                                    false,
+                                    null,
+                                    '⛔'
                                 );
+                                return;
                             } else {
                                 showModal(
                                     `Você já escolheu servir no time ${teamNames[existingTeam]}. Deseja confirmar a mudança para o time ${teamNames[team]} nesta escala?`,
@@ -2211,14 +2222,17 @@
                     } else {
                         // Nova escala - verificar se é pendente ou aprovada
                         if (isPending) {
-                            // Escala pendente (menos de 24h)
+                            // Escala pendente (menos de 24h) - salvar automaticamente
+                            await saveEscalaToFirestore(escalaId, date, time, team, eventName, false, 'pending');
                             showModal(
-                                `⛔ Atenção: faltam menos de 24 horas para o evento. Sua solicitação será enviada para aprovação do líder do time.`,
-                                true,
-                                async () => {
-                                    await saveEscalaToFirestore(escalaId, date, time, team, eventName, false, 'pending');
-                                }
+                                `⛔ Atenção: faltam menos de 24 horas para o evento. Sua solicitação foi enviada para aprovação do líder do time.`,
+                                false,
+                                null,
+                                false,
+                                null,
+                                '⛔'
                             );
+                            return;
                         } else {
                             // Escala normal - mostrar confirmação
                             showModal(
@@ -3944,6 +3958,9 @@
 
             // Renderizar visão admin
             function renderAdminView(grouped) {
+                console.log('🔍 renderAdminView - isTeamLeader:', isTeamLeader);
+                console.log('🔍 renderAdminView - userTeamLeadership:', userTeamLeadership);
+                
                 // Ordenar chaves por data e hora (ordem crescente)
                 const dates = Object.keys(grouped).sort((a, b) => {
                     const [dateA, timeA] = a.split('_');
@@ -3973,6 +3990,8 @@
                         const teamKey = teamName.toLowerCase();
                         // Líderes do time específico podem gerenciar seus times
                         const canManageThisTeam = isTeamLeader && userTeamLeadership && userTeamLeadership.includes(teamKey);
+                        
+                        console.log(`🔍 Team: ${teamKey}, isTeamLeader: ${isTeamLeader}, userTeamLeadership:`, userTeamLeadership, `canManage: ${canManageThisTeam}`);
                         
                         return volunteers.map(v => `
                             <div class="flex items-center justify-between group">
