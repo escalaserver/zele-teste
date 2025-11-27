@@ -213,6 +213,25 @@
             animation: pulse-save 0.5s ease-in-out 2;
             -webkit-animation: pulse-save 0.5s ease-in-out 2;
         }
+        
+        /* Onboarding Styles */
+        .onboarding-team-btn {
+            transition: all 0.3s ease;
+        }
+        .onboarding-team-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .day-toggle-btn {
+            transition: all 0.2s ease;
+        }
+        .period-btn {
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+        }
+        .period-btn:hover {
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body style="background-color: #cdc8c0;">
@@ -802,6 +821,165 @@
             <button id="confirm-transfer-btn" class="w-full zele-btn text-white font-bold py-3 px-6 rounded-lg">
                 ✅ Confirmar Transferência
             </button>
+        </div>
+    </div>
+
+    <!-- Modal de Onboarding - Primeiro Acesso -->
+    <div id="onboarding-modal" class="modal-overlay" style="display: none;">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 p-6 max-h-[90vh] overflow-y-auto">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold mb-2" style="color: #151b29;">👋 Bem-vindo(a)!</h2>
+                <p class="text-gray-600">Vamos conhecer suas preferências para servir</p>
+            </div>
+            
+            <!-- Escolha de Time -->
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold mb-3" style="color: #151b29;">🎯 Qual time você gostaria de servir?</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <button class="onboarding-team-btn p-4 border-2 border-gray-300 rounded-lg hover:border-blue-500 transition" data-team="welcome">
+                        <div class="text-3xl mb-2">👋</div>
+                        <div class="font-semibold text-blue-600">Welcome</div>
+                    </button>
+                    <button class="onboarding-team-btn p-4 border-2 border-gray-300 rounded-lg hover:border-gray-600 transition" data-team="backstage">
+                        <div class="text-3xl mb-2">🤝</div>
+                        <div class="font-semibold text-gray-600">Backstage</div>
+                    </button>
+                    <button class="onboarding-team-btn p-4 border-2 border-gray-300 rounded-lg hover:border-red-500 transition" data-team="parking">
+                        <div class="text-3xl mb-2">🚗</div>
+                        <div class="font-semibold text-red-600">Parking</div>
+                    </button>
+                    <button class="onboarding-team-btn p-4 border-2 border-gray-300 rounded-lg hover:border-yellow-500 transition" data-team="kids">
+                        <div class="text-3xl mb-2">👶</div>
+                        <div class="font-semibold text-yellow-600">Kids</div>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Disponibilidade Semanal -->
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold mb-3" style="color: #151b29;">📅 Quando você tem disponibilidade?</h3>
+                <p class="text-sm text-gray-600 mb-3">Selecione os dias e períodos que você pode servir:</p>
+                
+                <div class="space-y-3" id="availability-days">
+                    <!-- Segunda -->
+                    <div class="border border-gray-300 rounded-lg p-3">
+                        <button class="day-toggle-btn w-full flex items-center justify-between p-2 rounded hover:bg-gray-50 transition" data-day="monday">
+                            <span class="font-semibold text-gray-700">Segunda-feira</span>
+                            <span class="toggle-indicator text-gray-400">○</span>
+                        </button>
+                        <div class="period-options hidden mt-2 flex gap-2 justify-center" data-day="monday">
+                            <button class="period-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-100 transition" data-period="morning">☀️ Manhã</button>
+                            <button class="period-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-100 transition" data-period="afternoon">🌤️ Tarde</button>
+                            <button class="period-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-100 transition" data-period="night">🌙 Noite</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Terça -->
+                    <div class="border border-gray-300 rounded-lg p-3">
+                        <button class="day-toggle-btn w-full flex items-center justify-between p-2 rounded hover:bg-gray-50 transition" data-day="tuesday">
+                            <span class="font-semibold text-gray-700">Terça-feira</span>
+                            <span class="toggle-indicator text-gray-400">○</span>
+                        </button>
+                        <div class="period-options hidden mt-2 flex gap-2 justify-center" data-day="tuesday">
+                            <button class="period-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-100 transition" data-period="morning">☀️ Manhã</button>
+                            <button class="period-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-100 transition" data-period="afternoon">🌤️ Tarde</button>
+                            <button class="period-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-100 transition" data-period="night">🌙 Noite</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Quarta -->
+                    <div class="border border-gray-300 rounded-lg p-3">
+                        <button class="day-toggle-btn w-full flex items-center justify-between p-2 rounded hover:bg-gray-50 transition" data-day="wednesday">
+                            <span class="font-semibold text-gray-700">Quarta-feira</span>
+                            <span class="toggle-indicator text-gray-400">○</span>
+                        </button>
+                        <div class="period-options hidden mt-2 flex gap-2 justify-center" data-day="wednesday">
+                            <button class="period-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-100 transition" data-period="morning">☀️ Manhã</button>
+                            <button class="period-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-100 transition" data-period="afternoon">🌤️ Tarde</button>
+                            <button class="period-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-100 transition" data-period="night">🌙 Noite</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Quinta -->
+                    <div class="border border-gray-300 rounded-lg p-3">
+                        <button class="day-toggle-btn w-full flex items-center justify-between p-2 rounded hover:bg-gray-50 transition" data-day="thursday">
+                            <span class="font-semibold text-gray-700">Quinta-feira</span>
+                            <span class="toggle-indicator text-gray-400">○</span>
+                        </button>
+                        <div class="period-options hidden mt-2 flex gap-2 justify-center" data-day="thursday">
+                            <button class="period-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-100 transition" data-period="morning">☀️ Manhã</button>
+                            <button class="period-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-100 transition" data-period="afternoon">🌤️ Tarde</button>
+                            <button class="period-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-100 transition" data-period="night">🌙 Noite</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Sexta -->
+                    <div class="border border-gray-300 rounded-lg p-3">
+                        <button class="day-toggle-btn w-full flex items-center justify-between p-2 rounded hover:bg-gray-50 transition" data-day="friday">
+                            <span class="font-semibold text-gray-700">Sexta-feira</span>
+                            <span class="toggle-indicator text-gray-400">○</span>
+                        </button>
+                        <div class="period-options hidden mt-2 flex gap-2 justify-center" data-day="friday">
+                            <button class="period-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-100 transition" data-period="morning">☀️ Manhã</button>
+                            <button class="period-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-100 transition" data-period="afternoon">🌤️ Tarde</button>
+                            <button class="period-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-100 transition" data-period="night">🌙 Noite</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Sábado -->
+                    <div class="border border-gray-300 rounded-lg p-3">
+                        <button class="day-toggle-btn w-full flex items-center justify-between p-2 rounded hover:bg-gray-50 transition" data-day="saturday">
+                            <span class="font-semibold text-gray-700">Sábado</span>
+                            <span class="toggle-indicator text-gray-400">○</span>
+                        </button>
+                        <div class="period-options hidden mt-2 flex gap-2 justify-center" data-day="saturday">
+                            <button class="period-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-100 transition" data-period="morning">☀️ Manhã</button>
+                            <button class="period-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-100 transition" data-period="afternoon">🌤️ Tarde</button>
+                            <button class="period-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-100 transition" data-period="night">🌙 Noite</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Domingo -->
+                    <div class="border border-gray-300 rounded-lg p-3">
+                        <button class="day-toggle-btn w-full flex items-center justify-between p-2 rounded hover:bg-gray-50 transition" data-day="sunday">
+                            <span class="font-semibold text-gray-700">Domingo</span>
+                            <span class="toggle-indicator text-gray-400">○</span>
+                        </button>
+                        <div class="period-options hidden mt-2 flex gap-2 justify-center" data-day="sunday">
+                            <button class="period-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-100 transition" data-period="morning">☀️ Manhã</button>
+                            <button class="period-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-100 transition" data-period="afternoon">🌤️ Tarde</button>
+                            <button class="period-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-100 transition" data-period="night">🌙 Noite</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="confirm-onboarding-btn" class="w-full zele-btn text-white font-bold py-3 px-6 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                ✅ Continuar
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação de Onboarding -->
+    <div id="onboarding-confirm-modal" class="modal-overlay" style="display: none;">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-6">
+            <div class="text-center mb-4">
+                <div class="text-4xl mb-3">✅</div>
+                <h2 class="text-xl font-bold mb-2" style="color: #151b29;">Confirme suas informações</h2>
+            </div>
+            
+            <div class="space-y-4 mb-6" id="onboarding-summary">
+                <!-- Resumo será inserido aqui -->
+            </div>
+            
+            <div class="flex gap-3">
+                <button id="edit-onboarding-btn" class="flex-1 bg-gray-200 text-gray-800 font-bold py-3 px-6 rounded-lg hover:bg-gray-300 transition">
+                    ✏️ Editar
+                </button>
+                <button id="save-onboarding-btn" class="flex-1 zele-btn text-white font-bold py-3 px-6 rounded-lg">
+                    💾 Salvar
+                </button>
+            </div>
         </div>
     </div>
 
@@ -5543,6 +5721,257 @@
                 }
             });
             
+            // ============================================
+            // ONBOARDING - PRIMEIRO ACESSO
+            // ============================================
+            
+            let onboardingData = {
+                preferredTeam: null,
+                availability: {}
+            };
+            
+            // Seleção de time preferido
+            document.querySelectorAll('.onboarding-team-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remover seleção anterior
+                    document.querySelectorAll('.onboarding-team-btn').forEach(b => {
+                        b.classList.remove('ring-4', 'ring-offset-2');
+                        b.style.borderColor = '';
+                    });
+                    
+                    // Selecionar novo time
+                    const team = this.dataset.team;
+                    onboardingData.preferredTeam = team;
+                    this.classList.add('ring-4', 'ring-offset-2');
+                    
+                    // Cores por time
+                    const colors = {
+                        welcome: 'rgb(37, 99, 235)',
+                        backstage: 'rgb(75, 85, 99)',
+                        parking: 'rgb(239, 68, 68)',
+                        kids: 'rgb(234, 179, 8)'
+                    };
+                    this.style.borderColor = colors[team];
+                    
+                    validateOnboarding();
+                });
+            });
+            
+            // Toggle de dias da semana
+            document.querySelectorAll('.day-toggle-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const day = this.dataset.day;
+                    const periodOptions = document.querySelector(`.period-options[data-day="${day}"]`);
+                    const indicator = this.querySelector('.toggle-indicator');
+                    
+                    if (periodOptions.classList.contains('hidden')) {
+                        periodOptions.classList.remove('hidden');
+                        indicator.textContent = '●';
+                        indicator.classList.add('text-blue-600');
+                        this.classList.add('bg-blue-50');
+                    } else {
+                        periodOptions.classList.add('hidden');
+                        indicator.textContent = '○';
+                        indicator.classList.remove('text-blue-600');
+                        this.classList.remove('bg-blue-50');
+                        
+                        // Limpar seleções de período deste dia
+                        periodOptions.querySelectorAll('.period-btn').forEach(p => {
+                            p.classList.remove('bg-blue-500', 'text-white', 'border-blue-500');
+                        });
+                        
+                        // Remover do objeto de dados
+                        delete onboardingData.availability[day];
+                    }
+                    
+                    validateOnboarding();
+                });
+            });
+            
+            // Seleção de períodos
+            document.querySelectorAll('.period-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const day = this.closest('.period-options').dataset.day;
+                    const period = this.dataset.period;
+                    
+                    // Inicializar array se não existir
+                    if (!onboardingData.availability[day]) {
+                        onboardingData.availability[day] = [];
+                    }
+                    
+                    // Toggle seleção
+                    if (this.classList.contains('bg-blue-500')) {
+                        this.classList.remove('bg-blue-500', 'text-white', 'border-blue-500');
+                        onboardingData.availability[day] = onboardingData.availability[day].filter(p => p !== period);
+                        
+                        // Se não há mais períodos, remover o dia
+                        if (onboardingData.availability[day].length === 0) {
+                            delete onboardingData.availability[day];
+                        }
+                    } else {
+                        this.classList.add('bg-blue-500', 'text-white', 'border-blue-500');
+                        onboardingData.availability[day].push(period);
+                    }
+                    
+                    validateOnboarding();
+                });
+            });
+            
+            // Validar se pode continuar
+            function validateOnboarding() {
+                const btn = document.getElementById('confirm-onboarding-btn');
+                const hasTeam = onboardingData.preferredTeam !== null;
+                const hasAvailability = Object.keys(onboardingData.availability).length > 0;
+                
+                if (hasTeam && hasAvailability) {
+                    btn.disabled = false;
+                } else {
+                    btn.disabled = true;
+                }
+            }
+            
+            // Abrir modal de confirmação
+            document.getElementById('confirm-onboarding-btn')?.addEventListener('click', () => {
+                showOnboardingSummary();
+                document.getElementById('onboarding-modal').style.display = 'none';
+                document.getElementById('onboarding-confirm-modal').style.display = 'flex';
+            });
+            
+            // Mostrar resumo
+            function showOnboardingSummary() {
+                const summaryDiv = document.getElementById('onboarding-summary');
+                
+                const teamNames = {
+                    welcome: '👋 Welcome',
+                    backstage: '🤝 Backstage',
+                    parking: '🚗 Parking',
+                    kids: '👶 Kids'
+                };
+                
+                const dayNames = {
+                    monday: 'Segunda-feira',
+                    tuesday: 'Terça-feira',
+                    wednesday: 'Quarta-feira',
+                    thursday: 'Quinta-feira',
+                    friday: 'Sexta-feira',
+                    saturday: 'Sábado',
+                    sunday: 'Domingo'
+                };
+                
+                const periodNames = {
+                    morning: '☀️ Manhã',
+                    afternoon: '🌤️ Tarde',
+                    night: '🌙 Noite'
+                };
+                
+                let html = `
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <p class="text-sm font-semibold text-gray-700 mb-1">Time Preferido:</p>
+                        <p class="text-lg font-bold text-blue-600">${teamNames[onboardingData.preferredTeam]}</p>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-sm font-semibold text-gray-700 mb-2">Disponibilidade:</p>
+                        <div class="space-y-2">
+                `;
+                
+                for (const [day, periods] of Object.entries(onboardingData.availability)) {
+                    const periodsList = periods.map(p => periodNames[p]).join(', ');
+                    html += `
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="font-medium text-gray-700">${dayNames[day]}:</span>
+                            <span class="text-gray-600">${periodsList}</span>
+                        </div>
+                    `;
+                }
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+                
+                summaryDiv.innerHTML = html;
+            }
+            
+            // Voltar para editar
+            document.getElementById('edit-onboarding-btn')?.addEventListener('click', () => {
+                document.getElementById('onboarding-confirm-modal').style.display = 'none';
+                document.getElementById('onboarding-modal').style.display = 'flex';
+            });
+            
+            // Salvar onboarding
+            document.getElementById('save-onboarding-btn')?.addEventListener('click', async () => {
+                try {
+                    const { doc, updateDoc, setDoc, getDoc } = window.firestoreMethods;
+                    const userDocRef = doc(window.firebaseDb, 'users', currentUser.uid);
+                    const userDoc = await getDoc(userDocRef);
+                    
+                    const dataToSave = {
+                        preferredTeam: onboardingData.preferredTeam,
+                        availability: onboardingData.availability,
+                        onboardingComplete: true,
+                        onboardingDate: new Date().toISOString()
+                    };
+                    
+                    if (userDoc.exists()) {
+                        await updateDoc(userDocRef, dataToSave);
+                    } else {
+                        await setDoc(userDocRef, {
+                            ...dataToSave,
+                            email: currentUser.email,
+                            displayName: currentUser.displayName,
+                            createdAt: new Date().toISOString()
+                        });
+                    }
+                    
+                    document.getElementById('onboarding-confirm-modal').style.display = 'none';
+                    
+                    showModal('✅ Suas preferências foram salvas com sucesso!<br><br>Agora você pode começar a se escalar nos eventos.');
+                    
+                    console.log('✅ Onboarding concluído:', dataToSave);
+                } catch (error) {
+                    console.error('❌ Erro ao salvar onboarding:', error);
+                    showModal('❌ Erro ao salvar suas preferências. Tente novamente.');
+                }
+            });
+            
+            // Verificar se precisa mostrar onboarding
+            async function checkOnboarding(user) {
+                try {
+                    const { doc, getDoc } = window.firestoreMethods;
+                    const userDoc = await getDoc(doc(window.firebaseDb, 'users', user.uid));
+                    
+                    // Mostrar onboarding se:
+                    // 1. Usuário não existe no Firestore OU
+                    // 2. Usuário existe mas não completou onboarding
+                    let shouldShowOnboarding = false;
+                    
+                    if (!userDoc.exists()) {
+                        console.log('👋 Novo usuário - mostrar onboarding');
+                        shouldShowOnboarding = true;
+                    } else {
+                        const userData = userDoc.data();
+                        if (!userData.onboardingComplete) {
+                            console.log('👋 Usuário sem onboarding completo - mostrar formulário');
+                            shouldShowOnboarding = true;
+                        }
+                    }
+                    
+                    if (shouldShowOnboarding) {
+                        // Dar um delay para não conflitar com outros modais
+                        setTimeout(() => {
+                            document.getElementById('onboarding-modal').style.display = 'flex';
+                        }, 500);
+                    }
+                } catch (error) {
+                    console.error('❌ Erro ao verificar onboarding:', error);
+                }
+            }
+            
             // Excluir usuário permanentemente (apenas se bloqueado)
             async function deleteUser(userId, userName) {
                 const confirmation = await new Promise(resolve => {
@@ -5820,6 +6249,7 @@
                     await loadUserEscalas(); // Agora sim carregar escalas
                     await loadAllEscalas();
                     setupInstallButton(); // Configurar botão de instalação após login
+                    await checkOnboarding(user); // Verificar se precisa mostrar onboarding
                 } else {
                     showLogin();
                 }
