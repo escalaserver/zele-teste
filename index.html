@@ -3965,15 +3965,15 @@
                     const dateStr = dateObj.toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
                     const eventName = data.eventName ? ` - ${data.eventName}` : '';
 
-                    // Função para renderizar voluntários com botão de deletar e transferir (apenas para líderes do time específico)
+                    // Função para renderizar voluntários com botão de deletar e transferir (para líderes do time específico)
                     const renderVolunteers = (volunteers, teamName) => {
                         if (volunteers.length === 0) {
                             return '<div class="text-gray-400">Ninguém escalado</div>';
                         }
                         
                         const teamKey = teamName.toLowerCase();
-                        // Apenas líderes do time específico podem gerenciar
-                        const canManageThisTeam = isTeamLeader && userTeamLeadership.includes(teamKey);
+                        // Líderes do time específico podem gerenciar seus times
+                        const canManageThisTeam = isTeamLeader && userTeamLeadership && userTeamLeadership.includes(teamKey);
                         
                         return volunteers.map(v => `
                             <div class="flex items-center justify-between group">
@@ -4037,44 +4037,42 @@
                 elements.adminView.innerHTML = html;
 
                 // Event listeners para líder deletar escala (apenas do seu time)
-                if (isTeamLeader) {
-                    document.querySelectorAll('.admin-delete-escala').forEach(btn => {
-                        btn.addEventListener('click', (e) => {
-                            const escalaId = e.currentTarget.dataset.escalaId;
-                            const currentTeam = e.currentTarget.dataset.currentTeam;
-                            
-                            // Verificar permissão - apenas líder do time específico
-                            if (userTeamLeadership.includes(currentTeam)) {
-                                showModal(
-                                    `Como líder do time, deseja remover esta pessoa da escala?`,
-                                    true,
-                                    () => deleteEscala(escalaId),
-                                    true
-                                );
-                            } else {
-                                showModal('❌ Você só pode remover voluntários dos times que lidera.', false, null, true);
-                            }
-                        });
+                document.querySelectorAll('.admin-delete-escala').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const escalaId = e.currentTarget.dataset.escalaId;
+                        const currentTeam = e.currentTarget.dataset.currentTeam;
+                        
+                        // Verificar permissão - apenas líder do time específico
+                        if (isTeamLeader && userTeamLeadership && userTeamLeadership.includes(currentTeam)) {
+                            showModal(
+                                `Como líder do time, deseja remover esta pessoa da escala?`,
+                                true,
+                                () => deleteEscala(escalaId),
+                                true
+                            );
+                        } else {
+                            showModal('❌ Você só pode remover voluntários dos times que lidera.', false, null, true);
+                        }
                     });
-                    
-                    // Event listeners para transferir voluntário (apenas do seu time)
-                    document.querySelectorAll('.transfer-volunteer-btn').forEach(btn => {
-                        btn.addEventListener('click', (e) => {
-                            const escalaId = e.currentTarget.dataset.escalaId;
-                            const volunteerName = e.currentTarget.dataset.volunteerName;
-                            const currentTeam = e.currentTarget.dataset.currentTeam;
-                            const date = e.currentTarget.dataset.date;
-                            const time = e.currentTarget.dataset.time;
-                            
-                            // Verificar permissão - apenas líder do time específico
-                            if (userTeamLeadership.includes(currentTeam)) {
-                                openTransferModal(escalaId, volunteerName, currentTeam, date, time);
-                            } else {
-                                showModal('❌ Você só pode transferir voluntários dos times que lidera.', false, null, true);
-                            }
-                        });
+                });
+                
+                // Event listeners para transferir voluntário (apenas do seu time)
+                document.querySelectorAll('.transfer-volunteer-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const escalaId = e.currentTarget.dataset.escalaId;
+                        const volunteerName = e.currentTarget.dataset.volunteerName;
+                        const currentTeam = e.currentTarget.dataset.currentTeam;
+                        const date = e.currentTarget.dataset.date;
+                        const time = e.currentTarget.dataset.time;
+                        
+                        // Verificar permissão - apenas líder do time específico
+                        if (isTeamLeader && userTeamLeadership && userTeamLeadership.includes(currentTeam)) {
+                            openTransferModal(escalaId, volunteerName, currentTeam, date, time);
+                        } else {
+                            showModal('❌ Você só pode transferir voluntários dos times que lidera.', false, null, true);
+                        }
                     });
-                }
+                });
             }
 
             // ===== DASHBOARD E GRÁFICOS =====
