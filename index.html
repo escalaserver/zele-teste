@@ -2018,6 +2018,26 @@
                     elements.menuUserName.textContent = displayName + badge;
                     elements.menuUserEmail.textContent = user.email;
                     elements.menuUserPhoto.src = user.photoURL || defaultPhoto;
+
+                    // Mostrar times que o admin/líder lidera abaixo do email no menu
+                    const leadershipBadge = (userTeamLeadership && userTeamLeadership.length > 0)
+                        ? `Líder de: ${userTeamLeadership.map(t => {
+                            const map = { welcome: '👋 Welcome', backstage: '🤝 Backstage', parking: '🚗 Parking', kids: '👶 Kids' };
+                            return map[t] || t;
+                          }).join(' • ')}`
+                        : '';
+                    const leadershipEl = document.getElementById('menu-leadership-info');
+                    if (leadershipEl) {
+                        leadershipEl.textContent = leadershipBadge;
+                        leadershipEl.style.display = leadershipBadge ? 'block' : 'none';
+                    } else if (elements && elements.menuUserEmail) {
+                        const newInfo = document.createElement('div');
+                        newInfo.id = 'menu-leadership-info';
+                        newInfo.className = 'text-xs text-gray-500 mt-1';
+                        newInfo.textContent = leadershipBadge;
+                        newInfo.style.display = leadershipBadge ? 'block' : 'none';
+                        elements.menuUserEmail.parentElement?.insertBefore(newInfo, elements.menuUserEmail.nextSibling);
+                    }
                 }
             }
 
@@ -3988,10 +4008,10 @@
                         }
                         
                         const teamKey = teamName.toLowerCase();
-                        // Líderes do time específico podem gerenciar seus times
-                        const canManageThisTeam = isTeamLeader && userTeamLeadership && userTeamLeadership.includes(teamKey);
+                        // Apenas admins/líderes podem gerenciar, mas SOMENTE nos times que lideram
+                        const canManageThisTeam = (isAdmin === true || isTeamLeader === true) && (userTeamLeadership && userTeamLeadership.includes(teamKey));
                         
-                        console.log(`🔍 Team: ${teamKey}, isTeamLeader: ${isTeamLeader}, userTeamLeadership:`, userTeamLeadership, `canManage: ${canManageThisTeam}`);
+                        console.log(`🔍 Team: ${teamKey}, isAdmin: ${isAdmin}, isTeamLeader: ${isTeamLeader}, leadership:`, userTeamLeadership, `canManage: ${canManageThisTeam}`);
                         
                         return volunteers.map(v => `
                             <div class="flex items-center justify-between group">
@@ -4054,14 +4074,14 @@
 
                 elements.adminView.innerHTML = html;
 
-                // Event listeners para líder deletar escala (apenas do seu time)
+                // Event listeners para deletar escala (apenas nos times que lidera)
                 document.querySelectorAll('.admin-delete-escala').forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         const escalaId = e.currentTarget.dataset.escalaId;
                         const currentTeam = e.currentTarget.dataset.currentTeam;
                         
-                        // Verificar permissão - apenas líder do time específico
-                        if (isTeamLeader && userTeamLeadership && userTeamLeadership.includes(currentTeam)) {
+                        // Permissão: admin/líder apenas para os times que lidera
+                        if ((isAdmin === true || isTeamLeader === true) && userTeamLeadership && userTeamLeadership.includes(currentTeam)) {
                             showModal(
                                 `Como líder do time, deseja remover esta pessoa da escala?`,
                                 true,
@@ -4074,7 +4094,7 @@
                     });
                 });
                 
-                // Event listeners para transferir voluntário (apenas do seu time)
+                // Event listeners para transferir voluntário (apenas nos times que lidera)
                 document.querySelectorAll('.transfer-volunteer-btn').forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         const escalaId = e.currentTarget.dataset.escalaId;
@@ -4083,8 +4103,8 @@
                         const date = e.currentTarget.dataset.date;
                         const time = e.currentTarget.dataset.time;
                         
-                        // Verificar permissão - apenas líder do time específico
-                        if (isTeamLeader && userTeamLeadership && userTeamLeadership.includes(currentTeam)) {
+                        // Permissão: admin/líder apenas para os times que lidera
+                        if ((isAdmin === true || isTeamLeader === true) && userTeamLeadership && userTeamLeadership.includes(currentTeam)) {
                             openTransferModal(escalaId, volunteerName, currentTeam, date, time);
                         } else {
                             showModal('❌ Você só pode transferir voluntários dos times que lidera.', false, null, true);
