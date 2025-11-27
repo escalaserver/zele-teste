@@ -887,6 +887,16 @@
                     </div>
                 </button>
 
+                <button id="menu-pending-escalas-btn" class="w-full flex items-center gap-3 p-4 rounded-lg hover:bg-gray-100 transition text-left" style="display: none;">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <div>
+                        <p class="font-semibold text-gray-800">Pendentes para servir</p>
+                        <p class="text-xs text-gray-600">Aprovar ou negar escalas</p>
+                    </div>
+                </button>
+
                 <button id="install-app-btn" class="w-full flex items-center gap-3 p-4 rounded-lg hover:bg-gray-100 transition text-left" style="display: none;">
                     <svg class="w-6 h-6" style="color: #151b29;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
@@ -982,6 +992,42 @@
             <p class="text-sm text-gray-600 mb-4">Voluntários que tentaram deletar escalas dentro do período de 48 horas:</p>
             <div id="blocked-attempts-list" class="space-y-3">
                 <!-- Lista será preenchida dinamicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Escalas Pendentes (Admin) -->
+    <div id="pending-escalas-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-3xl w-full p-6 max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">⏰ Pendentes para servir</h2>
+                <button id="close-pending-modal" class="text-gray-600 hover:text-gray-800">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Escalas solicitadas com menos de 24h de antecedência:</p>
+            <div id="pending-escalas-list" class="space-y-4">
+                <!-- Lista será preenchida dinamicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Seleção de Time para Aprovação -->
+    <div id="approve-team-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">✅ Selecionar Time</h2>
+                <button id="close-approve-team-modal" class="text-gray-600 hover:text-gray-800">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Selecione o time para aprovar a escala:</p>
+            <div class="space-y-3" id="approve-team-options">
+                <!-- Opções de times serão inseridas aqui -->
             </div>
         </div>
     </div>
@@ -1558,6 +1604,30 @@
                 }
             });
 
+            // Botão de escalas pendentes
+            document.getElementById('menu-pending-escalas-btn')?.addEventListener('click', () => {
+                closeMenu();
+                loadPendingEscalas();
+                document.getElementById('pending-escalas-modal').classList.remove('hidden');
+            });
+
+            // Fechar modal de escalas pendentes
+            document.getElementById('close-pending-modal')?.addEventListener('click', () => {
+                document.getElementById('pending-escalas-modal').classList.add('hidden');
+            });
+
+            // Fechar modal clicando fora
+            document.getElementById('pending-escalas-modal')?.addEventListener('click', (e) => {
+                if (e.target.id === 'pending-escalas-modal') {
+                    document.getElementById('pending-escalas-modal').classList.add('hidden');
+                }
+            });
+
+            // Fechar modal de seleção de time
+            document.getElementById('close-approve-team-modal')?.addEventListener('click', () => {
+                document.getElementById('approve-team-modal').classList.add('hidden');
+            });
+
             // Fechar modal iOS
             document.getElementById('close-ios-modal')?.addEventListener('click', () => {
                 document.getElementById('ios-install-modal').classList.add('hidden');
@@ -1884,6 +1954,7 @@
                         document.getElementById('menu-manage-admins-btn').style.display = 'block';
                         document.getElementById('menu-dashboard-btn').style.display = 'block';
                         document.getElementById('menu-blocked-attempts-btn').style.display = 'block';
+                        document.getElementById('menu-pending-escalas-btn').style.display = 'block';
                         console.log('✅ Usuário É SUPER ADMINISTRADOR');
                         return true;
                     }
@@ -1900,6 +1971,7 @@
                             document.getElementById('menu-manage-admins-btn').style.display = 'block';
                             document.getElementById('menu-dashboard-btn').style.display = 'block';
                             document.getElementById('menu-blocked-attempts-btn').style.display = 'block';
+                            document.getElementById('menu-pending-escalas-btn').style.display = 'block';
                             console.log('✅ Usuário É SUPER ADMINISTRADOR');
                             return true;
                         } else if (data.role === 'admin') {
@@ -1909,6 +1981,7 @@
                             document.getElementById('menu-manage-admins-btn').style.display = 'none'; // Admin não gerencia usuários
                             document.getElementById('menu-dashboard-btn').style.display = 'block';
                             document.getElementById('menu-blocked-attempts-btn').style.display = 'block';
+                            document.getElementById('menu-pending-escalas-btn').style.display = 'block';
                             console.log('✅ Usuário É ADMINISTRADOR');
                             return true;
                         } else {
@@ -1924,6 +1997,7 @@
                     document.getElementById('menu-manage-admins-btn').style.display = 'none';
                     document.getElementById('menu-dashboard-btn').style.display = 'none';
                     document.getElementById('menu-blocked-attempts-btn').style.display = 'none';
+                    document.getElementById('menu-pending-escalas-btn').style.display = 'none';
                     return false;
                 } catch (error) {
                     console.error('❌ Erro ao verificar admin:', error);
@@ -2042,6 +2116,13 @@
                 };
 
                 try {
+                    // Verificar se falta menos de 24h para o evento
+                    const eventDateTime = new Date(`${date}T${time}`);
+                    const now = new Date();
+                    const hoursUntilEvent = (eventDateTime - now) / (1000 * 60 * 60);
+                    
+                    const isPending = hoursUntilEvent < 24 && hoursUntilEvent > 0;
+                    
                     // Verificar limite de voluntários no time para esta data/hora
                     const teamLimit = await checkTeamLimit(date, time, team);
                     
@@ -2091,32 +2172,64 @@
                         // Se for o mesmo time, apenas atualiza
                         if (existingTeam === team) {
                             // Mostrar confirmação antes de salvar
+                            if (isPending) {
+                                showModal(
+                                    `⛔ Atenção: faltam menos de 24 horas para o evento. Sua solicitação será enviada para aprovação do líder do time.`,
+                                    true,
+                                    async () => {
+                                        await saveEscalaToFirestore(escalaId, date, time, team, eventName, true, 'pending');
+                                    }
+                                );
+                            } else {
+                                showModal(
+                                    `Confirmar escala no time ${teamNames[team]}?`,
+                                    true,
+                                    async () => {
+                                        await saveEscalaToFirestore(escalaId, date, time, team, eventName, true, 'approved');
+                                    }
+                                );
+                            }
+                        } else {
+                            // Times diferentes - pedir confirmação
+                            if (isPending) {
+                                showModal(
+                                    `⛔ Você já está escalado no time ${teamNames[existingTeam]}. Como faltam menos de 24 horas para o evento, sua mudança para o time ${teamNames[team]} será enviada para aprovação.`,
+                                    true,
+                                    async () => {
+                                        await saveEscalaToFirestore(escalaId, date, time, team, eventName, false, 'pending');
+                                    }
+                                );
+                            } else {
+                                showModal(
+                                    `Você já escolheu servir no time ${teamNames[existingTeam]}. Deseja confirmar a mudança para o time ${teamNames[team]} nesta escala?`,
+                                    true,
+                                    async () => {
+                                        await saveEscalaToFirestore(escalaId, date, time, team, eventName, false, 'approved');
+                                    }
+                                );
+                            }
+                        }
+                    } else {
+                        // Nova escala - verificar se é pendente ou aprovada
+                        if (isPending) {
+                            // Escala pendente (menos de 24h)
+                            showModal(
+                                `⛔ Atenção: faltam menos de 24 horas para o evento. Sua solicitação será enviada para aprovação do líder do time.`,
+                                true,
+                                async () => {
+                                    await saveEscalaToFirestore(escalaId, date, time, team, eventName, false, 'pending');
+                                }
+                            );
+                        } else {
+                            // Escala normal - mostrar confirmação
                             showModal(
                                 `Confirmar escala no time ${teamNames[team]}?`,
                                 true,
                                 async () => {
-                                    await saveEscalaToFirestore(escalaId, date, time, team, eventName, true);
-                                }
-                            );
-                        } else {
-                            // Times diferentes - pedir confirmação
-                            showModal(
-                                `Você já escolheu servir no time ${teamNames[existingTeam]}. Deseja confirmar a mudança para o time ${teamNames[team]} nesta escala?`,
-                                true,
-                                async () => {
-                                    await saveEscalaToFirestore(escalaId, date, time, team, eventName, false);
+                                    await saveEscalaToFirestore(escalaId, date, time, team, eventName, false, 'approved');
                                 }
                             );
                         }
-                    } else {
-                        // Nova escala - mostrar confirmação
-                        showModal(
-                            `Confirmar escala no time ${teamNames[team]}?`,
-                            true,
-                            async () => {
-                                await saveEscalaToFirestore(escalaId, date, time, team, eventName, false);
-                            }
-                        );
                     }
                     
                 } catch (error) {
@@ -2126,11 +2239,11 @@
             }
 
             // Função auxiliar para salvar no Firestore
-            async function saveEscalaToFirestore(escalaId, date, time, team, eventName, skipCalendarPrompt) {
+            async function saveEscalaToFirestore(escalaId, date, time, team, eventName, skipCalendarPrompt, status = 'approved') {
                 try {
                     const { doc, setDoc } = window.firestoreMethods;
                     
-                    await setDoc(doc(window.firebaseDb, 'escalas', escalaId), {
+                    const escalaData = {
                         userId: currentUser.uid,
                         userName: currentUser.displayName,
                         userEmail: currentUser.email,
@@ -2139,10 +2252,20 @@
                         time: time,
                         team: team,
                         eventName: eventName || '',
-                        createdAt: new Date().toISOString()
-                    });
+                        createdAt: new Date().toISOString(),
+                        status: status,
+                        requestedTeam: team,
+                        requestTimestamp: new Date().toISOString()
+                    };
+                    
+                    // Se for escala negada, adicionar razão
+                    if (status === 'denied') {
+                        escalaData.deniedReason = 'Escala não aprovada pelo líder';
+                    }
+                    
+                    await setDoc(doc(window.firebaseDb, 'escalas', escalaId), escalaData);
 
-                    console.log('✅ Escala salva com sucesso!');
+                    console.log('✅ Escala salva com sucesso!', status);
                     
                     // Limpar seleção e resetar imagens
                     selectedTeam = null;
@@ -2161,7 +2284,11 @@
                     loadAllEscalas();
                     
                     // Mostrar confirmação de sucesso
-                    showModal('Escala salva com sucesso!');
+                    if (status === 'pending') {
+                        showModal('✅ Solicitação enviada! Aguarde aprovação do líder do time.');
+                    } else {
+                        showModal('Escala salva com sucesso!');
+                    }
                     
                 } catch (error) {
                     console.error('❌ Erro ao salvar escala:', error);
@@ -2341,9 +2468,11 @@
                     querySnapshot.forEach((docSnapshot) => {
                         const escala = docSnapshot.data();
                         const eventDateTime = new Date(escala.date + 'T' + escala.time);
+                        const status = escala.status || 'approved';
                         
-                        // Se o evento já passou, deletar
-                        if (eventDateTime < now) {
+                        // Se o evento já passou, deletar apenas escalas aprovadas OU negadas
+                        // Escalas pendentes não devem ser deletadas automaticamente (admin decide)
+                        if (eventDateTime < now && (status === 'approved' || status === 'denied')) {
                             deletePromises.push(
                                 deleteDoc(doc(window.firebaseDb, 'escalas', docSnapshot.id))
                             );
@@ -2503,24 +2632,62 @@
                 }
 
                 const html = escalas.map(escala => {
+                    const status = escala.status || 'approved';
                     const config = teamConfig[escala.team];
                     const dateObj = new Date(escala.date + 'T' + escala.time);
                     const dateStr = dateObj.toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
                     const timeStr = escala.time;
                     const eventNameDisplay = escala.eventName ? ` - ${escala.eventName}` : '';
                     
-                    // Mostrar botão de deletar apenas se for a própria escala do usuário
-                    const canDelete = escala.userId === currentUser.uid;
+                    // Mostrar botão de deletar apenas se for a própria escala do usuário e estiver aprovada
+                    const canDelete = escala.userId === currentUser.uid && status === 'approved';
+                    
+                    // Estilos diferentes por status
+                    let cardStyles = {
+                        icon: config.icon,
+                        teamName: config.name,
+                        borderColor: config.color,
+                        bgColor: config.bg,
+                        textStyle: '',
+                        teamDisplay: config.name
+                    };
+                    
+                    if (status === 'pending') {
+                        cardStyles = {
+                            icon: '⛔',
+                            teamName: 'PENDENTE',
+                            borderColor: 'border-red-500',
+                            bgColor: 'bg-white',
+                            textStyle: 'text-red-600 italic',
+                            teamDisplay: 'PENDENTE'
+                        };
+                    } else if (status === 'denied') {
+                        cardStyles = {
+                            icon: '🙏',
+                            teamName: 'Obrigado',
+                            borderColor: 'border-gray-300',
+                            bgColor: 'bg-white',
+                            textStyle: 'text-black',
+                            teamDisplay: 'Obrigado, mas não será necessário servir neste culto'
+                        };
+                    } else if (status === 'approved' && escala.requestedTeam && escala.requestedTeam !== escala.team) {
+                        // Aprovado mas time mudou - mostrar em verde
+                        cardStyles.textStyle = 'text-green-600';
+                    } else if (status === 'approved') {
+                        // Aprovado normal
+                        cardStyles.textStyle = '';
+                    }
 
                     return `
-                        <div class="border-l-4 ${config.color} ${config.bg} p-4 rounded-lg">
+                        <div class="border-l-4 ${cardStyles.borderColor} ${cardStyles.bgColor} p-4 rounded-lg">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-3">
-                                    <div class="text-3xl">${config.icon}</div>
+                                    <div class="text-3xl">${cardStyles.icon}</div>
                                     <div>
-                                        <h3 class="font-bold text-lg">${config.name}${eventNameDisplay}</h3>
+                                        <h3 class="font-bold text-lg ${cardStyles.textStyle}">${cardStyles.teamDisplay}${eventNameDisplay}</h3>
                                         <p class="text-sm text-gray-600">📅 ${dateStr}</p>
                                         <p class="text-sm text-gray-600">🕐 ${timeStr}</p>
+                                        ${escala.teamChangeNotice ? `<p class="text-xs text-orange-600 mt-1">⚠️ ${escala.teamChangeNotice}</p>` : ''}
                                     </div>
                                 </div>
                                 ${canDelete ? `
@@ -2978,6 +3145,276 @@
                             console.error('❌ Code:', error.code);
                             console.error('❌ Stack:', error.stack);
                             showModal(`❌ Erro ao excluir tentativa: ${error.message || error.code}`);
+                        }
+                    },
+                    true
+                );
+            }
+
+            // Verificar se pode deletar escala (impede deleção na véspera e no dia)
+            
+            // ========================================
+            // ESCALAS PENDENTES (Admin)
+            // ========================================
+            
+            let currentPendingEscalaId = null;
+            
+            // Carregar escalas pendentes (apenas admin)
+            async function loadPendingEscalas() {
+                if (!isAdmin && !isSuperAdmin) {
+                    console.log('⚠️ Usuário não é admin. Acesso negado.');
+                    return;
+                }
+                
+                const listEl = document.getElementById('pending-escalas-list');
+                if (!listEl) {
+                    console.error('❌ Elemento pending-escalas-list não encontrado');
+                    return;
+                }
+                
+                listEl.innerHTML = '<p class="text-gray-500 text-center py-8">Carregando...</p>';
+                
+                try {
+                    const { collection, query, where, getDocs } = window.firestoreMethods;
+                    
+                    if (!collection) {
+                        throw new Error('Métodos do Firestore não disponíveis. Recarregue a página.');
+                    }
+                    
+                    // Buscar escalas com status pending
+                    const q = query(
+                        collection(window.firebaseDb, 'escalas'),
+                        where('status', '==', 'pending')
+                    );
+                    
+                    const querySnapshot = await getDocs(q);
+                    const pendingEscalas = [];
+                    
+                    querySnapshot.forEach((doc) => {
+                        pendingEscalas.push({ id: doc.id, ...doc.data() });
+                    });
+                    
+                    // Ordenar por timestamp de solicitação
+                    pendingEscalas.sort((a, b) => {
+                        const timeA = new Date(a.requestTimestamp || a.createdAt).getTime();
+                        const timeB = new Date(b.requestTimestamp || b.createdAt).getTime();
+                        return timeB - timeA; // Mais recentes primeiro
+                    });
+                    
+                    console.log('📋 Escalas pendentes carregadas:', pendingEscalas.length);
+                    renderPendingEscalas(pendingEscalas);
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao carregar escalas pendentes:', error);
+                    listEl.innerHTML = `<p class="text-red-500 text-center py-8">❌ ${error.message || 'Erro ao carregar dados.'}</p>`;
+                }
+            }
+            
+            // Renderizar lista de escalas pendentes
+            function renderPendingEscalas(escalas) {
+                const listEl = document.getElementById('pending-escalas-list');
+                
+                if (escalas.length === 0) {
+                    listEl.innerHTML = '<p class="text-gray-500 text-center py-8">✅ Não há escalas pendentes no momento.</p>';
+                    return;
+                }
+                
+                const teamNames = {
+                    welcome: 'Welcome 👋',
+                    backstage: 'Backstage 🤝',
+                    parking: 'Parking 🚗',
+                    kids: 'Kids 👶'
+                };
+                
+                const html = escalas.map(escala => {
+                    const eventDate = new Date(escala.date + 'T' + escala.time);
+                    const eventDateStr = eventDate.toLocaleDateString('pt-BR', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    });
+                    const requestDate = new Date(escala.requestTimestamp || escala.createdAt);
+                    const requestDateStr = requestDate.toLocaleString('pt-BR');
+                    const eventNameDisplay = escala.eventName ? ` - ${escala.eventName}` : '';
+                    const hoursUntilEvent = Math.round((eventDate - new Date()) / (1000 * 60 * 60));
+                    
+                    return `
+                        <div class="border-l-4 border-blue-500 bg-blue-50 p-4 rounded-lg">
+                            <div class="flex items-start justify-between gap-4">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <img src="${escala.userPhoto || 'https://via.placeholder.com/40'}" alt="${escala.userName}" class="w-10 h-10 rounded-full">
+                                        <div>
+                                            <p class="font-bold text-gray-800">${escala.userName}</p>
+                                            <p class="text-xs text-gray-500">${escala.userEmail}</p>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-1 text-sm text-gray-700 mt-3">
+                                        <p><strong>📅 Evento:</strong> ${eventDateStr}${eventNameDisplay}</p>
+                                        <p><strong>🕑 Horário:</strong> ${escala.time}</p>
+                                        <p><strong>👥 Time solicitado:</strong> ${teamNames[escala.requestedTeam] || escala.requestedTeam}</p>
+                                        <p class="text-xs text-gray-500 mt-2"><strong>⏰ Solicitado em:</strong> ${requestDateStr}</p>
+                                        <p class="text-xs ${hoursUntilEvent < 12 ? 'text-red-600 font-bold' : 'text-orange-600'}">⚠️ Faltam ${hoursUntilEvent}h para o evento</p>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-2">
+                                    <button 
+                                        class="approve-escala-btn px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition text-sm font-semibold"
+                                        data-escala-id="${escala.id}"
+                                        data-escala-team="${escala.requestedTeam}"
+                                        title="Aprovar escala">
+                                        ✅ Aprovar
+                                    </button>
+                                    <button 
+                                        class="deny-escala-btn px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition text-sm font-semibold"
+                                        data-escala-id="${escala.id}"
+                                        title="Negar escala">
+                                        ❌ Negar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                listEl.innerHTML = html;
+                
+                // Event listeners para aprovar
+                document.querySelectorAll('.approve-escala-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const escalaId = e.currentTarget.dataset.escalaId;
+                        const requestedTeam = e.currentTarget.dataset.escalaTeam;
+                        openApproveTeamModal(escalaId, requestedTeam);
+                    });
+                });
+                
+                // Event listeners para negar
+                document.querySelectorAll('.deny-escala-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const escalaId = e.currentTarget.dataset.escalaId;
+                        denyPendingEscala(escalaId);
+                    });
+                });
+            }
+            
+            // Abrir modal de seleção de time para aprovar
+            function openApproveTeamModal(escalaId, requestedTeam) {
+                currentPendingEscalaId = escalaId;
+                
+                const teamOptions = [
+                    { key: 'welcome', name: 'Welcome', icon: '👋', color: 'bg-blue-100 hover:bg-blue-200 border-blue-500' },
+                    { key: 'backstage', name: 'Backstage', icon: '🤝', color: 'bg-gray-100 hover:bg-gray-200 border-gray-500' },
+                    { key: 'parking', name: 'Parking', icon: '🚗', color: 'bg-red-100 hover:bg-red-200 border-red-500' },
+                    { key: 'kids', name: 'Kids', icon: '👶', color: 'bg-yellow-100 hover:bg-yellow-200 border-yellow-500' }
+                ];
+                
+                const html = teamOptions.map(team => {
+                    const isRequested = team.key === requestedTeam;
+                    return `
+                        <button 
+                            class="approve-team-option w-full flex items-center gap-3 p-3 rounded-lg border-2 ${team.color} transition"
+                            data-team="${team.key}">
+                            <span class="text-2xl">${team.icon}</span>
+                            <span class="font-semibold text-gray-800">${team.name}</span>
+                            ${isRequested ? '<span class="ml-auto text-xs bg-blue-500 text-white px-2 py-1 rounded">Solicitado</span>' : ''}
+                        </button>
+                    `;
+                }).join('');
+                
+                document.getElementById('approve-team-options').innerHTML = html;
+                
+                // Event listeners para seleção de time
+                document.querySelectorAll('.approve-team-option').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const selectedTeam = e.currentTarget.dataset.team;
+                        approvePendingEscala(currentPendingEscalaId, selectedTeam, requestedTeam);
+                    });
+                });
+                
+                document.getElementById('approve-team-modal').classList.remove('hidden');
+            }
+            
+            // Aprovar escala pendente
+            async function approvePendingEscala(escalaId, selectedTeam, requestedTeam) {
+                try {
+                    const { doc, updateDoc, getDoc } = window.firestoreMethods;
+                    
+                    // Fechar modal de seleção de time
+                    document.getElementById('approve-team-modal').classList.add('hidden');
+                    
+                    // Buscar dados completos da escala
+                    const escalaRef = doc(window.firebaseDb, 'escalas', escalaId);
+                    const escalaDoc = await getDoc(escalaRef);
+                    
+                    if (!escalaDoc.exists()) {
+                        throw new Error('Escala não encontrada');
+                    }
+                    
+                    const escalaData = escalaDoc.data();
+                    
+                    // Determinar se houve mudança de time
+                    const teamChanged = selectedTeam !== requestedTeam;
+                    const updateData = {
+                        status: 'approved',
+                        team: selectedTeam,
+                        approvedAt: new Date().toISOString(),
+                        approvedBy: currentUser.uid
+                    };
+                    
+                    // Se mudou de time, adicionar aviso
+                    if (teamChanged) {
+                        const teamNames = {
+                            welcome: 'Welcome',
+                            backstage: 'Backstage',
+                            parking: 'Parking',
+                            kids: 'Kids'
+                        };
+                        updateData.teamChangeNotice = `Foi necessário mudar sua escolha do time ${teamNames[requestedTeam]} para ${teamNames[selectedTeam]} para uma melhor organização dos times.`;
+                    }
+                    
+                    // Atualizar escala
+                    await updateDoc(escalaRef, updateData);
+                    
+                    console.log('✅ Escala aprovada com sucesso!');
+                    showModal(`✅ Escala aprovada! ${teamChanged ? 'Time ajustado para melhor organização.' : ''}`);
+                    
+                    // Recarregar lista
+                    loadPendingEscalas();
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao aprovar escala:', error);
+                    showModal(`❌ Erro ao aprovar escala: ${error.message}`);
+                }
+            }
+            
+            // Negar escala pendente
+            async function denyPendingEscala(escalaId) {
+                showModal(
+                    'Tem certeza que deseja NEGAR esta escala?',
+                    true,
+                    async () => {
+                        try {
+                            const { doc, updateDoc } = window.firestoreMethods;
+                            
+                            // Atualizar status para denied
+                            const escalaRef = doc(window.firebaseDb, 'escalas', escalaId);
+                            await updateDoc(escalaRef, {
+                                status: 'denied',
+                                deniedAt: new Date().toISOString(),
+                                deniedBy: currentUser.uid,
+                                deniedReason: 'Escala não aprovada pelo administrador'
+                            });
+                            
+                            console.log('✅ Escala negada com sucesso!');
+                            showModal('✅ Escala negada. O voluntário será notificado.');
+                            
+                            // Recarregar lista
+                            loadPendingEscalas();
+                            
+                        } catch (error) {
+                            console.error('❌ Erro ao negar escala:', error);
+                            showModal(`❌ Erro ao negar escala: ${error.message}`);
                         }
                     },
                     true
