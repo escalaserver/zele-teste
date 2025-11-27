@@ -707,6 +707,104 @@
         </div>
     </div>
 
+    <!-- Popup de Detalhes do Evento com Voluntários (Gráfico 3) - Formato 9:16 -->
+    <div id="chart3-popup-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm relative" style="max-height: 90vh; aspect-ratio: 9/16; overflow-y: auto;">
+            <button id="chart3-popup-close" class="sticky top-4 right-4 float-right z-10 bg-white rounded-full p-2 shadow-lg text-gray-400 hover:text-gray-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+            
+            <div class="p-6">
+                <h3 class="text-xl font-bold mb-2" style="color: #151b29;" id="chart3-popup-title">Voluntários Escalados</h3>
+                <p class="text-sm text-gray-600 mb-1" id="chart3-popup-date"></p>
+                <p class="text-sm font-semibold text-blue-600 mb-4" id="chart3-popup-total"></p>
+                
+                <div class="space-y-4" id="chart3-popup-teams">
+                    <!-- Times com voluntários serão inseridos aqui -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Gerenciar Liderança de Times -->
+    <div id="team-leader-modal" class="modal-overlay">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold" style="color: #151b29;">🏆 Gerenciar Liderança</h2>
+                <button id="close-team-leader-modal" class="text-gray-600 hover:text-gray-800">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <p class="text-sm text-gray-600 mb-2">Voluntário: <strong id="leader-user-name"></strong></p>
+                <p class="text-xs text-gray-500 mb-4">Selecione os times que esta pessoa irá liderar:</p>
+            </div>
+            
+            <div class="space-y-3 mb-6">
+                <label class="flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer hover:bg-blue-50 transition">
+                    <input type="checkbox" class="leader-team-checkbox w-5 h-5 text-blue-600" data-team="welcome">
+                    <span class="text-2xl">👋</span>
+                    <span class="font-semibold text-gray-800">Welcome</span>
+                </label>
+                
+                <label class="flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition">
+                    <input type="checkbox" class="leader-team-checkbox w-5 h-5 text-gray-600" data-team="backstage">
+                    <span class="text-2xl">🤝</span>
+                    <span class="font-semibold text-gray-800">Backstage</span>
+                </label>
+                
+                <label class="flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer hover:bg-red-50 transition">
+                    <input type="checkbox" class="leader-team-checkbox w-5 h-5 text-red-600" data-team="parking">
+                    <span class="text-2xl">🚗</span>
+                    <span class="font-semibold text-gray-800">Parking</span>
+                </label>
+                
+                <label class="flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer hover:bg-yellow-50 transition">
+                    <input type="checkbox" class="leader-team-checkbox w-5 h-5 text-yellow-600" data-team="kids">
+                    <span class="text-2xl">👶</span>
+                    <span class="font-semibold text-gray-800">Kids</span>
+                </label>
+            </div>
+            
+            <button id="save-team-leader-btn" class="w-full zele-btn text-white font-bold py-3 px-6 rounded-lg">
+                💾 Salvar Liderança
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de Transferir Voluntário entre Times -->
+    <div id="transfer-volunteer-modal" class="modal-overlay">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold" style="color: #151b29;">🔁 Transferir Voluntário</h2>
+                <button id="close-transfer-modal" class="text-gray-600 hover:text-gray-800">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <p class="text-sm text-gray-600 mb-1">Voluntário: <strong id="transfer-volunteer-name"></strong></p>
+                <p class="text-sm text-gray-600 mb-4">Time atual: <strong id="transfer-current-team"></strong></p>
+                <p class="text-xs text-gray-500 mb-4">Selecione o novo time:</p>
+            </div>
+            
+            <div class="space-y-3 mb-6" id="transfer-teams-options">
+                <!-- Opções de times serão inseridas dinamicamente -->
+            </div>
+            
+            <button id="confirm-transfer-btn" class="w-full zele-btn text-white font-bold py-3 px-6 rounded-lg">
+                ✅ Confirmar Transferência
+            </button>
+        </div>
+    </div>
+
     <!-- Menu Lateral -->
     <div id="menu-overlay" class="menu-overlay"></div>
     <div id="menu-drawer" class="menu-drawer">
@@ -991,6 +1089,8 @@
             let selectedTeam = null;
             let isAdmin = false;
             let isSuperAdmin = false;
+            let isTeamLeader = false;
+            let userTeamLeadership = [];
             let availableDates = [];
             let deferredPrompt = null;
             let isIOS = false;
@@ -1752,6 +1852,14 @@
                     const userDoc = await getDoc(doc(window.firebaseDb, 'users', user.uid));
                     
                     console.log('📄 Documento existe?', userDoc.exists());
+                    
+                    // Verificar liderança de times
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        userTeamLeadership = userData.teamLeader || [];
+                        isTeamLeader = userTeamLeadership.length > 0;
+                        console.log('🏆 Líder de times:', userTeamLeadership);
+                    }
                     
                     // Super Admin hardcoded (primeiro super admin)
                     const SUPER_ADMIN_ID = 'HiCC8lYwRBgWJ0ATRYOV2rtc1ND2';
@@ -3375,21 +3483,36 @@
                     const dateStr = dateObj.toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
                     const eventName = data.eventName ? ` - ${data.eventName}` : '';
 
-                    // Função para renderizar voluntários com botão de deletar (apenas para admins)
+                    // Função para renderizar voluntários com botão de deletar e transferir (para admins e líderes)
                     const renderVolunteers = (volunteers, teamName) => {
                         if (volunteers.length === 0) {
                             return '<div class="text-gray-400">Ninguém escalado</div>';
                         }
                         
+                        const teamKey = teamName.toLowerCase();
+                        const canManageThisTeam = isAdmin || (isTeamLeader && userTeamLeadership.includes(teamKey));
+                        
                         return volunteers.map(v => `
                             <div class="flex items-center justify-between group">
                                 <span>• ${v.userName}</span>
-                                ${isAdmin ? `
-                                <button class="admin-delete-escala opacity-0 group-hover:opacity-100 transition text-red-600 hover:text-red-800 text-xs" 
-                                        data-escala-id="${v.id}" 
-                                        title="Remover ${v.userName}">
-                                    🗑️
-                                </button>
+                                ${canManageThisTeam ? `
+                                <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition">
+                                    <button class="transfer-volunteer-btn text-blue-600 hover:text-blue-800 text-sm" 
+                                            data-escala-id="${v.id}"
+                                            data-volunteer-name="${v.userName}"
+                                            data-current-team="${teamKey}"
+                                            data-date="${data.date}"
+                                            data-time="${data.time}"
+                                            title="Transferir ${v.userName} para outro time">
+                                        🔁
+                                    </button>
+                                    <button class="admin-delete-escala text-red-600 hover:text-red-800 text-xs" 
+                                            data-escala-id="${v.id}"
+                                            data-current-team="${teamKey}"
+                                            title="Remover ${v.userName}">
+                                        🗑️
+                                    </button>
+                                </div>
                                 ` : ''}
                             </div>
                         `).join('');
@@ -3430,17 +3553,43 @@
 
                 elements.adminView.innerHTML = html;
 
-                // Event listeners para admin deletar qualquer escala
-                if (isAdmin) {
+                // Event listeners para admin/líder deletar escala
+                if (isAdmin || isTeamLeader) {
                     document.querySelectorAll('.admin-delete-escala').forEach(btn => {
                         btn.addEventListener('click', (e) => {
                             const escalaId = e.currentTarget.dataset.escalaId;
-                            showModal(
-                                'Como administrador, deseja remover esta pessoa da escala?',
-                                true,
-                                () => deleteEscala(escalaId),
-                                true
-                            );
+                            const currentTeam = e.currentTarget.dataset.currentTeam;
+                            
+                            // Verificar permissão
+                            if (isAdmin || userTeamLeadership.includes(currentTeam)) {
+                                const roleText = isAdmin ? 'administrador' : 'líder do time';
+                                showModal(
+                                    `Como ${roleText}, deseja remover esta pessoa da escala?`,
+                                    true,
+                                    () => deleteEscala(escalaId),
+                                    true
+                                );
+                            } else {
+                                showModal('❌ Você só pode remover voluntários dos times que lidera.', false, null, true);
+                            }
+                        });
+                    });
+                    
+                    // Event listeners para transferir voluntário
+                    document.querySelectorAll('.transfer-volunteer-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const escalaId = e.currentTarget.dataset.escalaId;
+                            const volunteerName = e.currentTarget.dataset.volunteerName;
+                            const currentTeam = e.currentTarget.dataset.currentTeam;
+                            const date = e.currentTarget.dataset.date;
+                            const time = e.currentTarget.dataset.time;
+                            
+                            // Verificar permissão
+                            if (isAdmin || userTeamLeadership.includes(currentTeam)) {
+                                openTransferModal(escalaId, volunteerName, currentTeam, date, time);
+                            } else {
+                                showModal('❌ Você só pode transferir voluntários dos times que lidera.', false, null, true);
+                            }
                         });
                     });
                 }
@@ -3692,22 +3841,56 @@
             // Gráfico 3: Quantidade de Voluntários por Dia
             async function generateChart3_EventsWithMostVolunteers(escalas) {
                 const eventCount = {};
+                const eventDetails = {}; // Armazenar detalhes completos de cada evento
                 
                 escalas.forEach(escala => {
-                    const eventKey = `${escala.date} - ${escala.eventName || 'Evento'}`;
-                    eventCount[eventKey] = (eventCount[eventKey] || 0) + 1;
+                    const eventKey = `${escala.date}|${escala.time}|${escala.eventName || 'Evento'}`;
+                    
+                    if (!eventCount[eventKey]) {
+                        eventCount[eventKey] = 0;
+                        eventDetails[eventKey] = {
+                            date: escala.date,
+                            time: escala.time,
+                            eventName: escala.eventName || 'Evento',
+                            teams: {
+                                welcome: [],
+                                backstage: [],
+                                parking: [],
+                                kids: []
+                            }
+                        };
+                    }
+                    
+                    eventCount[eventKey]++;
+                    
+                    // Adicionar voluntário ao time correspondente
+                    const team = escala.team?.toLowerCase();
+                    if (eventDetails[eventKey].teams[team]) {
+                        eventDetails[eventKey].teams[team].push({
+                            name: escala.userName || 'Desconhecido',
+                            photo: escala.userPhoto || '',
+                            email: escala.userEmail || ''
+                        });
+                    }
                 });
                 
                 // Ordenar por data (crescente)
                 const sorted = Object.entries(eventCount)
-                    .sort((a, b) => new Date(a[0].split(' - ')[0] + 'T00:00:00') - new Date(b[0].split(' - ')[0] + 'T00:00:00'));
+                    .sort((a, b) => {
+                        const dateA = new Date(a[0].split('|')[0] + 'T' + a[0].split('|')[1]);
+                        const dateB = new Date(b[0].split('|')[0] + 'T' + b[0].split('|')[1]);
+                        return dateA - dateB;
+                    });
                 
                 const labels = sorted.map(item => {
-                    const date = item[0].split(' - ')[0];
+                    const date = item[0].split('|')[0];
                     const dateObj = new Date(date + 'T00:00:00');
                     return `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}`;
                 });
                 const data = sorted.map(item => item[1]);
+                
+                // Armazenar detalhes para uso no click
+                window.chart3EventDetails = sorted.map(item => eventDetails[item[0]]);
                 
                 const ctx = document.getElementById('chart-events');
                 
@@ -3733,6 +3916,12 @@
                         plugins: {
                             legend: {
                                 display: false
+                            },
+                            tooltip: {
+                                enabled: true,
+                                callbacks: {
+                                    afterLabel: () => '👆 Clique para ver detalhes'
+                                }
                             }
                         },
                         scales: {
@@ -3745,6 +3934,12 @@
                                 ticks: {
                                     stepSize: 1
                                 }
+                            }
+                        },
+                        onClick: (event, activeElements) => {
+                            if (activeElements.length > 0) {
+                                const index = activeElements[0].index;
+                                showChart3Popup(index);
                             }
                         },
                         interaction: {
@@ -3975,6 +4170,86 @@
                 }
             });
 
+            // Função para mostrar popup com voluntários do evento (Gráfico 3)
+            function showChart3Popup(index) {
+                const eventData = window.chart3EventDetails[index];
+                if (!eventData) return;
+                
+                // Formatar data
+                const dateObj = new Date(eventData.date + 'T' + eventData.time);
+                const formattedDate = dateObj.toLocaleDateString('pt-BR', { 
+                    weekday: 'long', 
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric' 
+                });
+                
+                // Calcular total de voluntários
+                const totalVolunteers = Object.values(eventData.teams).reduce((sum, team) => sum + team.length, 0);
+                
+                // Preencher título e data
+                document.getElementById('chart3-popup-title').textContent = eventData.eventName;
+                document.getElementById('chart3-popup-date').textContent = `📅 ${formattedDate} às ${eventData.time}`;
+                document.getElementById('chart3-popup-total').textContent = `👥 Total: ${totalVolunteers} voluntário${totalVolunteers !== 1 ? 's' : ''}`;
+                
+                // Preencher times
+                const teamsContainer = document.getElementById('chart3-popup-teams');
+                teamsContainer.innerHTML = '';
+                
+                const teamConfig = {
+                    welcome: { name: 'Welcome', icon: '👋', color: 'bg-blue-50 border-blue-300' },
+                    backstage: { name: 'Backstage', icon: '🤝', color: 'bg-gray-50 border-gray-300' },
+                    parking: { name: 'Parking', icon: '🚗', color: 'bg-red-50 border-red-300' },
+                    kids: { name: 'Kids', icon: '👶', color: 'bg-yellow-50 border-yellow-300' }
+                };
+                
+                Object.entries(eventData.teams).forEach(([teamKey, volunteers]) => {
+                    if (volunteers.length === 0) return; // Pular times vazios
+                    
+                    const config = teamConfig[teamKey];
+                    
+                    const teamDiv = document.createElement('div');
+                    teamDiv.className = `border-2 rounded-lg p-3 ${config.color}`;
+                    
+                    const volunteersHtml = volunteers.map(v => `
+                        <div class="flex items-center gap-2 py-1">
+                            <img src="${v.photo || 'Zele logo.png'}" alt="${v.name}" class="w-8 h-8 rounded-full object-cover flex-shrink-0">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-semibold text-gray-800 truncate">${v.name}</p>
+                                <p class="text-xs text-gray-600 truncate">${v.email}</p>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    teamDiv.innerHTML = `
+                        <div class="flex items-center gap-2 mb-3 pb-2 border-b border-gray-300">
+                            <span class="text-2xl">${config.icon}</span>
+                            <span class="font-bold text-gray-800">${config.name}</span>
+                            <span class="ml-auto bg-white px-2 py-1 rounded-full text-xs font-bold text-gray-700">${volunteers.length}</span>
+                        </div>
+                        <div class="space-y-1">
+                            ${volunteersHtml}
+                        </div>
+                    `;
+                    
+                    teamsContainer.appendChild(teamDiv);
+                });
+                
+                // Mostrar popup
+                document.getElementById('chart3-popup-overlay').classList.remove('hidden');
+            }
+            
+            // Event listeners do popup do Gráfico 3
+            document.getElementById('chart3-popup-close').addEventListener('click', () => {
+                document.getElementById('chart3-popup-overlay').classList.add('hidden');
+            });
+            
+            document.getElementById('chart3-popup-overlay').addEventListener('click', (e) => {
+                if (e.target.id === 'chart3-popup-overlay') {
+                    document.getElementById('chart3-popup-overlay').classList.add('hidden');
+                }
+            });
+
             // Função para configurar navegação dos gráficos
             function setupChartNavigation() {
                 // Navegação do Gráfico 3 (Quantidade de Voluntários por Dia)
@@ -4114,24 +4389,36 @@
                     
                     let html = '';
                     users.forEach(user => {
-                        const isUserSuperAdmin = user.role === 'superadmin';
-                        const isUserAdmin = user.role === 'admin';
-                        const isCurrentUser = user.id === currentUser.uid;
-                        const displayName = user.displayName || 'Sem nome';
-                        const email = user.email || 'Sem email';
-                        const photoURL = user.photoURL || 'Zele logo.png';
-                        const isBlocked = user.blocked === true;
-                        const lastLogin = user.lastLoginFormatted || 'Nunca acessou';
-                        
-                        // Badge visual
-                        let roleBadge = '';
-                        if (isUserSuperAdmin) {
-                            roleBadge = '<span class="text-purple-600" title="Super Administrador">👑👑</span>';
-                        } else if (isUserAdmin) {
-                            roleBadge = '<span class="text-yellow-600" title="Administrador">👑</span>';
-                        }
-                        
-                        html += `
+                                const isUserSuperAdmin = user.role === 'superadmin';
+                                const isUserAdmin = user.role === 'admin';
+                                const isCurrentUser = user.id === currentUser.uid;
+                                const displayName = user.displayName || 'Sem nome';
+                                const email = user.email || 'Sem email';
+                                const photoURL = user.photoURL || 'Zele logo.png';
+                                const isBlocked = user.blocked === true;
+                                const lastLogin = user.lastLoginFormatted || 'Nunca acessou';
+                                const teamLeader = user.teamLeader || [];
+                                
+                                // Badge visual
+                                let roleBadge = '';
+                                if (isUserSuperAdmin) {
+                                    roleBadge = '<span class="text-purple-600" title="Super Administrador">👑👑</span>';
+                                } else if (isUserAdmin) {
+                                    roleBadge = '<span class="text-yellow-600" title="Administrador">👑</span>';
+                                }
+                                
+                                // Badge de líder de time
+                                let leaderBadge = '';
+                                if (teamLeader.length > 0) {
+                                    const teamEmojis = {
+                                        welcome: '👋',
+                                        backstage: '🤝',
+                                        parking: '🚗',
+                                        kids: '👶'
+                                    };
+                                    const leaderEmojis = teamLeader.map(t => teamEmojis[t] || '').join('');
+                                    leaderBadge = `<span class="text-sm" title="Líder de: ${teamLeader.join(', ')}">${leaderEmojis}</span>`;
+                                }                                html += `
                             <div class="border-l-4 ${isBlocked ? 'border-red-500 bg-red-50' : (isUserSuperAdmin ? 'border-purple-500 bg-purple-50' : (isUserAdmin ? 'border-yellow-500 bg-yellow-50' : 'border-gray-300 bg-gray-50'))} rounded-lg p-3 mb-3">
                                 <!-- LINHA 1: Foto + Nome/Email -->
                                 <div class="flex items-center gap-3 mb-3">
@@ -4141,14 +4428,13 @@
                                         <p class="font-bold text-gray-800 text-sm leading-tight mb-1">
                                             ${displayName}
                                             ${roleBadge}
+                                            ${leaderBadge}
                                             ${isBlocked ? '<span class="text-red-600">🚫</span>' : ''}
                                             ${isCurrentUser ? '<span class="text-xs text-gray-500">(você)</span>' : ''}
                                         </p>
                                         <p class="text-xs text-gray-600 break-all">${email}</p>
                                     </div>
-                                </div>
-                                
-                                <!-- LINHA 2: Informações detalhadas -->
+                                </div>                                <!-- LINHA 2: Informações detalhadas -->
                                 <div class="mb-3 space-y-1">
                                     <p class="text-xs text-gray-500">
                                         <strong>ID:</strong> <code class="bg-gray-200 px-1 rounded text-xs break-all">${user.id}</code>
@@ -4164,7 +4450,18 @@
                                 
                                 <!-- LINHA 3: Botões de Ação -->
                                 ${!isCurrentUser ? `
-                                    <div class="grid grid-cols-2 gap-2">
+                                    <div class="space-y-2">
+                                        <!-- Gerenciar Liderança de Times (apenas superadmin) -->
+                                        <button 
+                                            class="manage-team-leader-btn w-full px-3 py-2 rounded-lg font-semibold text-white text-xs transition bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                                            data-user-id="${user.id}"
+                                            data-user-name="${displayName}"
+                                            data-team-leader='${JSON.stringify(teamLeader)}'
+                                            title="Gerenciar liderança de times">
+                                            🏆 ${teamLeader.length > 0 ? 'Editar' : 'Definir'} Liderança de Times
+                                        </button>
+                                        
+                                        <div class="grid grid-cols-2 gap-2">
                                         <!-- Promover/Rebaixar Admin/SuperAdmin -->
                                         ${isUserSuperAdmin ? `
                                             <button 
@@ -4216,6 +4513,7 @@
                                                 🗑️ Excluir
                                             </button>
                                         ` : ''}
+                                        </div>
                                     </div>
                                 ` : '<p class="text-xs text-gray-500 text-center py-2 bg-gray-100 rounded">Você não pode alterar seu próprio status</p>'}
                             </div>
@@ -4249,6 +4547,15 @@
                             const userId = e.currentTarget.dataset.userId;
                             const userName = e.currentTarget.dataset.userName;
                             deleteUser(userId, userName);
+                        });
+                    });
+                    
+                    document.querySelectorAll('.manage-team-leader-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const userId = e.currentTarget.dataset.userId;
+                            const userName = e.currentTarget.dataset.userName;
+                            const teamLeader = JSON.parse(e.currentTarget.dataset.teamLeader || '[]');
+                            openTeamLeaderModal(userId, userName, teamLeader);
                         });
                     });
                     
@@ -4467,6 +4774,223 @@
                     showModal('❌ Erro ao alterar bloqueio de usuário. Tente novamente.');
                 }
             }
+            
+            // Abrir modal de transferir voluntário
+            let currentTransferData = null;
+            
+            function openTransferModal(escalaId, volunteerName, currentTeam, date, time) {
+                currentTransferData = { escalaId, currentTeam, date, time };
+                
+                const teamNames = {
+                    welcome: 'Welcome',
+                    backstage: 'Backstage',
+                    parking: 'Parking',
+                    kids: 'Kids'
+                };
+                
+                const teamColors = {
+                    welcome: 'bg-blue-50 border-blue-300 hover:bg-blue-100',
+                    backstage: 'bg-gray-50 border-gray-300 hover:bg-gray-100',
+                    parking: 'bg-red-50 border-red-300 hover:bg-red-100',
+                    kids: 'bg-yellow-50 border-yellow-300 hover:bg-yellow-100'
+                };
+                
+                const teamEmojis = {
+                    welcome: '👋',
+                    backstage: '🤝',
+                    parking: '🚗',
+                    kids: '👶'
+                };
+                
+                document.getElementById('transfer-volunteer-name').textContent = volunteerName;
+                document.getElementById('transfer-current-team').textContent = teamNames[currentTeam];
+                
+                // Gerar opções de times (excluindo o time atual)
+                const teamsOptions = document.getElementById('transfer-teams-options');
+                teamsOptions.innerHTML = '';
+                
+                Object.keys(teamNames).forEach(teamKey => {
+                    if (teamKey !== currentTeam) {
+                        const radio = document.createElement('label');
+                        radio.className = `flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer transition ${teamColors[teamKey]}`;
+                        radio.innerHTML = `
+                            <input type="radio" name="transfer-team" class="w-5 h-5" value="${teamKey}">
+                            <span class="text-2xl">${teamEmojis[teamKey]}</span>
+                            <span class="font-semibold text-gray-800">${teamNames[teamKey]}</span>
+                        `;
+                        teamsOptions.appendChild(radio);
+                    }
+                });
+                
+                document.getElementById('transfer-volunteer-modal').classList.add('show');
+            }
+            
+            // Fechar modal de transferência
+            document.getElementById('close-transfer-modal')?.addEventListener('click', () => {
+                document.getElementById('transfer-volunteer-modal').classList.remove('show');
+                currentTransferData = null;
+            });
+            
+            document.getElementById('transfer-volunteer-modal')?.addEventListener('click', (e) => {
+                if (e.target.id === 'transfer-volunteer-modal') {
+                    document.getElementById('transfer-volunteer-modal').classList.remove('show');
+                    currentTransferData = null;
+                }
+            });
+            
+            // Confirmar transferência
+            document.getElementById('confirm-transfer-btn')?.addEventListener('click', async () => {
+                if (!currentTransferData) return;
+                
+                const selectedTeam = document.querySelector('input[name="transfer-team"]:checked')?.value;
+                
+                if (!selectedTeam) {
+                    showModal('⚠️ Por favor, selecione um time para transferir o voluntário.', false, null, true);
+                    return;
+                }
+                
+                try {
+                    const { doc, updateDoc, getDoc } = window.firestoreMethods;
+                    const escalaRef = doc(window.firebaseDb, 'escalas', currentTransferData.escalaId);
+                    const escalaDoc = await getDoc(escalaRef);
+                    
+                    if (!escalaDoc.exists()) {
+                        showModal('❌ Escala não encontrada.', false, null, true);
+                        return;
+                    }
+                    
+                    const escalaData = escalaDoc.data();
+                    const volunteerName = escalaData.userName;
+                    
+                    // Verificar limite do time de destino
+                    const teamLimit = await checkTeamLimit(currentTransferData.date, currentTransferData.time, selectedTeam);
+                    
+                    if (teamLimit.isFull) {
+                        const teamNames = {
+                            welcome: 'Welcome',
+                            backstage: 'Backstage',
+                            parking: 'Parking',
+                            kids: 'Kids'
+                        };
+                        showModal(
+                            `❌ O time ${teamNames[selectedTeam]} já está completo (${teamLimit.count}/${teamLimit.maxVolunteers} voluntários).<br><br>Não é possível transferir.`,
+                            false,
+                            null,
+                            true
+                        );
+                        return;
+                    }
+                    
+                    // Atualizar time do voluntário
+                    await updateDoc(escalaRef, {
+                        team: selectedTeam,
+                        updatedAt: new Date().toISOString(),
+                        transferredBy: currentUser.email,
+                        transferredAt: new Date().toISOString()
+                    });
+                    
+                    const teamNames = {
+                        welcome: 'Welcome',
+                        backstage: 'Backstage',
+                        parking: 'Parking',
+                        kids: 'Kids'
+                    };
+                    
+                    document.getElementById('transfer-volunteer-modal').classList.remove('show');
+                    currentTransferData = null;
+                    
+                    showModal(`✅ ${volunteerName} foi transferido(a) para o time ${teamNames[selectedTeam]}!`);
+                    
+                    // Recarregar visão geral
+                    await loadAllEscalas();
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao transferir voluntário:', error);
+                    showModal('❌ Erro ao transferir voluntário. Tente novamente.');
+                }
+            });
+            
+            // Abrir modal de gerenciar liderança de times
+            let currentLeaderUserId = null;
+            
+            function openTeamLeaderModal(userId, userName, currentTeamLeader = []) {
+                currentLeaderUserId = userId;
+                document.getElementById('leader-user-name').textContent = userName;
+                
+                // Marcar checkboxes dos times que o usuário já lidera
+                document.querySelectorAll('.leader-team-checkbox').forEach(checkbox => {
+                    checkbox.checked = currentTeamLeader.includes(checkbox.dataset.team);
+                });
+                
+                document.getElementById('team-leader-modal').classList.add('show');
+            }
+            
+            // Fechar modal de liderança
+            document.getElementById('close-team-leader-modal')?.addEventListener('click', () => {
+                document.getElementById('team-leader-modal').classList.remove('show');
+                currentLeaderUserId = null;
+            });
+            
+            document.getElementById('team-leader-modal')?.addEventListener('click', (e) => {
+                if (e.target.id === 'team-leader-modal') {
+                    document.getElementById('team-leader-modal').classList.remove('show');
+                    currentLeaderUserId = null;
+                }
+            });
+            
+            // Salvar liderança de times
+            document.getElementById('save-team-leader-btn')?.addEventListener('click', async () => {
+                if (!currentLeaderUserId) return;
+                
+                // Coletar times selecionados
+                const selectedTeams = [];
+                document.querySelectorAll('.leader-team-checkbox:checked').forEach(checkbox => {
+                    selectedTeams.push(checkbox.dataset.team);
+                });
+                
+                try {
+                    const { doc, setDoc, getDoc } = window.firestoreMethods;
+                    const userDocRef = doc(window.firebaseDb, 'users', currentLeaderUserId);
+                    const userDoc = await getDoc(userDocRef);
+                    
+                    if (userDoc.exists()) {
+                        await setDoc(userDocRef, {
+                            ...userDoc.data(),
+                            teamLeader: selectedTeams,
+                            updatedAt: new Date().toISOString()
+                        });
+                    } else {
+                        await setDoc(userDocRef, {
+                            teamLeader: selectedTeams,
+                            createdAt: new Date().toISOString()
+                        });
+                    }
+                    
+                    document.getElementById('team-leader-modal').classList.remove('show');
+                    currentLeaderUserId = null;
+                    
+                    const teamNames = {
+                        welcome: 'Welcome',
+                        backstage: 'Backstage',
+                        parking: 'Parking',
+                        kids: 'Kids'
+                    };
+                    
+                    if (selectedTeams.length > 0) {
+                        const teamsText = selectedTeams.map(t => teamNames[t]).join(', ');
+                        showModal(`✅ Liderança atualizada!<br><br><strong>Times:</strong> ${teamsText}`);
+                    } else {
+                        showModal('✅ Liderança removida de todos os times.');
+                    }
+                    
+                    // Recarregar lista de usuários
+                    await loadUsersList();
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao salvar liderança:', error);
+                    showModal('❌ Erro ao salvar liderança. Tente novamente.');
+                }
+            });
             
             // Excluir usuário permanentemente (apenas se bloqueado)
             async function deleteUser(userId, userName) {
