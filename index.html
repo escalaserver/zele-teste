@@ -697,6 +697,14 @@
                         <canvas id="chart-volunteers"></canvas>
                     </div>
                 </div>
+
+                <!-- Gráfico 5: Presença vs Ausência por Time -->
+                <div class="card-float rounded-xl p-6">
+                    <h3 class="font-bold text-lg mb-4" style="color: #151b29;">✅ Presença vs Ausência por Time</h3>
+                    <div class="h-64">
+                        <canvas id="chart-attendance"></canvas>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
@@ -1125,45 +1133,73 @@
         </div>
     </div>
 
-    <!-- Modal: Bloqueio de Datas -->
-    <div id="blocked-dates-modal" class="modal-overlay" style="display:none;">
-        <div class="modal bg-white">
+    <!-- Modal: Check-in de Voluntários -->
+    <div id="checkin-modal" class="modal-overlay" style="display:none;">
+        <div class="modal bg-white max-w-3xl">
             <div class="modal-header">
-                <h2 class="text-xl font-bold" style="color:#151b29;">🚫 Bloqueio de Datas</h2>
-                <button id="close-blocked-dates-modal" class="text-gray-600 hover:text-gray-800">
+                <h2 class="text-xl font-bold" style="color:#151b29;">✅ Check-in de Voluntários</h2>
+                <button id="close-checkin-modal" class="text-gray-600 hover:text-gray-800">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                 </button>
             </div>
             <div class="modal-body space-y-4">
-                <p class="text-sm text-gray-600">Marque as datas e períodos do dia em que você <strong>não pode</strong> servir.</p>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">Data</label>
-                        <input type="date" id="block-date-input" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">Período</label>
-                        <select id="block-period-select" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                            <option value="all">Dia inteiro</option>
-                            <option value="morning">Manhã</option>
-                            <option value="afternoon">Tarde</option>
-                            <option value="night">Noite</option>
-                        </select>
-                    </div>
-                    <div class="flex items-end">
-                        <button id="add-blocked-date-btn" class="w-full zele-btn text-white font-bold py-2 px-4 rounded-lg">➕ Adicionar</button>
-                    </div>
-                </div>
-
-                <div class="mt-2">
-                    <h3 class="font-semibold mb-2" style="color:#151b29;">Suas datas bloqueadas</h3>
-                    <div id="blocked-dates-list" class="space-y-2 text-sm"></div>
-                </div>
+                <div id="checkin-event-info" class="bg-blue-50 border-l-4 border-blue-500 p-3 rounded text-sm"></div>
+                <p class="text-sm text-gray-600">Marque a presença dos voluntários dos seus times:</p>
+                <div id="checkin-teams-list" class="space-y-4"></div>
             </div>
             <div class="modal-footer">
-                <button id="close-blocked-dates-btn" class="zele-btn-secondary px-4 py-2 rounded-lg">Fechar</button>
+                <button id="close-checkin-btn" class="zele-btn-secondary px-4 py-2 rounded-lg">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Bloqueio de Datas -->
+    <div id="blocked-dates-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full">
+            <!-- Header fixo -->
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-xl font-bold text-gray-800">🚫 Bloqueio de Datas</h2>
+                    <button id="close-blocked-dates-modal" class="text-gray-600 hover:text-gray-800">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <p class="text-sm text-gray-600 mb-4">Marque as datas e períodos do dia em que você <strong>não pode</strong> servir.</p>
+                
+                <!-- Campos de entrada fixos -->
+                <div class="grid grid-cols-1 gap-3">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-semibold mb-1 text-gray-700">Data</label>
+                            <input type="date" id="block-date-input" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1 text-gray-700">Período</label>
+                            <select id="block-period-select" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
+                                <option value="all">Dia inteiro</option>
+                                <option value="morning">Manhã</option>
+                                <option value="afternoon">Tarde</option>
+                                <option value="night">Noite</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="add-blocked-date-btn" class="w-full zele-btn text-white font-bold py-2 px-4 rounded-lg">➕ Adicionar</button>
+                </div>
+            </div>
+
+            <!-- Lista com scroll -->
+            <div class="p-6 max-h-[50vh] overflow-y-auto">
+                <h3 class="font-semibold mb-3 text-gray-800">Suas datas bloqueadas</h3>
+                <div id="blocked-dates-list" class="space-y-2"></div>
+            </div>
+
+            <!-- Footer fixo -->
+            <div class="p-6 border-t border-gray-200">
+                <button id="close-blocked-dates-btn" class="w-full zele-btn-secondary px-4 py-2 rounded-lg font-semibold">Fechar</button>
             </div>
         </div>
     </div>
@@ -4515,6 +4551,7 @@
                     await generateChart2_TopVolunteers(escalas);
                     await generateChart3_EventsWithMostVolunteers(escalas);
                     await generateChart4_EventsWithEmptyTeams(dateFrom, dateTo);
+                    await generateChart5_CheckinAttendance(escalas); // Novo gráfico de presença
                     
                     // Configurar navegação dos gráficos com scroll
                     setupChartNavigation();
@@ -5125,6 +5162,113 @@
                             chart4.update();
                         }
                     });
+                }
+            }
+
+            // Gráfico 5: Presença vs Ausência por Time
+            async function generateChart5_CheckinAttendance(escalas) {
+                try {
+                    // Filtrar apenas escalas com check-in registrado
+                    const escalasWithCheckin = escalas.filter(escala => 
+                        escala.checkIn && (escala.checkIn.status === 'present' || escala.checkIn.status === 'absent')
+                    );
+                    
+                    // Agregar por time
+                    const teamStats = {
+                        welcome: { present: 0, absent: 0 },
+                        backstage: { present: 0, absent: 0 },
+                        parking: { present: 0, absent: 0 },
+                        kids: { present: 0, absent: 0 }
+                    };
+                    
+                    escalasWithCheckin.forEach(escala => {
+                        const team = escala.team?.toLowerCase();
+                        if (teamStats.hasOwnProperty(team)) {
+                            if (escala.checkIn.status === 'present') {
+                                teamStats[team].present++;
+                            } else if (escala.checkIn.status === 'absent') {
+                                teamStats[team].absent++;
+                            }
+                        }
+                    });
+                    
+                    const ctx = document.getElementById('chart-attendance');
+                    
+                    // Destruir gráfico anterior se existir
+                    if (dashboardCharts.attendance) {
+                        dashboardCharts.attendance.destroy();
+                    }
+                    
+                    dashboardCharts.attendance = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['👋 Welcome', '🤝 Backstage', '🚗 Parking', '👶 Kids'],
+                            datasets: [
+                                {
+                                    label: 'Presentes',
+                                    data: [
+                                        teamStats.welcome.present,
+                                        teamStats.backstage.present,
+                                        teamStats.parking.present,
+                                        teamStats.kids.present
+                                    ],
+                                    backgroundColor: 'rgba(34, 197, 94, 0.7)', // Verde
+                                    borderColor: 'rgba(34, 197, 94, 1)',
+                                    borderWidth: 2
+                                },
+                                {
+                                    label: 'Ausentes',
+                                    data: [
+                                        teamStats.welcome.absent,
+                                        teamStats.backstage.absent,
+                                        teamStats.parking.absent,
+                                        teamStats.kids.absent
+                                    ],
+                                    backgroundColor: 'rgba(239, 68, 68, 0.7)', // Vermelho
+                                    borderColor: 'rgba(239, 68, 68, 1)',
+                                    borderWidth: 2
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top'
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.dataset.label || '';
+                                            const value = context.parsed.y;
+                                            const teamIndex = context.dataIndex;
+                                            const teamNames = ['welcome', 'backstage', 'parking', 'kids'];
+                                            const team = teamNames[teamIndex];
+                                            const total = teamStats[team].present + teamStats[team].absent;
+                                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                            return `${label}: ${value} (${percentage}%)`;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    stacked: false
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        stepSize: 1
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao gerar gráfico de presença:', error);
                 }
             }
 
@@ -6425,6 +6569,11 @@
                     await loadAllEscalas();
                     setupInstallButton(); // Configurar botão de instalação após login
                     await checkOnboarding(user); // Verificar se precisa mostrar onboarding
+                    
+                    // Verificar check-in de voluntários (para líderes)
+                    setTimeout(async () => {
+                        await checkForCheckinEvents();
+                    }, 1500); // Delay para não conflitar com onboarding
                 } else {
                     showLogin();
                 }
@@ -6434,12 +6583,12 @@
             function openBlockedDatesModal() {
                 const modal = document.getElementById('blocked-dates-modal');
                 renderBlockedDatesList();
-                modal.style.display = 'flex';
+                modal.classList.remove('hidden');
             }
 
             function closeBlockedDatesModal() {
                 const modal = document.getElementById('blocked-dates-modal');
-                modal.style.display = 'none';
+                modal.classList.add('hidden');
             }
 
             function renderBlockedDatesList() {
@@ -6544,6 +6693,195 @@
                 if (!date) { showModal('Selecione uma data.'); return; }
                 await addBlockedDate(date, period);
             });
+
+            // ===== CHECK-IN DE VOLUNTÁRIOS =====
+            let currentCheckinEvent = null;
+
+            async function checkForCheckinEvents() {
+                // Só executar para líderes de time
+                if (!isTeamLeader || !userTeamLeadership || userTeamLeadership.length === 0) {
+                    console.log('🔍 Check-in: Usuário não é líder de time');
+                    return;
+                }
+
+                try {
+                    const { collection, query, where, getDocs } = window.firestoreMethods;
+                    const now = new Date();
+                    const oneHourBefore = new Date(now.getTime() - (60 * 60 * 1000));
+                    const oneHalfHourAfter = new Date(now.getTime() + (90 * 60 * 1000));
+
+                    console.log('🔍 Check-in: Buscando eventos entre', oneHourBefore, 'e', oneHalfHourAfter);
+
+                    // Buscar escalas dos times que lidera
+                    const escalasRef = collection(window.firebaseDb, 'escalas');
+                    const q = query(escalasRef, where('team', 'in', userTeamLeadership));
+                    const snapshot = await getDocs(q);
+
+                    const eventsInWindow = [];
+                    snapshot.forEach(doc => {
+                        const escala = { id: doc.id, ...doc.data() };
+                        const eventDateTime = new Date(escala.date + 'T' + escala.time);
+                        
+                        // Verificar se está na janela: 1h antes até 1:30h depois
+                        const oneHourBeforeEvent = new Date(eventDateTime.getTime() - (60 * 60 * 1000));
+                        const oneHalfHourAfterEvent = new Date(eventDateTime.getTime() + (90 * 60 * 1000));
+
+                        if (now >= oneHourBeforeEvent && now <= oneHalfHourAfterEvent) {
+                            eventsInWindow.push({ ...escala, eventDateTime });
+                        }
+                    });
+
+                    console.log('🔍 Check-in: Eventos encontrados na janela:', eventsInWindow.length);
+
+                    if (eventsInWindow.length > 0) {
+                        // Agrupar por evento (date + time)
+                        const groupedByEvent = {};
+                        eventsInWindow.forEach(escala => {
+                            const key = `${escala.date}_${escala.time}`;
+                            if (!groupedByEvent[key]) {
+                                groupedByEvent[key] = {
+                                    date: escala.date,
+                                    time: escala.time,
+                                    eventName: escala.eventName,
+                                    eventDateTime: escala.eventDateTime,
+                                    teams: {}
+                                };
+                            }
+                            if (!groupedByEvent[key].teams[escala.team]) {
+                                groupedByEvent[key].teams[escala.team] = [];
+                            }
+                            groupedByEvent[key].teams[escala.team].push(escala);
+                        });
+
+                        // Pegar o primeiro evento (mais próximo)
+                        const firstEventKey = Object.keys(groupedByEvent).sort()[0];
+                        currentCheckinEvent = groupedByEvent[firstEventKey];
+                        
+                        openCheckinModal();
+                    }
+                } catch (error) {
+                    console.error('❌ Erro ao verificar eventos para check-in:', error);
+                }
+            }
+
+            function openCheckinModal() {
+                if (!currentCheckinEvent) return;
+
+                const modal = document.getElementById('checkin-modal');
+                const eventInfo = document.getElementById('checkin-event-info');
+                const teamsList = document.getElementById('checkin-teams-list');
+
+                // Info do evento
+                const dateObj = new Date(currentCheckinEvent.date + 'T' + currentCheckinEvent.time);
+                const dateStr = dateObj.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+                const eventNameDisplay = currentCheckinEvent.eventName ? ` - ${currentCheckinEvent.eventName}` : '';
+                eventInfo.innerHTML = `
+                    <div class="font-semibold">Evento: ${dateStr}${eventNameDisplay}</div>
+                    <div class="text-xs text-gray-600">Horário: ${currentCheckinEvent.time}</div>
+                `;
+
+                // Listar times e voluntários
+                const teamNames = {
+                    welcome: { name: 'Welcome', icon: '👋', color: 'bg-blue-50 border-blue-200' },
+                    backstage: { name: 'Backstage', icon: '🤝', color: 'bg-gray-50 border-gray-200' },
+                    parking: { name: 'Parking', icon: '🚗', color: 'bg-red-50 border-red-200' },
+                    kids: { name: 'Kids', icon: '👶', color: 'bg-yellow-50 border-yellow-200' }
+                };
+
+                let html = '';
+                Object.entries(currentCheckinEvent.teams).forEach(([teamKey, volunteers]) => {
+                    const teamInfo = teamNames[teamKey] || { name: teamKey, icon: '👥', color: 'bg-gray-50' };
+                    html += `
+                        <div class="border-l-4 ${teamInfo.color} border rounded p-3">
+                            <h4 class="font-semibold mb-2 flex items-center gap-2">
+                                <span>${teamInfo.icon}</span>
+                                <span>${teamInfo.name}</span>
+                                <span class="text-xs text-gray-500">(${volunteers.length})</span>
+                            </h4>
+                            <div class="space-y-2">
+                                ${volunteers.map(v => {
+                                    const checkInStatus = v.checkIn?.status || 'pending';
+                                    return `
+                                        <div class="flex items-center justify-between bg-white p-2 rounded border">
+                                            <div class="flex items-center gap-2">
+                                                <img src="${v.userPhoto || 'https://via.placeholder.com/32'}" alt="${v.userName}" class="w-8 h-8 rounded-full">
+                                                <span class="font-medium text-sm">${v.userName}</span>
+                                                ${checkInStatus === 'present' ? '<span class="text-xs text-green-600 font-semibold">✓ Presente</span>' : ''}
+                                                ${checkInStatus === 'absent' ? '<span class="text-xs text-red-600 font-semibold">✗ Ausente</span>' : ''}
+                                            </div>
+                                            <div class="flex gap-2">
+                                                <button class="checkin-present-btn w-10 h-10 flex items-center justify-center rounded ${checkInStatus === 'present' ? 'bg-green-500 text-white' : 'bg-green-50 text-green-600 border border-green-200'} hover:bg-green-600 hover:text-white transition"
+                                                        data-escala-id="${v.id}"
+                                                        data-volunteer-name="${v.userName}"
+                                                        title="Marcar ${v.userName} como presente">
+                                                    ✓
+                                                </button>
+                                                <button class="checkin-absent-btn w-10 h-10 flex items-center justify-center rounded ${checkInStatus === 'absent' ? 'bg-red-500 text-white' : 'bg-red-50 text-red-600 border border-red-200'} hover:bg-red-600 hover:text-white transition"
+                                                        data-escala-id="${v.id}"
+                                                        data-volunteer-name="${v.userName}"
+                                                        title="Marcar ${v.userName} como ausente">
+                                                    ✗
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                teamsList.innerHTML = html;
+
+                // Event listeners para os botões
+                document.querySelectorAll('.checkin-present-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const escalaId = e.currentTarget.dataset.escalaId;
+                        await markCheckin(escalaId, 'present');
+                    });
+                });
+
+                document.querySelectorAll('.checkin-absent-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const escalaId = e.currentTarget.dataset.escalaId;
+                        await markCheckin(escalaId, 'absent');
+                    });
+                });
+
+                modal.style.display = 'flex';
+            }
+
+            function closeCheckinModal() {
+                document.getElementById('checkin-modal').style.display = 'none';
+            }
+
+            async function markCheckin(escalaId, status) {
+                try {
+                    const { doc, updateDoc } = window.firestoreMethods;
+                    const escalaRef = doc(window.firebaseDb, 'escalas', escalaId);
+                    
+                    await updateDoc(escalaRef, {
+                        checkIn: {
+                            status: status,
+                            checkedBy: currentUser.uid,
+                            checkedByName: currentUser.displayName || currentUser.email,
+                            checkedAt: new Date().toISOString()
+                        }
+                    });
+
+                    console.log(`✅ Check-in registrado: ${escalaId} = ${status}`);
+                    
+                    // Recarregar modal para atualizar UI
+                    await checkForCheckinEvents();
+                } catch (error) {
+                    console.error('❌ Erro ao registrar check-in:', error);
+                    showModal('Erro ao registrar presença. Tente novamente.');
+                }
+            }
+
+            // Listeners do modal de check-in
+            document.getElementById('close-checkin-modal')?.addEventListener('click', closeCheckinModal);
+            document.getElementById('close-checkin-btn')?.addEventListener('click', closeCheckinModal);
 
             console.log('✅ App inicializado');
         }
