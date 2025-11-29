@@ -2202,10 +2202,9 @@
                         console.log('🏆 isTeamLeader:', isTeamLeader);
                         
                         // Mostrar botão de check-in para líderes
-                        if (isTeamLeader) {
-                            document.getElementById('menu-checkin-btn').style.display = 'block';
-                        } else {
-                            document.getElementById('menu-checkin-btn').style.display = 'none';
+                        const checkinBtn = document.getElementById('menu-checkin-btn');
+                        if (checkinBtn) {
+                            checkinBtn.style.display = isTeamLeader ? 'block' : 'none';
                         }
                         
                         // Bloqueios de data do usuário
