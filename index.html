@@ -5680,22 +5680,23 @@
                 console.log('💾 Times selecionados:', selectedTeams);
                 
                 try {
-                    const { doc, setDoc, getDoc } = window.firestoreMethods;
+                    const { doc, setDoc, updateDoc, getDoc } = window.firestoreMethods;
                     const userDocRef = doc(window.firebaseDb, 'users', currentLeaderUserId);
                     const userDoc = await getDoc(userDocRef);
                     
                     console.log('💾 Documento existe?', userDoc.exists());
                     
                     if (userDoc.exists()) {
-                        const updatedData = {
-                            ...userDoc.data(),
+                        // Usar updateDoc para preservar outros campos
+                        const updateData = {
                             teamLeader: selectedTeams,
                             updatedAt: new Date().toISOString()
                         };
-                        console.log('💾 Dados a serem salvos:', updatedData);
-                        await setDoc(userDocRef, updatedData);
-                        console.log('✅ Dados salvos com sucesso');
+                        console.log('💾 Dados a serem atualizados:', updateData);
+                        await updateDoc(userDocRef, updateData);
+                        console.log('✅ Dados atualizados com sucesso');
                     } else {
+                        // Se não existir, criar com setDoc
                         const newData = {
                             teamLeader: selectedTeams,
                             createdAt: new Date().toISOString()
@@ -5974,7 +5975,7 @@
                     
                     // Mostrar onboarding se:
                     // 1. Usuário não existe no Firestore OU
-                    // 2. Usuário existe mas não completou onboarding
+                    // 2. Usuário existe mas não completou onboarding (campo === true)
                     let shouldShowOnboarding = false;
                     
                     if (!userDoc.exists()) {
@@ -5982,9 +5983,12 @@
                         shouldShowOnboarding = true;
                     } else {
                         const userData = userDoc.data();
-                        if (!userData.onboardingComplete) {
+                        // Só mostrar se onboardingComplete NÃO for true
+                        if (userData.onboardingComplete !== true) {
                             console.log('👋 Usuário sem onboarding completo - mostrar formulário');
                             shouldShowOnboarding = true;
+                        } else {
+                            console.log('✅ Onboarding já foi completado');
                         }
                     }
                     
