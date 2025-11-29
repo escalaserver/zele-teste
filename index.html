@@ -2031,7 +2031,7 @@
                     };
                     
                     if (userDoc.exists()) {
-                        // Atualizar apenas dados do perfil, mantendo role, blocked e photoURL
+                        // Atualizar apenas dados do perfil, mantendo role, blocked, photoURL e onboarding
                         const existingData = userDoc.data();
                         
                         // Se existe photoURL no Firestore, usar ele (Base64)
@@ -2040,13 +2040,14 @@
                             user.photoURL = existingData.photoURL;
                         }
                         
+                        // Usar merge: true para preservar TODOS os campos existentes (incluindo onboarding)
                         await setDoc(userDocRef, {
                             ...userData,
                             photoURL: existingData.photoURL || user.photoURL || '',
                             role: existingData.role || 'user', // Preservar role existente
                             blocked: existingData.blocked || false, // Preservar status de bloqueio
                             createdAt: existingData.createdAt || new Date().toISOString()
-                        });
+                        }, { merge: true });
                         logger.log('✅ Dados do usuário atualizados');
                     } else {
                         // Criar novo documento com role padrão
@@ -5951,86 +5952,231 @@
                 document.getElementById('onboarding-modal').style.display = 'flex';
             });
             
-            // Salvar onboarding
+            // Salvar onboarding (com validações e proteção contra duplo clique)
             document.getElementById('save-onboarding-btn')?.addEventListener('click', async () => {
+                const btn = document.getElementById('save-onboarding-btn');
+                if (!currentUser?.uid) {
+                    showModal('❌ Usuário não autenticado. Faça login novamente.');
+                    return;
+                }
+                // Evitar múltiplos cliques
+                if (btn.dataset.loading === 'true') return;
+                btn.dataset.loading = 'true';
+                btn.classList.add('opacity-60','cursor-not-allowed');
                 try {
                     const { doc, setDoc, getDoc } = window.firestoreMethods;
                     const userDocRef = doc(window.firebaseDb, 'users', currentUser.uid);
-                    
+
+                    // Sanitizar e validar dados
+                    const allowedTeams = ['welcome','backstage','parking','kids'];
+                    if (!allowedTeams.includes(onboardingData.preferredTeam)) {
+                        showModal('⚠️ Selecione um time válido antes de salvar.');
+                        return;
+                    }
+                    const availability = onboardingData.availability || {};
+                    const days = Object.keys(availability);
+                    if (days.length === 0) {
+                        showModal('⚠️ Selecione pelo menos um dia de disponibilidade.');
+                        return;
+                    }
+                    // Garantir arrays de períodos válidos
+                    const sanitizedAvailability = {};
+                    const allowedPeriods = ['morning','afternoon','night'];
+                    for (const day of days) {
+                        const periodsArr = Array.isArray(availability[day]) ? availability[day] : [];
+                        const filtered = periodsArr.filter(p => allowedPeriods.includes(p));
+                        if (filtered.length > 0) {
+                            sanitizedAvailability[day] = filtered;
+                        }
+                    }
+                    if (Object.keys(sanitizedAvailability).length === 0) {
+                        showModal('⚠️ Selecione períodos válidos para sua disponibilidade.');
+                        return;
+                    }
+
                     const dataToSave = {
                         preferredTeam: onboardingData.preferredTeam,
-                        availability: onboardingData.availability,
+                        availability: sanitizedAvailability,
                         onboardingComplete: true,
                         onboardingDate: new Date().toISOString()
                     };
-                    
+
                     console.log('💾 Salvando onboarding para:', currentUser.uid);
-                    console.log('💾 Dados:', dataToSave);
-                    
-                    // Usar setDoc com merge: true para garantir que salva corretamente
+                    console.log('💾 Dados (sanitizados):', dataToSave);
+
                     await setDoc(userDocRef, dataToSave, { merge: true });
                     console.log('💾 Dados salvos com setDoc merge:true');
-                    
-                    // Verificar se foi salvo
+
+                    // Verificar se foi salvo corretamente
                     const verifyDoc = await getDoc(userDocRef);
-                    console.log('✅ Verificação - onboardingComplete salvo:', verifyDoc.data()?.onboardingComplete);
-                    console.log('✅ Verificação - tipo:', typeof verifyDoc.data()?.onboardingComplete);
-                    console.log('✅ Verificação - documento completo:', verifyDoc.data());
-                    
-                    // Fechar ambos os modais
-                    document.getElementById('onboarding-confirm-modal').style.display = 'none';
-                    document.getElementById('onboarding-modal').style.display = 'none';
-                    
+                    const vData = verifyDoc.data() || {};
+                    console.log('✅ Verificação - onboardingComplete salvo:', vData.onboardingComplete);
+                    if (vData.onboardingComplete !== true) {
+                        console.warn('⚠️ Campo onboardingComplete não é boolean true. Valor:', vData.onboardingComplete);
+                    }
+                    console.log('✅ Documento completo pós-salvo:', vData);
+
+                    // Fechar modais
+                    const confirmModal = document.getElementById('onboarding-confirm-modal');
+                    const mainModal = document.getElementById('onboarding-modal');
+                    if (confirmModal) confirmModal.style.display = 'none';
+                    if (mainModal) mainModal.style.display = 'none';
+
                     showModal('✅ Suas preferências foram salvas com sucesso!<br><br>Agora você pode começar a se escalar nos eventos.');
-                    
-                    console.log('✅ Onboarding concluído:', dataToSave);
+                    console.log('✅ Onboarding concluído com sucesso.');
                 } catch (error) {
                     console.error('❌ Erro ao salvar onboarding:', error);
                     showModal('❌ Erro ao salvar suas preferências. Tente novamente.');
+                } finally {
+                    btn.dataset.loading = 'false';
+                    btn.classList.remove('opacity-60','cursor-not-allowed');
                 }
             });
             
             // Verificar se precisa mostrar onboarding
             async function checkOnboarding(user) {
                 try {
+                    if (!user?.uid) return;
                     const { doc, getDoc } = window.firestoreMethods;
-                    const userDoc = await getDoc(doc(window.firebaseDb, 'users', user.uid));
-                    
+                    const ref = doc(window.firebaseDb, 'users', user.uid);
+                    const userDoc = await getDoc(ref);
                     console.log('🔍 checkOnboarding - userDoc.exists():', userDoc.exists());
-                    
-                    // Mostrar onboarding se:
-                    // 1. Usuário não existe no Firestore OU
-                    // 2. Usuário existe mas não completou onboarding (campo === true)
+
                     let shouldShowOnboarding = false;
-                    
                     if (!userDoc.exists()) {
                         console.log('👋 Novo usuário - mostrar onboarding');
                         shouldShowOnboarding = true;
                     } else {
-                        const userData = userDoc.data();
-                        console.log('🔍 checkOnboarding - userData.onboardingComplete:', userData.onboardingComplete);
-                        console.log('🔍 checkOnboarding - tipo:', typeof userData.onboardingComplete);
-                        console.log('🔍 checkOnboarding - comparação !== true:', userData.onboardingComplete !== true);
-                        
-                        // Só mostrar se onboardingComplete NÃO for true
-                        if (userData.onboardingComplete !== true) {
+                        const data = userDoc.data() || {};
+                        const completed = data.onboardingComplete === true || data.onboardingComplete === 'true';
+                        console.log('🔍 checkOnboarding - raw value:', data.onboardingComplete, '-> completed:', completed);
+                        if (!completed) {
                             console.log('👋 Usuário sem onboarding completo - mostrar formulário');
                             shouldShowOnboarding = true;
                         } else {
                             console.log('✅ Onboarding já foi completado');
                         }
                     }
-                    
+
                     if (shouldShowOnboarding) {
-                        // Dar um delay para não conflitar com outros modais
-                        setTimeout(() => {
-                            document.getElementById('onboarding-modal').style.display = 'flex';
-                        }, 500);
+                        const modal = document.getElementById('onboarding-modal');
+                        if (modal && modal.style.display !== 'flex') {
+                            setTimeout(() => { modal.style.display = 'flex'; }, 500);
+                        }
                     }
                 } catch (error) {
                     console.error('❌ Erro ao verificar onboarding:', error);
                 }
             }
+
+            // ========================================
+            // HARNES DE TESTES AUTOMATIZADOS - ONBOARDING
+            // Ativar adicionando '?onboardingTest=1' na URL ou definindo window.ENABLE_ONBOARDING_TESTS = true
+            // ========================================
+            (function initOnboardingTestHarness(){
+                try {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const enabled = urlParams.get('onboardingTest') === '1' || window.ENABLE_ONBOARDING_TESTS === true;
+                    if (!enabled) return;
+
+                    console.log('%c🧪 ONBOARDING TEST HARNESS ATIVADO','background:#2563eb;color:#fff;padding:4px;border-radius:4px');
+
+                    // Criar painel de testes
+                    const panel = document.createElement('div');
+                    panel.style.position = 'fixed';
+                    panel.style.bottom = '10px';
+                    panel.style.right = '10px';
+                    panel.style.zIndex = '9999';
+                    panel.style.background = 'rgba(0,0,0,0.85)';
+                    panel.style.color = '#fff';
+                    panel.style.padding = '10px 14px';
+                    panel.style.fontSize = '12px';
+                    panel.style.borderRadius = '8px';
+                    panel.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
+                    panel.innerHTML = '<strong>🧪 Onboarding Tests</strong><br><button id="run-onboarding-tests" style="margin-top:6px;padding:6px 10px;background:#1d4ed8;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:600;">Rodar</button><div id="onboarding-tests-output" style="margin-top:6px;max-height:220px;overflow:auto;font-family:monospace;line-height:1.3"></div>';
+                    document.body.appendChild(panel);
+
+                    const outputEl = panel.querySelector('#onboarding-tests-output');
+                    function logLine(msg){
+                        const div = document.createElement('div');
+                        div.textContent = msg;
+                        outputEl.appendChild(div);
+                    }
+
+                    function mockDoc(dataExists, dataObj){
+                        return {
+                            exists: () => dataExists,
+                            data: () => dataObj
+                        };
+                    }
+
+                    async function runOnboardingTests(){
+                        outputEl.innerHTML='';
+                        logLine('Iniciando testes...');
+                        const originalGetDoc = window.firestoreMethods.getDoc;
+                        const originalSetDoc = window.firestoreMethods.setDoc;
+
+                        let savedData = {}; // Captura escrita do teste de salvar
+                        window.firestoreMethods.setDoc = async (ref, data, opts) => {
+                            savedData = { ...savedData, ...data };
+                            return Promise.resolve();
+                        };
+
+                        const testUser = { uid: 'TEST_UID', email: 'tester@example.com', displayName:'Tester' };
+
+                        const cases = [
+                            { name:'Novo usuário (sem doc)', exists:false, data:{} , expectShow:true },
+                            { name:'Doc sem onboardingComplete', exists:true, data:{} , expectShow:true },
+                            { name:'onboardingComplete false', exists:true, data:{ onboardingComplete:false }, expectShow:true },
+                            { name:"onboardingComplete 'true' (string)", exists:true, data:{ onboardingComplete:'true' }, expectShow:false },
+                            { name:'onboardingComplete true', exists:true, data:{ onboardingComplete:true }, expectShow:false }
+                        ];
+
+                        for (const c of cases){
+                            window.firestoreMethods.getDoc = async () => mockDoc(c.exists, c.data);
+                            let modalWasShown = false;
+                            const modalEl = document.getElementById('onboarding-modal');
+                            if (modalEl){ modalEl.style.display='none'; }
+                            const originalSetTimeout = window.setTimeout;
+                            window.setTimeout = (fn, t) => { fn(); return 0; }; // Executa imediatamente para teste
+                            await checkOnboarding(testUser);
+                            window.setTimeout = originalSetTimeout;
+                            if (modalEl && modalEl.style.display === 'flex') modalWasShown = true;
+                            const pass = modalWasShown === c.expectShow;
+                            logLine(`${pass?'✅':'❌'} ${c.name} -> modalShown=${modalWasShown} (esperado=${c.expectShow})`);
+                        }
+
+                        // Teste de salvar dados inválidos
+                        onboardingData.preferredTeam = 'INVALID';
+                        onboardingData.availability = {};
+                        let validationBlocked = false;
+                        const originalShowModal = window.showModal;
+                        window.showModal = (msg) => { validationBlocked = true; logLine('ℹ️ showModal: '+msg); return; };
+                        document.getElementById('save-onboarding-btn')?.click();
+                        logLine(`${validationBlocked?'✅':'❌'} Bloqueio por dados inválidos (time/availability)`);
+                        window.showModal = originalShowModal;
+
+                        // Teste de salvar válido
+                        onboardingData.preferredTeam = 'welcome';
+                        onboardingData.availability = { monday:['morning','night'], sunday:['afternoon'] };
+                        savedData = {};
+                        document.getElementById('save-onboarding-btn')?.click();
+                        // Aguarda microtask
+                        setTimeout(()=>{
+                            const ok = savedData.onboardingComplete === true && savedData.preferredTeam === 'welcome';
+                            logLine(`${ok?'✅':'❌'} Salvamento válido -> preferredTeam=${savedData.preferredTeam}, onboardingComplete=${savedData.onboardingComplete}`);
+                        },50);
+
+                        // Restaurar métodos
+                        window.firestoreMethods.getDoc = originalGetDoc;
+                        window.firestoreMethods.setDoc = originalSetDoc;
+                    }
+
+                    panel.querySelector('#run-onboarding-tests').addEventListener('click', runOnboardingTests);
+                } catch(err){
+                    console.error('Erro ao inicializar harness de testes onboarding:', err);
+                }
+            })();
             
             // Excluir usuário permanentemente (apenas se bloqueado)
             async function deleteUser(userId, userName) {
