@@ -5966,7 +5966,9 @@
                     console.log('✅ Verificação - onboardingComplete salvo:', verifyDoc.data()?.onboardingComplete);
                     console.log('✅ Verificação - tipo:', typeof verifyDoc.data()?.onboardingComplete);
                     
+                    // Fechar ambos os modais
                     document.getElementById('onboarding-confirm-modal').style.display = 'none';
+                    document.getElementById('onboarding-modal').style.display = 'none';
                     
                     showModal('✅ Suas preferências foram salvas com sucesso!<br><br>Agora você pode começar a se escalar nos eventos.');
                     
