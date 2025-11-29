@@ -1134,23 +1134,23 @@
     </div>
 
     <!-- Modal: Check-in de Voluntários -->
-    <div id="checkin-modal" class="modal-overlay" style="display:none;">
-        <div class="modal bg-white max-w-3xl">
-            <div class="modal-header">
-                <h2 class="text-xl font-bold" style="color:#151b29;">✅ Check-in de Voluntários</h2>
-                <button id="close-checkin-modal" class="text-gray-600 hover:text-gray-800">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-            <div class="modal-body space-y-4">
-                <div id="checkin-event-info" class="bg-blue-50 border-l-4 border-blue-500 p-3 rounded text-sm"></div>
-                <p class="text-sm text-gray-600">Marque a presença dos voluntários dos seus times:</p>
-                <div id="checkin-teams-list" class="space-y-4"></div>
-            </div>
-            <div class="modal-footer">
-                <button id="close-checkin-btn" class="zele-btn-secondary px-4 py-2 rounded-lg">Fechar</button>
+    <!-- Modal: Check-in de Voluntários -->
+    <div id="checkin-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm relative" style="max-height: 90vh; aspect-ratio: 9/16; overflow-y: auto;">
+            <button id="close-checkin-modal" class="sticky top-4 right-4 float-right z-10 bg-white rounded-full p-2 shadow-lg text-gray-400 hover:text-gray-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+            
+            <div class="p-6">
+                <h3 class="text-xl font-bold mb-3" style="color: #151b29;">✅ Check-in de Voluntários</h3>
+                <div id="checkin-event-info" class="bg-blue-50 border-l-4 border-blue-500 p-3 rounded text-sm mb-4"></div>
+                <p class="text-sm text-gray-600 mb-4">Marque a presença dos voluntários:</p>
+                
+                <div id="checkin-teams-list" class="space-y-4">
+                    <!-- Times com voluntários serão inseridos aqui -->
+                </div>
             </div>
         </div>
     </div>
@@ -2200,6 +2200,14 @@
                         isTeamLeader = userTeamLeadership.length > 0;
                         console.log('🏆 Líder de times:', userTeamLeadership);
                         console.log('🏆 isTeamLeader:', isTeamLeader);
+                        
+                        // Mostrar botão de check-in para líderes
+                        if (isTeamLeader) {
+                            document.getElementById('menu-checkin-btn').style.display = 'block';
+                        } else {
+                            document.getElementById('menu-checkin-btn').style.display = 'none';
+                        }
+                        
                         // Bloqueios de data do usuário
                         userBlockedDates = userData.blockedDates || {};
                         console.log('🗓️ Bloqueios carregados:', userBlockedDates);
@@ -6848,11 +6856,11 @@
                     });
                 });
 
-                modal.style.display = 'flex';
+                modal.classList.remove('hidden');
             }
 
             function closeCheckinModal() {
-                document.getElementById('checkin-modal').style.display = 'none';
+                document.getElementById('checkin-modal').classList.add('hidden');
             }
 
             async function markCheckin(escalaId, status) {
@@ -6881,7 +6889,22 @@
 
             // Listeners do modal de check-in
             document.getElementById('close-checkin-modal')?.addEventListener('click', closeCheckinModal);
-            document.getElementById('close-checkin-btn')?.addEventListener('click', closeCheckinModal);
+            
+            // Listener do overlay para fechar ao clicar fora
+            document.getElementById('checkin-modal')?.addEventListener('click', (e) => {
+                if (e.target.id === 'checkin-modal') {
+                    closeCheckinModal();
+                }
+            });
+            
+            // Menu button para abrir check-in
+            document.getElementById('menu-checkin-btn')?.addEventListener('click', async () => {
+                document.getElementById('menu-overlay').classList.add('hidden');
+                await checkForCheckinEvents();
+                if (!currentCheckinEvent) {
+                    showModal('⏰ Não há eventos disponíveis para check-in no momento.<br><br>O check-in fica disponível 1h antes até 1:30h após o evento.', false, null, false, null, '⏰');
+                }
+            });
 
             console.log('✅ App inicializado');
         }
