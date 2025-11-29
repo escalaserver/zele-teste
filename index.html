@@ -2339,7 +2339,13 @@
                     const now = new Date();
                     const hoursUntilEvent = (eventDateTime - now) / (1000 * 60 * 60);
                     
+                    console.log('⏰ Verificação 24h:');
+                    console.log('  Data/Hora evento:', eventDateTime);
+                    console.log('  Data/Hora atual:', now);
+                    console.log('  Horas até evento:', hoursUntilEvent);
+                    
                     const isPending = hoursUntilEvent < 24 && hoursUntilEvent > 0;
+                    console.log('  É pendente (<24h)?', isPending);
                     
                     // Verificar limite de voluntários no time para esta data/hora
                     const teamLimit = await checkTeamLimit(date, time, team);
@@ -2394,6 +2400,7 @@
                         if (existingTeam === team) {
                             // Mostrar confirmação antes de salvar
                             if (isPending) {
+                                console.log('⛔ PENDENTE: Salvando como pending (mesmo time, <24h)');
                                 // Salvar automaticamente sem botões SIM/NÃO
                                 await saveEscalaToFirestore(escalaId, date, time, team, eventName, true, 'pending');
                                 showModal(
@@ -2406,6 +2413,7 @@
                                 );
                                 return;
                             } else {
+                                console.log('✅ Normal: Confirmação padrão (mesmo time, >24h)');
                                 showModal(
                                     `Confirmar escala no time ${teamNames[team]}?`,
                                     true,
@@ -2417,6 +2425,7 @@
                         } else {
                             // Times diferentes - pedir confirmação
                             if (isPending) {
+                                console.log('⛔ PENDENTE: Salvando como pending (mudança de time, <24h)');
                                 // Salvar automaticamente sem botões SIM/NÃO
                                 await saveEscalaToFirestore(escalaId, date, time, team, eventName, false, 'pending');
                                 showModal(
@@ -2429,6 +2438,7 @@
                                 );
                                 return;
                             } else {
+                                console.log('✅ Normal: Confirmação mudança de time (>24h)');
                                 showModal(
                                     `Você já escolheu servir no time ${teamNames[existingTeam]}. Deseja confirmar a mudança para o time ${teamNames[team]} nesta escala?`,
                                     true,
@@ -2441,6 +2451,7 @@
                     } else {
                         // Nova escala - verificar se é pendente ou aprovada
                         if (isPending) {
+                            console.log('⛔ PENDENTE: Salvando nova escala como pending (<24h)');
                             // Escala pendente (menos de 24h) - salvar automaticamente
                             await saveEscalaToFirestore(escalaId, date, time, team, eventName, false, 'pending');
                             showModal(
@@ -2453,6 +2464,7 @@
                             );
                             return;
                         } else {
+                            console.log('✅ Normal: Nova escala normal (>24h)');
                             // Escala normal - mostrar confirmação
                             showModal(
                                 `Confirmar escala no time ${teamNames[team]}?`,
@@ -2473,6 +2485,12 @@
             // Função auxiliar para salvar no Firestore
             async function saveEscalaToFirestore(escalaId, date, time, team, eventName, skipCalendarPrompt, status = 'approved') {
                 try {
+                    console.log('💾 saveEscalaToFirestore chamada:');
+                    console.log('  escalaId:', escalaId);
+                    console.log('  status:', status);
+                    console.log('  team:', team);
+                    console.log('  date/time:', date, time);
+                    
                     const { doc, setDoc } = window.firestoreMethods;
                     
                     const escalaData = {
@@ -2490,6 +2508,8 @@
                         requestTimestamp: new Date().toISOString()
                     };
                     
+                    console.log('💾 Dados da escala:', escalaData);
+                    
                     // Se for escala negada, adicionar razão
                     if (status === 'denied') {
                         escalaData.deniedReason = 'Escala não aprovada pelo líder';
@@ -2497,7 +2517,7 @@
                     
                     await setDoc(doc(window.firebaseDb, 'escalas', escalaId), escalaData);
 
-                    console.log('✅ Escala salva com sucesso!', status);
+                    console.log('✅ Escala salva com sucesso! Status:', status);
                     
                     // Limpar seleção e resetar imagens
                     selectedTeam = null;
@@ -5934,9 +5954,8 @@
             // Salvar onboarding
             document.getElementById('save-onboarding-btn')?.addEventListener('click', async () => {
                 try {
-                    const { doc, updateDoc, setDoc, getDoc } = window.firestoreMethods;
+                    const { doc, setDoc, getDoc } = window.firestoreMethods;
                     const userDocRef = doc(window.firebaseDb, 'users', currentUser.uid);
-                    const userDoc = await getDoc(userDocRef);
                     
                     const dataToSave = {
                         preferredTeam: onboardingData.preferredTeam,
@@ -5948,23 +5967,15 @@
                     console.log('💾 Salvando onboarding para:', currentUser.uid);
                     console.log('💾 Dados:', dataToSave);
                     
-                    if (userDoc.exists()) {
-                        console.log('💾 Documento existe - usando updateDoc');
-                        await updateDoc(userDocRef, dataToSave);
-                    } else {
-                        console.log('💾 Documento não existe - usando setDoc');
-                        await setDoc(userDocRef, {
-                            ...dataToSave,
-                            email: currentUser.email,
-                            displayName: currentUser.displayName,
-                            createdAt: new Date().toISOString()
-                        });
-                    }
+                    // Usar setDoc com merge: true para garantir que salva corretamente
+                    await setDoc(userDocRef, dataToSave, { merge: true });
+                    console.log('💾 Dados salvos com setDoc merge:true');
                     
                     // Verificar se foi salvo
                     const verifyDoc = await getDoc(userDocRef);
                     console.log('✅ Verificação - onboardingComplete salvo:', verifyDoc.data()?.onboardingComplete);
                     console.log('✅ Verificação - tipo:', typeof verifyDoc.data()?.onboardingComplete);
+                    console.log('✅ Verificação - documento completo:', verifyDoc.data());
                     
                     // Fechar ambos os modais
                     document.getElementById('onboarding-confirm-modal').style.display = 'none';
