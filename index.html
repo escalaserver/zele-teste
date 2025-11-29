@@ -1127,7 +1127,7 @@
 
     <!-- Modal: Bloqueio de Datas -->
     <div id="blocked-dates-modal" class="modal-overlay" style="display:none;">
-        <div class="modal">
+        <div class="modal bg-white">
             <div class="modal-header">
                 <h2 class="text-xl font-bold" style="color:#151b29;">🚫 Bloqueio de Datas</h2>
                 <button id="close-blocked-dates-modal" class="text-gray-600 hover:text-gray-800">
@@ -4274,6 +4274,8 @@
             function renderAdminView(grouped) {
                 console.log('🔍 renderAdminView - isTeamLeader:', isTeamLeader);
                 console.log('🔍 renderAdminView - userTeamLeadership:', userTeamLeadership);
+                console.log('🔍 renderAdminView - isAdmin:', isAdmin);
+                console.log('🔍 renderAdminView - isSuperAdmin:', isSuperAdmin);
                 
                 // Ordenar chaves por data e hora (ordem crescente)
                 const dates = Object.keys(grouped).sort((a, b) => {
