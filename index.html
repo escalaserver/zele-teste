@@ -213,7 +213,6 @@
             animation: pulse-save 0.5s ease-in-out 2;
             -webkit-animation: pulse-save 0.5s ease-in-out 2;
         }
-        
         /* Onboarding Styles */
         .onboarding-team-btn {
             transition: all 0.3s ease;
@@ -1024,6 +1023,16 @@
                     <span id="upcoming-badge" class="hidden absolute top-3 right-3 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">0</span>
                 </button>
 
+                <button id="menu-block-dates-btn" class="w-full flex items-center gap-3 p-4 rounded-lg hover:bg-gray-100 transition text-left">
+                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3M5 21h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2zm0 0h14M7 11h10M7 15h6"/>
+                    </svg>
+                    <div>
+                        <p class="font-semibold text-gray-800">Bloqueio de Datas</p>
+                        <p class="text-xs text-gray-600">Marque quando não pode servir</p>
+                    </div>
+                </button>
+
                 <button id="menu-admin-btn" class="w-full flex items-center gap-3 p-4 rounded-lg hover:bg-gray-100 transition text-left" style="display: none;">
                     <svg class="w-6 h-6" style="color: #151b29;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -1112,6 +1121,49 @@
             <div class="mt-8 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">
                 <p>Zele Server v2.3</p>
                 <p class="mt-1">Servir é a linguagem do céu</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Bloqueio de Datas -->
+    <div id="blocked-dates-modal" class="modal-overlay" style="display:none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="text-xl font-bold" style="color:#151b29;">🚫 Bloqueio de Datas</h2>
+                <button id="close-blocked-dates-modal" class="text-gray-600 hover:text-gray-800">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body space-y-4">
+                <p class="text-sm text-gray-600">Marque as datas e períodos do dia em que você <strong>não pode</strong> servir.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Data</label>
+                        <input type="date" id="block-date-input" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Período</label>
+                        <select id="block-period-select" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                            <option value="all">Dia inteiro</option>
+                            <option value="morning">Manhã</option>
+                            <option value="afternoon">Tarde</option>
+                            <option value="night">Noite</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button id="add-blocked-date-btn" class="w-full zele-btn text-white font-bold py-2 px-4 rounded-lg">➕ Adicionar</button>
+                    </div>
+                </div>
+
+                <div class="mt-2">
+                    <h3 class="font-semibold mb-2" style="color:#151b29;">Suas datas bloqueadas</h3>
+                    <div id="blocked-dates-list" class="space-y-2 text-sm"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="close-blocked-dates-btn" class="zele-btn-secondary px-4 py-2 rounded-lg">Fechar</button>
             </div>
         </div>
     </div>
@@ -1314,6 +1366,7 @@
             let isSuperAdmin = false;
             let isTeamLeader = false;
             let userTeamLeadership = [];
+            let userBlockedDates = {}; // {'YYYY-MM-DD': ['all'] | ['morning','afternoon','night']}
             let availableDates = [];
             let deferredPrompt = null;
             let isIOS = false;
@@ -2101,7 +2154,7 @@
                     
                     console.log('📄 Documento existe?', userDoc.exists());
                     
-                    // Verificar liderança de times
+                    // Verificar liderança de times e carregar bloqueios
                     if (userDoc.exists()) {
                         const userData = userDoc.data();
                         console.log('📄 Dados completos do usuário:', userData);
@@ -2111,6 +2164,9 @@
                         isTeamLeader = userTeamLeadership.length > 0;
                         console.log('🏆 Líder de times:', userTeamLeadership);
                         console.log('🏆 isTeamLeader:', isTeamLeader);
+                        // Bloqueios de data do usuário
+                        userBlockedDates = userData.blockedDates || {};
+                        console.log('🗓️ Bloqueios carregados:', userBlockedDates);
                         
                         // Atualizar UI após carregar liderança
                         updateUserUI(user);
@@ -2335,6 +2391,24 @@
                 };
 
                 try {
+                    // Bloqueio de datas: impedir se usuário marcou indisponibilidade
+                    function getPeriodFromTime(t) {
+                        if (!t || t === '00:00') return 'unknown';
+                        const [hh, mm] = t.split(':').map(x => parseInt(x, 10));
+                        const h = isNaN(hh) ? 0 : hh;
+                        if (h < 12) return 'morning';
+                        if (h < 18) return 'afternoon';
+                        return 'night';
+                    }
+                    const period = getPeriodFromTime(time);
+                    const blocks = userBlockedDates?.[date] || [];
+                    const isBlocked = Array.isArray(blocks) && (blocks.includes('all') || (period !== 'unknown' && blocks.includes(period)) || (period === 'unknown' && blocks.includes('all')));
+                    if (isBlocked) {
+                        const periodLabel = period === 'morning' ? 'manhã' : period === 'afternoon' ? 'tarde' : period === 'night' ? 'noite' : 'dia';
+                        showModal(`⛔ Você marcou indisponibilidade para ${period === 'unknown' ? 'este dia' : `a ${periodLabel}`} (${new Date(date+ 'T12:00:00').toLocaleDateString('pt-BR')}).<br><br>Remova o bloqueio em Menu → Bloqueio de Datas para prosseguir.`, false, null, false, null, '⛔');
+                        return;
+                    }
+
                     // Verificar se falta menos de 24h para o evento
                     const eventDateTime = new Date(`${date}T${time}`);
                     const now = new Date();
@@ -4235,22 +4309,24 @@
                         console.log(`🔍 Team: ${teamKey}, isSuperAdmin: ${isSuperAdmin}, isAdmin: ${isAdmin}, isTeamLeader: ${isTeamLeader}, leadership:`, userTeamLeadership, `canManage: ${canManageThisTeam}`);
                         
                         return volunteers.map(v => `
-                            <div class="flex items-center justify-between">
-                                <span>• ${v.userName}</span>
+                            <div class="flex items-center justify-between py-2 md:py-1">
+                                <span class="text-base md:text-sm font-medium">• ${v.userName}</span>
                                 ${canManageThisTeam ? `
-                                <div class="flex gap-2">
-                                    <button class="transfer-volunteer-btn text-blue-600 hover:text-blue-800 text-sm"
+                                <div class="flex gap-3">
+                                    <button class="transfer-volunteer-btn text-blue-600 hover:text-blue-800 w-10 h-10 md:w-7 md:h-7 flex items-center justify-center rounded focus:outline-none focus:ring-2 focus:ring-blue-300 text-2xl md:text-base"
                                             data-escala-id="${v.id}"
                                             data-volunteer-name="${v.userName}"
                                             data-current-team="${teamKey}"
                                             data-date="${data.date}"
                                             data-time="${data.time}"
+                                            aria-label="Transferir ${v.userName} para outro time"
                                             title="Transferir ${v.userName} para outro time">
                                         🔁
                                     </button>
-                                    <button class="admin-delete-escala text-red-600 hover:text-red-800 text-xs"
+                                    <button class="admin-delete-escala text-red-600 hover:text-red-800 w-10 h-10 md:w-7 md:h-7 flex items-center justify-center rounded focus:outline-none focus:ring-2 focus:ring-red-300 text-2xl md:text-base"
                                             data-escala-id="${v.id}"
                                             data-current-team="${teamKey}"
+                                            aria-label="Remover ${v.userName}"
                                             title="Remover ${v.userName}">
                                         🗑️
                                     </button>
@@ -6350,6 +6426,121 @@
                 } else {
                     showLogin();
                 }
+            });
+
+            // ===== Bloqueio de Datas: Funções e Listeners =====
+            function openBlockedDatesModal() {
+                const modal = document.getElementById('blocked-dates-modal');
+                renderBlockedDatesList();
+                modal.style.display = 'flex';
+            }
+
+            function closeBlockedDatesModal() {
+                const modal = document.getElementById('blocked-dates-modal');
+                modal.style.display = 'none';
+            }
+
+            function renderBlockedDatesList() {
+                const list = document.getElementById('blocked-dates-list');
+                if (!list) return;
+                const entries = Object.entries(userBlockedDates || {});
+                if (entries.length === 0) {
+                    list.innerHTML = '<p class="text-gray-500">Sem bloqueios cadastrados.</p>';
+                    return;
+                }
+                const periodLabel = { all: 'Dia inteiro', morning: 'Manhã', afternoon: 'Tarde', night: 'Noite' };
+                const html = entries.sort((a,b)=>a[0].localeCompare(b[0])).map(([date, periods])=>{
+                    const dateStr = new Date(date+'T12:00:00').toLocaleDateString('pt-BR');
+                    const chips = (periods||[]).map(p=>`
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded bg-gray-100 border border-gray-200 mr-1 mb-1">
+                            ${periodLabel[p] || p}
+                            <button class="remove-block-btn text-gray-500 hover:text-red-600" data-date="${date}" data-period="${p}" title="Remover">×</button>
+                        </span>
+                    `).join('');
+                    return `
+                        <div class="flex items-center justify-between bg-white border border-gray-200 rounded p-2">
+                            <div>
+                                <div class="font-semibold text-gray-800">${dateStr}</div>
+                                <div class="mt-1 flex flex-wrap">${chips}</div>
+                            </div>
+                            <button class="remove-block-date-btn text-red-600 hover:text-red-800" data-date="${date}" title="Remover dia inteiro">🗑️</button>
+                        </div>
+                    `;
+                }).join('');
+                list.innerHTML = html;
+
+                // Listeners de remoção
+                list.querySelectorAll('.remove-block-btn').forEach(btn=>{
+                    btn.addEventListener('click', async (e)=>{
+                        const date = e.currentTarget.dataset.date;
+                        const period = e.currentTarget.dataset.period;
+                        await removeBlockedPeriod(date, period);
+                    });
+                });
+                list.querySelectorAll('.remove-block-date-btn').forEach(btn=>{
+                    btn.addEventListener('click', async (e)=>{
+                        const date = e.currentTarget.dataset.date;
+                        await removeBlockedDate(date);
+                    });
+                });
+            }
+
+            async function saveBlockedDatesToFirestore() {
+                try {
+                    const { doc, setDoc } = window.firestoreMethods;
+                    const userDocRef = doc(window.firebaseDb, 'users', currentUser.uid);
+                    await setDoc(userDocRef, { blockedDates: userBlockedDates }, { merge: true });
+                    console.log('✅ Bloqueios salvos:', userBlockedDates);
+                } catch (err) {
+                    console.error('❌ Erro ao salvar bloqueios:', err);
+                    showModal('Erro ao salvar bloqueios. Tente novamente.');
+                }
+            }
+
+            async function addBlockedDate(date, period) {
+                if (!date || !period) return;
+                userBlockedDates = userBlockedDates || {};
+                const existing = userBlockedDates[date] || [];
+                if (period === 'all') {
+                    userBlockedDates[date] = ['all'];
+                } else {
+                    if (!existing.includes('all')) {
+                        const set = new Set(existing);
+                        set.add(period);
+                        userBlockedDates[date] = Array.from(set);
+                    }
+                }
+                await saveBlockedDatesToFirestore();
+                renderBlockedDatesList();
+            }
+
+            async function removeBlockedPeriod(date, period) {
+                const existing = userBlockedDates[date] || [];
+                if (existing.includes('all')) {
+                    delete userBlockedDates[date];
+                } else {
+                    userBlockedDates[date] = existing.filter(p=>p!==period);
+                    if (userBlockedDates[date].length === 0) delete userBlockedDates[date];
+                }
+                await saveBlockedDatesToFirestore();
+                renderBlockedDatesList();
+            }
+
+            async function removeBlockedDate(date) {
+                delete userBlockedDates[date];
+                await saveBlockedDatesToFirestore();
+                renderBlockedDatesList();
+            }
+
+            // Listeners do modal
+            document.getElementById('menu-block-dates-btn')?.addEventListener('click', openBlockedDatesModal);
+            document.getElementById('close-blocked-dates-modal')?.addEventListener('click', closeBlockedDatesModal);
+            document.getElementById('close-blocked-dates-btn')?.addEventListener('click', closeBlockedDatesModal);
+            document.getElementById('add-blocked-date-btn')?.addEventListener('click', async ()=>{
+                const date = (document.getElementById('block-date-input').value || '').trim();
+                const period = document.getElementById('block-period-select').value;
+                if (!date) { showModal('Selecione uma data.'); return; }
+                await addBlockedDate(date, period);
             });
 
             console.log('✅ App inicializado');
