@@ -5945,9 +5945,14 @@
                         onboardingDate: new Date().toISOString()
                     };
                     
+                    console.log('💾 Salvando onboarding para:', currentUser.uid);
+                    console.log('💾 Dados:', dataToSave);
+                    
                     if (userDoc.exists()) {
+                        console.log('💾 Documento existe - usando updateDoc');
                         await updateDoc(userDocRef, dataToSave);
                     } else {
+                        console.log('💾 Documento não existe - usando setDoc');
                         await setDoc(userDocRef, {
                             ...dataToSave,
                             email: currentUser.email,
@@ -5955,6 +5960,11 @@
                             createdAt: new Date().toISOString()
                         });
                     }
+                    
+                    // Verificar se foi salvo
+                    const verifyDoc = await getDoc(userDocRef);
+                    console.log('✅ Verificação - onboardingComplete salvo:', verifyDoc.data()?.onboardingComplete);
+                    console.log('✅ Verificação - tipo:', typeof verifyDoc.data()?.onboardingComplete);
                     
                     document.getElementById('onboarding-confirm-modal').style.display = 'none';
                     
@@ -5973,6 +5983,8 @@
                     const { doc, getDoc } = window.firestoreMethods;
                     const userDoc = await getDoc(doc(window.firebaseDb, 'users', user.uid));
                     
+                    console.log('🔍 checkOnboarding - userDoc.exists():', userDoc.exists());
+                    
                     // Mostrar onboarding se:
                     // 1. Usuário não existe no Firestore OU
                     // 2. Usuário existe mas não completou onboarding (campo === true)
@@ -5983,6 +5995,10 @@
                         shouldShowOnboarding = true;
                     } else {
                         const userData = userDoc.data();
+                        console.log('🔍 checkOnboarding - userData.onboardingComplete:', userData.onboardingComplete);
+                        console.log('🔍 checkOnboarding - tipo:', typeof userData.onboardingComplete);
+                        console.log('🔍 checkOnboarding - comparação !== true:', userData.onboardingComplete !== true);
+                        
                         // Só mostrar se onboardingComplete NÃO for true
                         if (userData.onboardingComplete !== true) {
                             console.log('👋 Usuário sem onboarding completo - mostrar formulário');
