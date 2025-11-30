@@ -4639,7 +4639,11 @@
                     const period = dashboardPeriodSelect.value;
                     let dateFrom, dateTo;
                     
+                    // Obter data atual no horário de São Paulo (UTC-3)
                     const now = new Date();
+                    const saoPauloOffset = -3 * 60; // UTC-3 em minutos
+                    const localOffset = now.getTimezoneOffset();
+                    const saoPauloTime = new Date(now.getTime() + (localOffset + saoPauloOffset) * 60000);
                     
                     if (period === 'custom') {
                         const fromInput = document.getElementById('date-from').value;
@@ -4650,22 +4654,24 @@
                             return;
                         }
                         
-                        dateFrom = new Date(fromInput);
-                        dateTo = new Date(toInput);
+                        dateFrom = new Date(fromInput + 'T00:00:00');
+                        dateTo = new Date(toInput + 'T23:59:59');
                     } else if (period === 'all') {
-                        dateFrom = new Date('2020-01-01'); // Data antiga o suficiente
-                        dateTo = new Date(now.getTime() + (365 * 24 * 60 * 60 * 1000)); // 1 ano no futuro
+                        dateFrom = new Date('2020-01-01T00:00:00'); // Data antiga o suficiente
+                        dateTo = new Date(saoPauloTime.getTime() + (365 * 24 * 60 * 60 * 1000)); // 1 ano no futuro
                     } else {
                         const days = parseInt(period);
                         if (days < 0) {
                             // Período passado (Últimos X dias)
-                            dateFrom = new Date(now.getTime() + (days * 24 * 60 * 60 * 1000));
-                            dateTo = now;
+                            dateFrom = new Date(saoPauloTime.getTime() + (days * 24 * 60 * 60 * 1000));
+                            dateFrom.setHours(0, 0, 0, 0);
+                            dateTo = new Date(saoPauloTime);
+                            dateTo.setHours(23, 59, 59, 999);
                         } else {
                             // Período futuro (Próximos X dias) - incluindo o dia corrente
-                            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()); // Início do dia corrente
-                            dateFrom = today;
-                            dateTo = new Date(today.getTime() + (days * 24 * 60 * 60 * 1000));
+                            dateFrom = new Date(saoPauloTime.getFullYear(), saoPauloTime.getMonth(), saoPauloTime.getDate(), 0, 0, 0, 0);
+                            dateTo = new Date(dateFrom.getTime() + (days * 24 * 60 * 60 * 1000));
+                            dateTo.setHours(23, 59, 59, 999);
                         }
                     }
                     
@@ -4686,8 +4692,11 @@
                     
                     querySnapshot.forEach(doc => {
                         const data = doc.data();
-                        const escalaDate = new Date(data.date);
-                        if (escalaDate >= dateFrom && escalaDate <= dateTo) {
+                        // Comparar strings de data diretamente (formato YYYY-MM-DD)
+                        const dateFromStr = dateFrom.toISOString().split('T')[0];
+                        const dateToStr = dateTo.toISOString().split('T')[0];
+                        
+                        if (data.date >= dateFromStr && data.date <= dateToStr) {
                             escalas.push({ id: doc.id, ...data });
                         }
                     });
