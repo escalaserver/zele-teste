@@ -705,6 +705,14 @@
                         <canvas id="chart-attendance"></canvas>
                     </div>
                 </div>
+
+                <!-- Gráfico 6: Ranking de Voluntários - Check-in vs Ausência -->
+                <div class="card-float rounded-xl p-6">
+                    <h3 class="font-bold text-lg mb-4" style="color: #151b29;">📊 Ranking de Check-in - Presença vs Ausência</h3>
+                    <div class="h-64">
+                        <canvas id="chart-checkin-ranking"></canvas>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
@@ -4595,7 +4603,9 @@
                 teams: null,
                 volunteers: null,
                 events: null,
-                emptyTeams: null
+                emptyTeams: null,
+                chart5: null,
+                checkinRanking: null
             };
 
             // Event listeners para filtros de Dashboard
@@ -4652,9 +4662,10 @@
                             dateFrom = new Date(now.getTime() + (days * 24 * 60 * 60 * 1000));
                             dateTo = now;
                         } else {
-                            // Período futuro (Próximos X dias)
-                            dateFrom = now;
-                            dateTo = new Date(now.getTime() + (days * 24 * 60 * 60 * 1000));
+                            // Período futuro (Próximos X dias) - incluindo o dia corrente
+                            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()); // Início do dia corrente
+                            dateFrom = today;
+                            dateTo = new Date(today.getTime() + (days * 24 * 60 * 60 * 1000));
                         }
                     }
                     
@@ -4692,6 +4703,7 @@
                     await generateChart3_EventsWithMostVolunteers(escalas);
                     await generateChart4_EventsWithEmptyTeams(dateFrom, dateTo);
                     await generateChart5_CheckinAttendance(escalas); // Novo gráfico de presença
+                    await generateChart6_CheckinRanking(escalas); // Ranking de check-in
                     
                     // Configurar navegação dos gráficos com scroll
                     setupChartNavigation();
@@ -5519,6 +5531,136 @@
             // Gráfico 5: Presença vs Ausência por Time
             // Armazenar detalhes de presença para o popup do Chart 5
             window.chart5AttendanceDetails = {};
+
+            // Gráfico 6: Ranking de Voluntários - Check-in vs Ausência
+            async function generateChart6_CheckinRanking(escalas) {
+                // Contar check-ins por voluntário
+                const volunteerCheckins = {};
+                
+                escalas.forEach(escala => {
+                    const name = escala.userName || 'Desconhecido';
+                    const checkinStatus = escala.checkIn?.status;
+                    
+                    if (!volunteerCheckins[name]) {
+                        volunteerCheckins[name] = {
+                            present: 0,
+                            absent: 0,
+                            total: 0
+                        };
+                    }
+                    
+                    if (checkinStatus === 'present') {
+                        volunteerCheckins[name].present++;
+                        volunteerCheckins[name].total++;
+                    } else if (checkinStatus === 'absent') {
+                        volunteerCheckins[name].absent++;
+                        volunteerCheckins[name].total++;
+                    }
+                });
+                
+                // Filtrar apenas voluntários com check-ins e ordenar por total
+                const sorted = Object.entries(volunteerCheckins)
+                    .filter(item => item[1].total > 0)
+                    .sort((a, b) => b[1].total - a[1].total)
+                    .slice(0, 10);
+                
+                const labels = sorted.map(item => item[0]);
+                const presentData = sorted.map(item => item[1].present);
+                const absentData = sorted.map(item => item[1].absent);
+                
+                const ctx = document.getElementById('chart-checkin-ranking');
+                
+                if (dashboardCharts.checkinRanking) {
+                    dashboardCharts.checkinRanking.destroy();
+                }
+                
+                dashboardCharts.checkinRanking = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: '✅ Presença',
+                                data: presentData,
+                                backgroundColor: 'rgba(34, 197, 94, 0.8)',
+                                borderColor: 'rgba(34, 197, 94, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: '❌ Ausência',
+                                data: absentData,
+                                backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                                borderColor: 'rgba(239, 68, 68, 1)',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    boxWidth: 15,
+                                    padding: 10,
+                                    font: {
+                                        size: 11
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.dataset.label || '';
+                                        const value = context.parsed.x;
+                                        return value > 0 ? `${label}: ${value}` : null;
+                                    },
+                                    footer: function(tooltipItems) {
+                                        let total = 0;
+                                        tooltipItems.forEach(item => {
+                                            total += item.parsed.x;
+                                        });
+                                        return 'Total: ' + total;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: true,
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1,
+                                    font: {
+                                        size: 11
+                                    }
+                                },
+                                grid: {
+                                    display: true,
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                }
+                            },
+                            y: {
+                                stacked: true,
+                                ticks: {
+                                    font: {
+                                        size: 11
+                                    },
+                                    autoSkip: false
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                console.log('📊 Chart 6 - Ranking de Check-in gerado!');
+            }
 
             async function generateChart5_CheckinAttendance(escalas) {
                 try {
