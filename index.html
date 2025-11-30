@@ -1089,6 +1089,16 @@
                     </div>
                 </button>
 
+                <button id="menu-checkin-btn" class="w-full flex items-center gap-3 p-4 rounded-lg hover:bg-gray-100 transition text-left" style="display: none;">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <div>
+                        <p class="font-semibold text-gray-800">Check-in de Voluntários</p>
+                        <p class="text-xs text-gray-600">Marcar presença/ausência</p>
+                    </div>
+                </button>
+
                 <button id="menu-admin-btn" class="w-full flex items-center gap-3 p-4 rounded-lg hover:bg-gray-100 transition text-left" style="display: none;">
                     <svg class="w-6 h-6" style="color: #151b29;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -5545,6 +5555,16 @@
             async function generateChart6_CheckinRanking(escalas) {
                 console.log('📊 Chart 6 - Total de escalas recebidas:', escalas.length);
                 
+                // Filtrar escalas com check-in primeiro
+                const escalasWithCheckin = escalas.filter(e => e.checkIn && (e.checkIn.status === 'present' || e.checkIn.status === 'absent'));
+                console.log('📊 Chart 6 - Escalas com check-in:', escalasWithCheckin.length);
+                console.log('📊 Chart 6 - Eventos com check-in:', escalasWithCheckin.map(e => ({
+                    userName: e.userName,
+                    date: e.date,
+                    time: e.time,
+                    status: e.checkIn?.status
+                })));
+                
                 // Contar check-ins por voluntário
                 const volunteerCheckins = {};
                 
@@ -5687,6 +5707,13 @@
                     
                     console.log('📊 Chart 5 - Total de escalas:', escalas.length);
                     console.log('📊 Chart 5 - Escalas com check-in:', escalasWithCheckin.length);
+                    console.log('📊 Chart 5 - Detalhes:', escalasWithCheckin.map(e => ({
+                        userName: e.userName,
+                        date: e.date,
+                        time: e.time,
+                        team: e.team,
+                        status: e.checkIn?.status
+                    })));
                     
                     // Agregar por time e armazenar detalhes
                     const teamStats = {
@@ -7307,9 +7334,16 @@
                             groupedByEvent[key].teams[escala.team].push(escala);
                         });
 
-                        // Pegar o primeiro evento (mais próximo)
-                        const firstEventKey = Object.keys(groupedByEvent).sort()[0];
-                        currentCheckinEvent = groupedByEvent[firstEventKey];
+                        // Pegar o evento mais recente (que já começou ou está mais próximo de agora)
+                        const sortedEvents = Object.entries(groupedByEvent).sort((a, b) => {
+                            return b[1].eventDateTime - a[1].eventDateTime; // Mais recente primeiro
+                        });
+                        
+                        // Pegar o evento que já começou, ou o mais próximo
+                        const eventToShow = sortedEvents.find(([key, event]) => event.eventDateTime <= now) || sortedEvents[0];
+                        currentCheckinEvent = eventToShow[1];
+                        
+                        console.log('🎯 Check-in: Evento selecionado:', currentCheckinEvent.date, currentCheckinEvent.time, currentCheckinEvent.eventName);
                         
                         openCheckinModal();
                     }
@@ -7485,4 +7519,3 @@
     </script>
 </body>
 </html>
-
