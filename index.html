@@ -1111,24 +1111,26 @@
                     </div>
                 </button>
 
-                <button id="menu-blocked-attempts-btn" class="w-full flex items-center gap-3 p-4 rounded-lg hover:bg-gray-100 transition text-left" style="display: none;">
+                <button id="menu-blocked-attempts-btn" class="w-full flex items-center gap-3 p-4 rounded-lg hover:bg-gray-100 transition text-left relative" style="display: none;">
                     <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                     </svg>
-                    <div>
+                    <div class="flex-1">
                         <p class="font-semibold text-gray-800">Tentativas Bloqueadas</p>
                         <p class="text-xs text-gray-600">Ver deleções bloqueadas</p>
                     </div>
+                    <span id="blocked-attempts-badge" class="hidden absolute top-2 right-2 bg-red-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">0</span>
                 </button>
 
-                <button id="menu-pending-escalas-btn" class="w-full flex items-center gap-3 p-4 rounded-lg hover:bg-gray-100 transition text-left" style="display: none;">
+                <button id="menu-pending-escalas-btn" class="w-full flex items-center gap-3 p-4 rounded-lg hover:bg-gray-100 transition text-left relative" style="display: none;">
                     <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    <div>
+                    <div class="flex-1">
                         <p class="font-semibold text-gray-800">Pendentes para servir</p>
                         <p class="text-xs text-gray-600">Aprovar ou negar escalas</p>
                     </div>
+                    <span id="pending-escalas-badge" class="hidden absolute top-2 right-2 bg-red-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">0</span>
                 </button>
 
                 <button id="install-app-btn" class="w-full flex items-center gap-3 p-4 rounded-lg hover:bg-gray-100 transition text-left" style="display: none;">
@@ -1188,9 +1190,14 @@
                 <div id="checkin-event-info" class="bg-blue-50 border-l-4 border-blue-500 p-3 rounded text-sm mb-4"></div>
                 <p class="text-sm text-gray-600 mb-4">Marque a presença dos voluntários:</p>
                 
-                <div id="checkin-teams-list" class="space-y-4">
+                <div id="checkin-teams-list" class="space-y-4 mb-6">
                     <!-- Times com voluntários serão inseridos aqui -->
                 </div>
+                
+                <!-- Botão Fechar no final -->
+                <button id="close-checkin-btn" class="w-full py-3 px-6 text-white font-bold rounded-lg transition hover:opacity-90" style="background-color: #151b29;">
+                    Fechar
+                </button>
             </div>
         </div>
     </div>
@@ -2279,6 +2286,8 @@
                         document.getElementById('menu-dashboard-btn').style.display = 'block';
                         document.getElementById('menu-blocked-attempts-btn').style.display = 'block';
                         document.getElementById('menu-pending-escalas-btn').style.display = 'block';
+                        updateBlockedAttemptsBadge(); // Atualizar badge
+                        updatePendingEscalasBadge(); // Atualizar badge
                         console.log('✅ Usuário É SUPER ADMINISTRADOR');
                         return true;
                     }
@@ -2296,6 +2305,8 @@
                             document.getElementById('menu-dashboard-btn').style.display = 'block';
                             document.getElementById('menu-blocked-attempts-btn').style.display = 'block';
                             document.getElementById('menu-pending-escalas-btn').style.display = 'block';
+                            updateBlockedAttemptsBadge(); // Atualizar badge
+                            updatePendingEscalasBadge(); // Atualizar badge
                             console.log('✅ Usuário É SUPER ADMINISTRADOR');
                             return true;
                         } else if (data.role === 'admin') {
@@ -2306,6 +2317,8 @@
                             document.getElementById('menu-dashboard-btn').style.display = 'block';
                             document.getElementById('menu-blocked-attempts-btn').style.display = 'block';
                             document.getElementById('menu-pending-escalas-btn').style.display = 'block';
+                            updateBlockedAttemptsBadge(); // Atualizar badge
+                            updatePendingEscalasBadge(); // Atualizar badge
                             console.log('✅ Usuário É ADMINISTRADOR');
                             return true;
                         } else {
@@ -3318,6 +3331,61 @@
                 );
             }
             
+            // Atualizar badge de tentativas bloqueadas no menu
+            async function updateBlockedAttemptsBadge() {
+                if (!isSuperAdmin && !isAdmin) return;
+                
+                try {
+                    const { collection, getDocs } = window.firestoreMethods || {};
+                    if (!collection || !getDocs) return;
+                    
+                    const querySnapshot = await getDocs(collection(window.firebaseDb, 'blockedAttempts'));
+                    const count = querySnapshot.size;
+                    
+                    const badge = document.getElementById('blocked-attempts-badge');
+                    if (badge) {
+                        if (count > 0) {
+                            badge.textContent = count;
+                            badge.classList.remove('hidden');
+                        } else {
+                            badge.classList.add('hidden');
+                        }
+                    }
+                } catch (error) {
+                    console.error('❌ Erro ao atualizar badge de tentativas bloqueadas:', error);
+                }
+            }
+            
+            // Atualizar badge de escalas pendentes no menu
+            async function updatePendingEscalasBadge() {
+                if (!isAdmin && !isSuperAdmin) return;
+                
+                try {
+                    const { collection, query, where, getDocs } = window.firestoreMethods || {};
+                    if (!collection || !query || !where || !getDocs) return;
+                    
+                    const q = query(
+                        collection(window.firebaseDb, 'escalas'),
+                        where('status', '==', 'pending')
+                    );
+                    
+                    const querySnapshot = await getDocs(q);
+                    const count = querySnapshot.size;
+                    
+                    const badge = document.getElementById('pending-escalas-badge');
+                    if (badge) {
+                        if (count > 0) {
+                            badge.textContent = count;
+                            badge.classList.remove('hidden');
+                        } else {
+                            badge.classList.add('hidden');
+                        }
+                    }
+                } catch (error) {
+                    console.error('❌ Erro ao atualizar badge de escalas pendentes:', error);
+                }
+            }
+            
             // Carregar tentativas bloqueadas (apenas superadmin)
             let blockedAttemptsUnsubscribe = null; // Guardar referência do listener
             
@@ -3456,6 +3524,17 @@
                 if (!listEl) {
                     console.error('❌ Elemento blocked-attempts-list não encontrado no render');
                     return;
+                }
+                
+                // Atualizar badge do menu
+                const badge = document.getElementById('blocked-attempts-badge');
+                if (badge) {
+                    if (attempts.length > 0) {
+                        badge.textContent = attempts.length;
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                    }
                 }
                 
                 if (attempts.length === 0) {
@@ -3623,6 +3702,17 @@
             // Renderizar lista de escalas pendentes
             function renderPendingEscalas(escalas) {
                 const listEl = document.getElementById('pending-escalas-list');
+                
+                // Atualizar badge do menu
+                const badge = document.getElementById('pending-escalas-badge');
+                if (badge) {
+                    if (escalas.length > 0) {
+                        badge.textContent = escalas.length;
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                    }
+                }
                 
                 if (escalas.length === 0) {
                     listEl.innerHTML = '<p class="text-gray-500 text-center py-8">✅ Não há escalas pendentes no momento.</p>';
@@ -4592,6 +4682,9 @@
                     });
                     
                     console.log('📋 Escalas encontradas:', escalas.length);
+                    
+                    // Armazenar escalas globalmente para atualização do gráfico
+                    window.currentDashboardEscalas = escalas;
                     
                     // Gerar dados dos gráficos
                     await generateChart1_TeamParticipation(escalas);
@@ -7154,6 +7247,11 @@
 
             function closeCheckinModal() {
                 document.getElementById('checkin-modal').classList.add('hidden');
+                
+                // Atualizar o gráfico de presença após fechar o modal
+                if (window.dashboardCharts && window.dashboardCharts.chart5 && window.currentDashboardEscalas) {
+                    generateChart5_CheckinAttendance(window.currentDashboardEscalas);
+                }
             }
 
             async function markCheckin(escalaId, status) {
@@ -7182,6 +7280,7 @@
 
             // Listeners do modal de check-in
             document.getElementById('close-checkin-modal')?.addEventListener('click', closeCheckinModal);
+            document.getElementById('close-checkin-btn')?.addEventListener('click', closeCheckinModal);
             
             // Listener do overlay para fechar ao clicar fora
             document.getElementById('checkin-modal')?.addEventListener('click', (e) => {
