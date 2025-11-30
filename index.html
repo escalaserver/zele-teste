@@ -754,6 +754,26 @@
         </div>
     </div>
 
+    <!-- Popup de Voluntários Únicos por Time (Gráfico 1) - Formato 9:16 -->
+    <div id="chart1-popup-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm relative" style="max-height: 90vh; aspect-ratio: 9/16; overflow-y: auto;">
+            <button id="chart1-popup-close" class="sticky top-4 right-4 float-right z-10 bg-white rounded-full p-2 shadow-lg text-gray-400 hover:text-gray-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+            
+            <div class="p-6">
+                <h3 class="text-xl font-bold mb-2" style="color: #151b29;" id="chart1-popup-title">Voluntários do Time</h3>
+                <p class="text-sm font-semibold text-blue-600 mb-4" id="chart1-popup-total"></p>
+                
+                <div class="space-y-2" id="chart1-popup-volunteers">
+                    <!-- Voluntários serão inseridos aqui -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal de Gerenciar Liderança de Times -->
     <div id="team-leader-modal" class="modal-overlay">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-6">
@@ -828,6 +848,26 @@
             <button id="confirm-transfer-btn" class="w-full zele-btn text-white font-bold py-3 px-6 rounded-lg">
                 ✅ Confirmar Transferência
             </button>
+        </div>
+    </div>
+
+    <!-- Popup de Presenças/Ausências (Gráfico 5) - Formato 9:16 -->
+    <div id="chart5-popup-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm relative" style="max-height: 90vh; aspect-ratio: 9/16; overflow-y: auto;">
+            <button id="chart5-popup-close" class="sticky top-4 right-4 float-right z-10 bg-white rounded-full p-2 shadow-lg text-gray-400 hover:text-gray-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+            
+            <div class="p-6">
+                <h3 class="text-xl font-bold mb-2" style="color: #151b29;" id="chart5-popup-title">Voluntários</h3>
+                <p class="text-sm font-semibold mb-4" id="chart5-popup-subtitle"></p>
+                
+                <div class="space-y-3" id="chart5-popup-list">
+                    <!-- Lista de voluntários será inserida aqui -->
+                </div>
+            </div>
         </div>
     </div>
 
@@ -3057,7 +3097,7 @@
                                         <h3 class="font-bold text-lg ${cardStyles.textStyle}">${cardStyles.teamDisplay}${eventNameDisplay}</h3>
                                         <p class="text-sm text-gray-600">📅 ${dateStr}</p>
                                         <p class="text-sm text-gray-600">🕐 ${timeStr}</p>
-                                        ${escala.teamChangeNotice ? `<p class="text-xs text-orange-600 mt-1">⚠️ ${escala.teamChangeNotice}</p>` : ''}
+                                        ${escala.teamChangeNotice ? `<p class="text-sm text-red-600 font-semibold mt-1">⚠️ ${escala.teamChangeNotice}</p>` : ''}
                                     </div>
                                 </div>
                                 ${canDelete ? `
@@ -4572,25 +4612,42 @@
             }
 
             // Gráfico 1: Participação por Time (voluntários únicos)
+            // Armazenar detalhes dos voluntários para o popup do Chart 1
+            window.chart1VolunteerDetails = {};
+
             async function generateChart1_TeamParticipation(escalas) {
                 const teamVolunteers = {
-                    welcome: new Set(),
-                    backstage: new Set(),
-                    parking: new Set(),
-                    kids: new Set()
+                    welcome: new Map(),
+                    backstage: new Map(),
+                    parking: new Map(),
+                    kids: new Map()
                 };
                 
-                // Adicionar userId único por time (Set garante unicidade)
+                // Adicionar userId único por time (Map armazena userId -> volunteer data)
                 escalas.forEach(escala => {
                     const team = escala.team?.toLowerCase();
-                    const userId = escala.userId || escala.userName; // Usar userId ou nome como fallback
+                    const userId = escala.userId;
                     
                     if (teamVolunteers.hasOwnProperty(team) && userId) {
-                        teamVolunteers[team].add(userId);
+                        if (!teamVolunteers[team].has(userId)) {
+                            teamVolunteers[team].set(userId, {
+                                name: escala.userName || 'Sem nome',
+                                email: escala.userEmail || '',
+                                photo: escala.userPhoto || 'Zele logo.png'
+                            });
+                        }
                     }
                 });
                 
-                // Converter Sets para contagem
+                // Armazenar detalhes para o popup
+                window.chart1VolunteerDetails = {
+                    welcome: Array.from(teamVolunteers.welcome.values()),
+                    backstage: Array.from(teamVolunteers.backstage.values()),
+                    parking: Array.from(teamVolunteers.parking.values()),
+                    kids: Array.from(teamVolunteers.kids.values())
+                };
+                
+                // Converter Maps para contagem
                 const teamCount = {
                     welcome: teamVolunteers.welcome.size,
                     backstage: teamVolunteers.backstage.size,
@@ -4642,6 +4699,16 @@
                                     stepSize: 1
                                 }
                             }
+                        },
+                        onClick: (event, activeElements) => {
+                            if (activeElements.length > 0) {
+                                const index = activeElements[0].index;
+                                showChart1Popup(index);
+                            }
+                        },
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
                         }
                     }
                 });
@@ -4649,20 +4716,41 @@
 
             // Gráfico 2: Ranking de Voluntários com mais Escalas
             async function generateChart2_TopVolunteers(escalas) {
-                const volunteerCount = {};
+                // Contar escalas por voluntário e por time
+                const volunteerTeamCount = {};
                 
                 escalas.forEach(escala => {
                     const name = escala.userName || 'Desconhecido';
-                    volunteerCount[name] = (volunteerCount[name] || 0) + 1;
+                    const team = escala.team?.toLowerCase();
+                    
+                    if (!volunteerTeamCount[name]) {
+                        volunteerTeamCount[name] = {
+                            total: 0,
+                            welcome: 0,
+                            backstage: 0,
+                            parking: 0,
+                            kids: 0
+                        };
+                    }
+                    
+                    volunteerTeamCount[name].total++;
+                    if (team && volunteerTeamCount[name].hasOwnProperty(team)) {
+                        volunteerTeamCount[name][team]++;
+                    }
                 });
                 
-                // Ordenar e pegar top 10
-                const sorted = Object.entries(volunteerCount)
-                    .sort((a, b) => b[1] - a[1])
+                // Ordenar por total e pegar top 10
+                const sorted = Object.entries(volunteerTeamCount)
+                    .sort((a, b) => b[1].total - a[1].total)
                     .slice(0, 10);
                 
                 const labels = sorted.map(item => item[0]);
-                const data = sorted.map(item => item[1]);
+                
+                // Preparar datasets por time (do menor para o maior na barra)
+                const welcomeData = sorted.map(item => item[1].welcome);
+                const backstageData = sorted.map(item => item[1].backstage);
+                const parkingData = sorted.map(item => item[1].parking);
+                const kidsData = sorted.map(item => item[1].kids);
                 
                 const ctx = document.getElementById('chart-volunteers');
                 
@@ -4674,13 +4762,36 @@
                     type: 'bar',
                     data: {
                         labels: labels,
-                        datasets: [{
-                            label: 'Escalas Participadas',
-                            data: data,
-                            backgroundColor: 'rgba(34, 197, 94, 0.7)',
-                            borderColor: 'rgba(34, 197, 94, 1)',
-                            borderWidth: 2
-                        }]
+                        datasets: [
+                            {
+                                label: '👋 Welcome',
+                                data: welcomeData,
+                                backgroundColor: 'rgba(55, 125, 184, 0.8)',
+                                borderColor: 'rgba(55, 125, 184, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: '🤝 Backstage',
+                                data: backstageData,
+                                backgroundColor: 'rgba(128, 128, 128, 0.8)',
+                                borderColor: 'rgba(128, 128, 128, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: '🚗 Parking',
+                                data: parkingData,
+                                backgroundColor: 'rgba(248, 113, 113, 0.8)',
+                                borderColor: 'rgba(248, 113, 113, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: '👶 Kids',
+                                data: kidsData,
+                                backgroundColor: 'rgba(251, 191, 36, 0.8)',
+                                borderColor: 'rgba(251, 191, 36, 1)',
+                                borderWidth: 1
+                            }
+                        ]
                     },
                     options: {
                         responsive: true,
@@ -4688,15 +4799,43 @@
                         indexAxis: 'y', // Horizontal
                         plugins: {
                             legend: {
-                                display: false
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    boxWidth: 15,
+                                    padding: 10,
+                                    font: {
+                                        size: 11
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.dataset.label || '';
+                                        const value = context.parsed.x;
+                                        return value > 0 ? `${label}: ${value}` : null;
+                                    },
+                                    footer: function(tooltipItems) {
+                                        let total = 0;
+                                        tooltipItems.forEach(item => {
+                                            total += item.parsed.x;
+                                        });
+                                        return `Total: ${total} escalas`;
+                                    }
+                                }
                             }
                         },
                         scales: {
                             x: {
+                                stacked: true,
                                 beginAtZero: true,
                                 ticks: {
                                     stepSize: 1
                                 }
+                            },
+                            y: {
+                                stacked: true
                             }
                         }
                     }
@@ -5115,6 +5254,118 @@
                 }
             });
 
+            // Função para mostrar popup com voluntários únicos do time (Gráfico 1)
+            function showChart1Popup(index) {
+                const teams = ['welcome', 'backstage', 'parking', 'kids'];
+                const teamNames = ['👋 Welcome', '🤝 Backstage', '🚗 Parking', '👶 Kids'];
+                const teamColors = ['text-blue-600', 'text-gray-600', 'text-red-600', 'text-yellow-600'];
+                
+                const teamKey = teams[index];
+                const volunteers = window.chart1VolunteerDetails[teamKey] || [];
+                
+                // Preencher título
+                document.getElementById('chart1-popup-title').textContent = teamNames[index];
+                document.getElementById('chart1-popup-total').textContent = `👥 Total: ${volunteers.length} voluntário${volunteers.length !== 1 ? 's' : ''} único${volunteers.length !== 1 ? 's' : ''}`;
+                
+                // Preencher lista de voluntários
+                const volunteersContainer = document.getElementById('chart1-popup-volunteers');
+                
+                if (volunteers.length === 0) {
+                    volunteersContainer.innerHTML = '<p class="text-center text-gray-500 py-4">Nenhum voluntário neste time.</p>';
+                } else {
+                    // Ordenar por nome
+                    const sortedVolunteers = volunteers.sort((a, b) => a.name.localeCompare(b.name));
+                    
+                    volunteersContainer.innerHTML = sortedVolunteers.map(v => `
+                        <div class="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                            <img src="${v.photo}" alt="${v.name}" class="w-10 h-10 rounded-full object-cover flex-shrink-0" onerror="this.src='Zele logo.png'">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-semibold text-gray-800 truncate">${v.name}</p>
+                                ${v.email ? `<p class="text-xs text-gray-600 truncate">${v.email}</p>` : ''}
+                            </div>
+                        </div>
+                    `).join('');
+                }
+                
+                // Mostrar popup
+                document.getElementById('chart1-popup-overlay').classList.remove('hidden');
+            }
+            
+            // Event listeners do popup do Gráfico 1
+            document.getElementById('chart1-popup-close').addEventListener('click', () => {
+                document.getElementById('chart1-popup-overlay').classList.add('hidden');
+            });
+            
+            document.getElementById('chart1-popup-overlay').addEventListener('click', (e) => {
+                if (e.target.id === 'chart1-popup-overlay') {
+                    document.getElementById('chart1-popup-overlay').classList.add('hidden');
+                }
+            });
+
+            // Função para mostrar popup de presença/ausência (Gráfico 5)
+            function showChart5Popup(teamIndex, status) {
+                const teams = ['welcome', 'backstage', 'parking', 'kids'];
+                const teamNames = ['👋 Welcome', '🤝 Backstage', '🚗 Parking', '👶 Kids'];
+                
+                const teamKey = teams[teamIndex];
+                const volunteers = window.chart5AttendanceDetails[teamKey]?.[status] || [];
+                
+                const statusLabel = status === 'present' ? '✅ Presentes' : '❌ Ausentes';
+                const statusColor = status === 'present' ? 'text-green-600' : 'text-red-600';
+                
+                // Preencher título
+                document.getElementById('chart5-popup-title').textContent = teamNames[teamIndex];
+                document.getElementById('chart5-popup-subtitle').innerHTML = `<span class="${statusColor}">${statusLabel}</span> - ${volunteers.length} voluntário${volunteers.length !== 1 ? 's' : ''}`;
+                
+                // Preencher lista
+                const listContainer = document.getElementById('chart5-popup-list');
+                
+                if (volunteers.length === 0) {
+                    listContainer.innerHTML = '<p class="text-center text-gray-500 py-4">Nenhum registro encontrado.</p>';
+                } else {
+                    // Ordenar por data (mais recente primeiro) e depois por nome
+                    const sortedVolunteers = volunteers.sort((a, b) => {
+                        const dateCompare = b.date.localeCompare(a.date);
+                        if (dateCompare !== 0) return dateCompare;
+                        return a.name.localeCompare(b.name);
+                    });
+                    
+                    listContainer.innerHTML = sortedVolunteers.map(v => {
+                        const dateObj = new Date(v.date + 'T00:00:00');
+                        const formattedDate = dateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+                        const checkedDate = v.checkedAt ? new Date(v.checkedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+                        
+                        return `
+                            <div class="bg-white border border-gray-200 rounded-lg p-3">
+                                <div class="flex items-start gap-3 mb-2">
+                                    <img src="${v.photo}" alt="${v.name}" class="w-10 h-10 rounded-full object-cover flex-shrink-0" onerror="this.src='Zele logo.png'">
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-semibold text-gray-800 truncate">${v.name}</p>
+                                        <p class="text-xs text-gray-600">📅 ${formattedDate} - ${v.time}</p>
+                                        <p class="text-xs text-gray-500 truncate">${v.eventName}</p>
+                                    </div>
+                                </div>
+                                ${checkedDate ? `<p class="text-xs text-gray-400 mt-1">Registrado por ${v.checkedBy} em ${checkedDate}</p>` : ''}
+                            </div>
+                        `;
+                    }).join('');
+                }
+                
+                // Mostrar popup
+                document.getElementById('chart5-popup-overlay').classList.remove('hidden');
+            }
+            
+            // Event listeners do popup do Gráfico 5
+            document.getElementById('chart5-popup-close').addEventListener('click', () => {
+                document.getElementById('chart5-popup-overlay').classList.add('hidden');
+            });
+            
+            document.getElementById('chart5-popup-overlay').addEventListener('click', (e) => {
+                if (e.target.id === 'chart5-popup-overlay') {
+                    document.getElementById('chart5-popup-overlay').classList.add('hidden');
+                }
+            });
+
             // Função para configurar navegação dos gráficos
             function setupChartNavigation() {
                 // Navegação do Gráfico 3 (Quantidade de Voluntários por Dia)
@@ -5173,6 +5424,9 @@
             }
 
             // Gráfico 5: Presença vs Ausência por Time
+            // Armazenar detalhes de presença para o popup do Chart 5
+            window.chart5AttendanceDetails = {};
+
             async function generateChart5_CheckinAttendance(escalas) {
                 try {
                     // Filtrar apenas escalas com check-in registrado
@@ -5180,7 +5434,7 @@
                         escala.checkIn && (escala.checkIn.status === 'present' || escala.checkIn.status === 'absent')
                     );
                     
-                    // Agregar por time
+                    // Agregar por time e armazenar detalhes
                     const teamStats = {
                         welcome: { present: 0, absent: 0 },
                         backstage: { present: 0, absent: 0 },
@@ -5188,16 +5442,39 @@
                         kids: { present: 0, absent: 0 }
                     };
                     
+                    const teamDetails = {
+                        welcome: { present: [], absent: [] },
+                        backstage: { present: [], absent: [] },
+                        parking: { present: [], absent: [] },
+                        kids: { present: [], absent: [] }
+                    };
+                    
                     escalasWithCheckin.forEach(escala => {
                         const team = escala.team?.toLowerCase();
                         if (teamStats.hasOwnProperty(team)) {
-                            if (escala.checkIn.status === 'present') {
+                            const status = escala.checkIn.status;
+                            const volunteerData = {
+                                name: escala.userName || 'Sem nome',
+                                photo: escala.userPhoto || 'Zele logo.png',
+                                date: escala.date,
+                                time: escala.time,
+                                eventName: escala.eventName || 'Evento',
+                                checkedBy: escala.checkIn.checkedByName || 'Sistema',
+                                checkedAt: escala.checkIn.checkedAt
+                            };
+                            
+                            if (status === 'present') {
                                 teamStats[team].present++;
-                            } else if (escala.checkIn.status === 'absent') {
+                                teamDetails[team].present.push(volunteerData);
+                            } else if (status === 'absent') {
                                 teamStats[team].absent++;
+                                teamDetails[team].absent.push(volunteerData);
                             }
                         }
                     });
+                    
+                    // Armazenar detalhes para o popup
+                    window.chart5AttendanceDetails = teamDetails;
                     
                     const ctx = document.getElementById('chart-attendance');
                     
@@ -5270,6 +5547,18 @@
                                         stepSize: 1
                                     }
                                 }
+                            },
+                            onClick: (event, activeElements) => {
+                                if (activeElements.length > 0) {
+                                    const teamIndex = activeElements[0].index;
+                                    const datasetIndex = activeElements[0].datasetIndex;
+                                    const status = datasetIndex === 0 ? 'present' : 'absent';
+                                    showChart5Popup(teamIndex, status);
+                                }
+                            },
+                            interaction: {
+                                mode: 'nearest',
+                                intersect: true
                             }
                         }
                     });
@@ -5859,20 +6148,21 @@
                         return;
                     }
                     
-                    // Atualizar time do voluntário
-                    await updateDoc(escalaRef, {
-                        team: selectedTeam,
-                        updatedAt: new Date().toISOString(),
-                        transferredBy: currentUser.email,
-                        transferredAt: new Date().toISOString()
-                    });
-                    
                     const teamNames = {
                         welcome: 'Welcome',
                         backstage: 'Backstage',
                         parking: 'Parking',
                         kids: 'Kids'
                     };
+                    
+                    // Atualizar time do voluntário com aviso de mudança
+                    await updateDoc(escalaRef, {
+                        team: selectedTeam,
+                        updatedAt: new Date().toISOString(),
+                        transferredBy: currentUser.email,
+                        transferredAt: new Date().toISOString(),
+                        teamChangeNotice: `Foi necessário mudar você do time ${teamNames[currentTransferData.currentTeam]} para ${teamNames[selectedTeam]} para uma melhor organização dos times.`
+                    });
                     
                     document.getElementById('transfer-volunteer-modal').classList.remove('show');
                     currentTransferData = null;
@@ -6691,7 +6981,10 @@
             }
 
             // Listeners do modal
-            document.getElementById('menu-block-dates-btn')?.addEventListener('click', openBlockedDatesModal);
+            document.getElementById('menu-block-dates-btn')?.addEventListener('click', () => {
+                document.getElementById('menu-overlay').classList.add('hidden');
+                openBlockedDatesModal();
+            });
             document.getElementById('close-blocked-dates-modal')?.addEventListener('click', closeBlockedDatesModal);
             document.getElementById('close-blocked-dates-btn')?.addEventListener('click', closeBlockedDatesModal);
             document.getElementById('add-blocked-date-btn')?.addEventListener('click', async ()=>{
@@ -6808,10 +7101,11 @@
                             <div class="space-y-2">
                                 ${volunteers.map(v => {
                                     const checkInStatus = v.checkIn?.status || 'pending';
+                                    const photoUrl = v.userPhoto || 'Zele logo.png';
                                     return `
                                         <div class="flex items-center justify-between bg-white p-2 rounded border">
                                             <div class="flex items-center gap-2">
-                                                <img src="${v.userPhoto || 'https://via.placeholder.com/32'}" alt="${v.userName}" class="w-8 h-8 rounded-full">
+                                                <img src="${photoUrl}" alt="${v.userName}" class="w-8 h-8 rounded-full object-cover" onerror="this.src='Zele logo.png'">
                                                 <span class="font-medium text-sm">${v.userName}</span>
                                                 ${checkInStatus === 'present' ? '<span class="text-xs text-green-600 font-semibold">✓ Presente</span>' : ''}
                                                 ${checkInStatus === 'absent' ? '<span class="text-xs text-red-600 font-semibold">✗ Ausente</span>' : ''}
