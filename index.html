@@ -5543,6 +5543,8 @@
 
             // Gráfico 6: Ranking de Voluntários - Check-in vs Ausência
             async function generateChart6_CheckinRanking(escalas) {
+                console.log('📊 Chart 6 - Total de escalas recebidas:', escalas.length);
+                
                 // Contar check-ins por voluntário
                 const volunteerCheckins = {};
                 
@@ -5568,10 +5570,15 @@
                 });
                 
                 // Filtrar apenas voluntários com check-ins e ordenar por total
+                const totalVolunteersWithCheckin = Object.entries(volunteerCheckins).filter(item => item[1].total > 0).length;
+                console.log('📊 Chart 6 - Voluntários com check-in:', totalVolunteersWithCheckin);
+                
                 const sorted = Object.entries(volunteerCheckins)
                     .filter(item => item[1].total > 0)
                     .sort((a, b) => b[1].total - a[1].total)
                     .slice(0, 10);
+                    
+                console.log('📊 Chart 6 - Top 10:', sorted.map(v => `${v[0]}: ${v[1].present} presentes, ${v[1].absent} ausentes`));
                 
                 const labels = sorted.map(item => item[0]);
                 const presentData = sorted.map(item => item[1].present);
@@ -5677,6 +5684,9 @@
                     const escalasWithCheckin = escalas.filter(escala => 
                         escala.checkIn && (escala.checkIn.status === 'present' || escala.checkIn.status === 'absent')
                     );
+                    
+                    console.log('📊 Chart 5 - Total de escalas:', escalas.length);
+                    console.log('📊 Chart 5 - Escalas com check-in:', escalasWithCheckin.length);
                     
                     // Agregar por time e armazenar detalhes
                     const teamStats = {
@@ -7475,3 +7485,4 @@
     </script>
 </body>
 </html>
+
