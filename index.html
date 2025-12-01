@@ -7453,10 +7453,10 @@
                 try {
                     const { collection, query, where, getDocs } = window.firestoreMethods;
                     const now = new Date();
-                    const oneHourBefore = new Date(now.getTime() - (60 * 60 * 1000));
-                    const oneHalfHourAfter = new Date(now.getTime() + (90 * 60 * 1000));
+                    const twoHoursBefore = new Date(now.getTime() - (2 * 60 * 60 * 1000));
+                    const threeHoursAfter = new Date(now.getTime() + (3 * 60 * 60 * 1000));
 
-                    console.log('🔍 Check-in: Buscando eventos entre', oneHourBefore, 'e', oneHalfHourAfter);
+                    console.log('🔍 Check-in: Buscando eventos entre', twoHoursBefore, 'e', threeHoursAfter);
 
                     // Buscar escalas dos times que lidera
                     const escalasRef = collection(window.firebaseDb, 'escalas');
@@ -7468,11 +7468,11 @@
                         const escala = { id: doc.id, ...doc.data() };
                         const eventDateTime = new Date(escala.date + 'T' + escala.time);
                         
-                        // Verificar se está na janela: 1h antes até 1:30h depois
-                        const oneHourBeforeEvent = new Date(eventDateTime.getTime() - (60 * 60 * 1000));
-                        const oneHalfHourAfterEvent = new Date(eventDateTime.getTime() + (90 * 60 * 1000));
+                        // Verificar se está na janela: 2h antes até 3h depois
+                        const twoHoursBeforeEvent = new Date(eventDateTime.getTime() - (2 * 60 * 60 * 1000));
+                        const threeHoursAfterEvent = new Date(eventDateTime.getTime() + (3 * 60 * 60 * 1000));
 
-                        if (now >= oneHourBeforeEvent && now <= oneHalfHourAfterEvent) {
+                        if (now >= twoHoursBeforeEvent && now <= threeHoursAfterEvent) {
                             eventsInWindow.push({ ...escala, eventDateTime });
                         }
                     });
