@@ -1072,8 +1072,8 @@
                 <div class="border border-gray-200 rounded-lg overflow-hidden">
                     <button id="toggle-my-menu" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition">
                         <span class="font-semibold text-gray-800">👤 Meu Menu</span>
-                        <svg class="w-5 h-5 transform transition-transform rotate-180" id="my-menu-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        <svg class="w-5 h-5 transform transition-transform" id="my-menu-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                         </svg>
                     </button>
                     <div id="my-menu-items" class="hidden bg-white">
@@ -1124,8 +1124,8 @@
                 <div id="leadership-menu-group" class="border border-gray-200 rounded-lg overflow-hidden" style="display: none;">
                     <button id="toggle-leadership-menu" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition">
                         <span class="font-semibold text-gray-800">👑 Menu da Liderança</span>
-                        <svg class="w-5 h-5 transform transition-transform rotate-180" id="leadership-menu-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        <svg class="w-5 h-5 transform transition-transform" id="leadership-menu-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                         </svg>
                     </button>
                     <div id="leadership-menu-items" class="hidden bg-white">
@@ -1870,38 +1870,38 @@
             const myMenuItems = document.getElementById('my-menu-items');
             const myMenuArrow = document.getElementById('my-menu-arrow');
 
+            // Grupo 2: Menu da Liderança
+            const toggleLeadershipMenu = document.getElementById('toggle-leadership-menu');
+            const leadershipMenuItems = document.getElementById('leadership-menu-items');
+            const leadershipMenuArrow = document.getElementById('leadership-menu-arrow');
+
             if (toggleMyMenu) {
                 toggleMyMenu.addEventListener('click', () => {
                     const isExpanding = myMenuItems.classList.contains('hidden');
                     
                     // Se estiver expandindo o grupo 1, retrair o grupo 2
-                    if (isExpanding) {
+                    if (isExpanding && leadershipMenuItems) {
                         leadershipMenuItems.classList.add('hidden');
-                        leadershipMenuArrow.classList.add('rotate-180');
+                        leadershipMenuArrow.classList.remove('rotate-90');
                     }
                     
                     myMenuItems.classList.toggle('hidden');
-                    myMenuArrow.classList.toggle('rotate-180');
+                    myMenuArrow.classList.toggle('rotate-90');
                 });
             }
-
-            // Grupo 2: Menu da Liderança
-            const toggleLeadershipMenu = document.getElementById('toggle-leadership-menu');
-            const leadershipMenuItems = document.getElementById('leadership-menu-items');
-            const leadershipMenuArrow = document.getElementById('leadership-menu-arrow');
 
             if (toggleLeadershipMenu) {
                 toggleLeadershipMenu.addEventListener('click', () => {
                     const isExpanding = leadershipMenuItems.classList.contains('hidden');
                     
                     // Se estiver expandindo o grupo 2, retrair o grupo 1
-                    if (isExpanding) {
+                    if (isExpanding && myMenuItems) {
                         myMenuItems.classList.add('hidden');
-                        myMenuArrow.classList.add('rotate-180');
+                        myMenuArrow.classList.remove('rotate-90');
                     }
                     
                     leadershipMenuItems.classList.toggle('hidden');
-                    leadershipMenuArrow.classList.toggle('rotate-180');
+                    leadershipMenuArrow.classList.toggle('rotate-90');
                 });
             }
 
