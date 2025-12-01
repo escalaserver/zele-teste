@@ -7494,23 +7494,31 @@
 
                     console.log(`✅ Check-in registrado: ${escalaId} = ${status}`);
                     
-                    // Atualizar visualmente o botão clicado
-                    const buttons = document.querySelectorAll(`[data-escala-id="${escalaId}"]`);
-                    buttons.forEach(btn => {
-                        if (status === 'present') {
+                    // Atualizar visualmente os botões - resetar ambos primeiro
+                    const allButtons = document.querySelectorAll(`[data-escala-id="${escalaId}"]`);
+                    
+                    // Resetar todos os botões dessa escala
+                    allButtons.forEach(btn => {
+                        btn.classList.remove('bg-green-100', 'border-2', 'border-green-600', 'bg-red-100', 'border-red-600');
+                        btn.classList.add('bg-gray-200', 'hover:bg-gray-300');
+                        btn.disabled = false;
+                    });
+                    
+                    // Aplicar estilo apenas ao botão correspondente ao status
+                    allButtons.forEach(btn => {
+                        const btnText = btn.textContent.toLowerCase();
+                        
+                        if (status === 'present' && btnText.includes('presente')) {
                             btn.classList.remove('bg-gray-200', 'hover:bg-gray-300');
                             btn.classList.add('bg-green-100', 'border-2', 'border-green-600');
-                            if (btn.textContent.includes('Presente')) {
-                                btn.innerHTML = '✅ Presente';
-                            }
-                        } else {
+                            btn.innerHTML = '✅ Presente';
+                            btn.disabled = true;
+                        } else if (status === 'absent' && btnText.includes('ausente')) {
                             btn.classList.remove('bg-gray-200', 'hover:bg-gray-300');
                             btn.classList.add('bg-red-100', 'border-2', 'border-red-600');
-                            if (btn.textContent.includes('Ausente')) {
-                                btn.innerHTML = '❌ Ausente';
-                            }
+                            btn.innerHTML = '❌ Ausente';
+                            btn.disabled = true;
                         }
-                        btn.disabled = true;
                     });
                 } catch (error) {
                     console.error('❌ Erro ao registrar check-in:', error);
