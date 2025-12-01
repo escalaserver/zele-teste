@@ -1072,11 +1072,11 @@
                 <div class="border border-gray-200 rounded-lg overflow-hidden">
                     <button id="toggle-my-menu" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition">
                         <span class="font-semibold text-gray-800">👤 Meu Menu</span>
-                        <svg class="w-5 h-5 transform transition-transform" id="my-menu-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 transform transition-transform rotate-180" id="my-menu-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
-                    <div id="my-menu-items" class="bg-white">
+                    <div id="my-menu-items" class="hidden bg-white">
                         <button id="menu-upcoming-events-btn" class="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition text-left relative border-b border-gray-100">
                             <svg class="w-6 h-6" style="color: #151b29;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
@@ -1124,7 +1124,7 @@
                 <div id="leadership-menu-group" class="border border-gray-200 rounded-lg overflow-hidden" style="display: none;">
                     <button id="toggle-leadership-menu" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition">
                         <span class="font-semibold text-gray-800">👑 Menu da Liderança</span>
-                        <svg class="w-5 h-5 transform transition-transform" id="leadership-menu-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 transform transition-transform rotate-180" id="leadership-menu-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
@@ -1865,13 +1865,21 @@
             // CONTROLE DOS GRUPOS EXPANSÍVEIS DO MENU
             // ===================================
 
-            // Grupo 1: Meu Menu (sempre aberto por padrão)
+            // Grupo 1: Meu Menu
             const toggleMyMenu = document.getElementById('toggle-my-menu');
             const myMenuItems = document.getElementById('my-menu-items');
             const myMenuArrow = document.getElementById('my-menu-arrow');
 
             if (toggleMyMenu) {
                 toggleMyMenu.addEventListener('click', () => {
+                    const isExpanding = myMenuItems.classList.contains('hidden');
+                    
+                    // Se estiver expandindo o grupo 1, retrair o grupo 2
+                    if (isExpanding) {
+                        leadershipMenuItems.classList.add('hidden');
+                        leadershipMenuArrow.classList.add('rotate-180');
+                    }
+                    
                     myMenuItems.classList.toggle('hidden');
                     myMenuArrow.classList.toggle('rotate-180');
                 });
@@ -1884,6 +1892,14 @@
 
             if (toggleLeadershipMenu) {
                 toggleLeadershipMenu.addEventListener('click', () => {
+                    const isExpanding = leadershipMenuItems.classList.contains('hidden');
+                    
+                    // Se estiver expandindo o grupo 2, retrair o grupo 1
+                    if (isExpanding) {
+                        myMenuItems.classList.add('hidden');
+                        myMenuArrow.classList.add('rotate-180');
+                    }
+                    
                     leadershipMenuItems.classList.toggle('hidden');
                     leadershipMenuArrow.classList.toggle('rotate-180');
                 });
