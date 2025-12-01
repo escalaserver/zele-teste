@@ -4692,34 +4692,31 @@
                     console.log('📅 dateTo ISO:', dateTo.toISOString().split('T')[0]);
                     
                     // Buscar todas as escalas no período
-                    const { collection, query, where, getDocs } = window.firestoreMethods;
+                    const { collection, getDocs } = window.firestoreMethods;
                     const escalasRef = collection(window.firebaseDb, 'escalas');
                     
-                    const q = query(
-                        escalasRef,
-                        where('date', '>=', dateFrom.toISOString().split('T')[0]),
-                        where('date', '<=', dateTo.toISOString().split('T')[0])
-                    );
-                    
-                    const querySnapshot = await getDocs(escalasRef); // Buscar todas e filtrar no cliente
+                    // Buscar TODAS as escalas e filtrar no cliente (sem query where)
+                    const querySnapshot = await getDocs(escalasRef);
                     console.log('📊 Total de documentos no Firestore:', querySnapshot.size);
                     
                     const escalas = [];
+                    const dateFromStr = dateFrom.toISOString().split('T')[0];
+                    const dateToStr = dateTo.toISOString().split('T')[0];
+                    
+                    console.log('📊 Filtrando escalas entre:', dateFromStr, 'e', dateToStr);
                     
                     querySnapshot.forEach(doc => {
                         const data = doc.data();
-                        // Comparar strings de data diretamente (formato YYYY-MM-DD)
-                        const dateFromStr = dateFrom.toISOString().split('T')[0];
-                        const dateToStr = dateTo.toISOString().split('T')[0];
-                        
-                        console.log('🔍 Escala:', data.date, '- Entre', dateFromStr, 'e', dateToStr, '?', data.date >= dateFromStr && data.date <= dateToStr);
                         
                         if (data.date >= dateFromStr && data.date <= dateToStr) {
                             escalas.push({ id: doc.id, ...data });
                         }
                     });
                     
-                    console.log('📋 Escalas encontradas:', escalas.length);
+                    console.log('📋 Escalas encontradas no período:', escalas.length);
+                    if (escalas.length === 0) {
+                        console.warn('⚠️ Nenhuma escala encontrada! Verifique se existem escalas no Firestore para este período.');
+                    }
                     
                     // Armazenar escalas globalmente para atualização do gráfico
                     window.currentDashboardEscalas = escalas;
