@@ -1068,110 +1068,136 @@
 
             <!-- Menu Items -->
             <div class="space-y-2">
-                <button id="menu-upcoming-events-btn" class="w-full flex items-center gap-3 p-4 rounded-lg hover:bg-gray-100 transition text-left relative">
-                    <svg class="w-6 h-6" style="color: #151b29;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                    </svg>
-                    <div class="flex-1">
-                        <p class="font-semibold text-gray-800">Próximos Eventos</p>
-                        <p class="text-xs text-gray-600">Suas escalas próximas</p>
-                    </div>
-                    <span id="upcoming-badge" class="hidden absolute top-3 right-3 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">0</span>
-                </button>
+                <!-- Grupo 1: Meu Menu -->
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <button id="toggle-my-menu" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition">
+                        <span class="font-semibold text-gray-800">👤 Meu Menu</span>
+                        <svg class="w-5 h-5 transform transition-transform" id="my-menu-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div id="my-menu-items" class="bg-white">
+                        <button id="menu-upcoming-events-btn" class="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition text-left relative border-b border-gray-100">
+                            <svg class="w-6 h-6" style="color: #151b29;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                            </svg>
+                            <div class="flex-1">
+                                <p class="font-semibold text-gray-800">Próximos Eventos</p>
+                                <p class="text-xs text-gray-600">Suas escalas próximas</p>
+                            </div>
+                            <span id="upcoming-badge" class="hidden absolute top-3 right-3 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">0</span>
+                        </button>
 
-                <button id="menu-block-dates-btn" class="w-full flex items-center gap-3 p-4 rounded-lg hover:bg-gray-100 transition text-left">
-                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3M5 21h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2zm0 0h14M7 11h10M7 15h6"/>
-                    </svg>
-                    <div>
-                        <p class="font-semibold text-gray-800">Bloqueio de Datas</p>
-                        <p class="text-xs text-gray-600">Marque quando não pode servir</p>
-                    </div>
-                </button>
+                        <button id="menu-block-dates-btn" class="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition text-left border-b border-gray-100">
+                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3M5 21h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2zm0 0h14M7 11h10M7 15h6"/>
+                            </svg>
+                            <div>
+                                <p class="font-semibold text-gray-800">Bloqueio de Datas</p>
+                                <p class="text-xs text-gray-600">Marque quando não pode servir</p>
+                            </div>
+                        </button>
 
-                <button id="menu-checkin-btn" class="w-full flex items-center gap-3 p-4 rounded-lg hover:bg-gray-100 transition text-left" style="display: none;">
-                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <div>
-                        <p class="font-semibold text-gray-800">Check-in de Voluntários</p>
-                        <p class="text-xs text-gray-600">Marcar presença/ausência</p>
-                    </div>
-                </button>
+                        <button id="install-app-btn" class="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition text-left border-b border-gray-100" style="display: none;">
+                            <svg class="w-6 h-6" style="color: #151b29;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                            <div>
+                                <p class="font-semibold text-gray-800">Instalar App</p>
+                                <p class="text-xs text-gray-600">Adicionar à tela inicial</p>
+                            </div>
+                        </button>
 
-                <button id="menu-admin-btn" class="w-full flex items-center gap-3 p-4 rounded-lg hover:bg-gray-100 transition text-left" style="display: none;">
-                    <svg class="w-6 h-6" style="color: #151b29;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
-                    <div>
-                        <p class="font-semibold text-gray-800">Datas dos Eventos</p>
-                        <p class="text-xs text-gray-600">Gerenciar datas disponíveis</p>
+                        <button id="menu-change-photo-btn" class="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition text-left">
+                            <svg class="w-6 h-6" style="color: #151b29;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            <div>
+                                <p class="font-semibold text-gray-800">Alterar Foto</p>
+                                <p class="text-xs text-gray-600">Escolher foto de perfil</p>
+                            </div>
+                        </button>
                     </div>
-                </button>
+                </div>
 
-                <button id="menu-manage-admins-btn" class="w-full flex items-center gap-3 p-4 rounded-lg hover:bg-gray-100 transition text-left" style="display: none;">
-                    <svg class="w-6 h-6" style="color: #151b29;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-                    </svg>
-                    <div>
-                        <p class="font-semibold text-gray-800">Gerenciar Acesso</p>
-                        <p class="text-xs text-gray-600">Gerenciar usuários e permissões</p>
+                <!-- Grupo 2: Menu da Liderança -->
+                <div id="leadership-menu-group" class="border border-gray-200 rounded-lg overflow-hidden" style="display: none;">
+                    <button id="toggle-leadership-menu" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition">
+                        <span class="font-semibold text-gray-800">👑 Menu da Liderança</span>
+                        <svg class="w-5 h-5 transform transition-transform" id="leadership-menu-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div id="leadership-menu-items" class="hidden bg-white">
+                        <button id="menu-dashboard-btn" class="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition text-left border-b border-gray-100">
+                            <svg class="w-6 h-6" style="color: #151b29;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                            <div>
+                                <p class="font-semibold text-gray-800">Dashboard</p>
+                                <p class="text-xs text-gray-600">Estatísticas e gráficos</p>
+                            </div>
+                        </button>
+
+                        <button id="menu-checkin-btn" class="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition text-left border-b border-gray-100">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <div>
+                                <p class="font-semibold text-gray-800">Check-in de Voluntários</p>
+                                <p class="text-xs text-gray-600">Marcar presença/ausência</p>
+                            </div>
+                        </button>
+
+                        <button id="menu-blocked-attempts-btn" class="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition text-left relative border-b border-gray-100">
+                            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                            <div class="flex-1">
+                                <p class="font-semibold text-gray-800">Tentativas Bloqueadas</p>
+                                <p class="text-xs text-gray-600">Ver deleções bloqueadas</p>
+                            </div>
+                            <span id="blocked-attempts-badge" class="hidden absolute top-2 right-2 bg-red-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">0</span>
+                        </button>
+
+                        <button id="menu-pending-escalas-btn" class="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition text-left relative border-b border-gray-100">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <div class="flex-1">
+                                <p class="font-semibold text-gray-800">Pendentes para servir</p>
+                                <p class="text-xs text-gray-600">Aprovar ou negar escalas</p>
+                            </div>
+                            <span id="pending-escalas-badge" class="hidden absolute top-2 right-2 bg-red-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">0</span>
+                        </button>
+
+                        <button id="menu-admin-btn" class="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition text-left">
+                            <svg class="w-6 h-6" style="color: #151b29;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            <div>
+                                <p class="font-semibold text-gray-800">Datas dos Eventos</p>
+                                <p class="text-xs text-gray-600">Gerenciar datas disponíveis</p>
+                            </div>
+                        </button>
                     </div>
-                </button>
+                </div>
 
-                <button id="menu-dashboard-btn" class="w-full flex items-center gap-3 p-4 rounded-lg hover:bg-gray-100 transition text-left" style="display: none;">
-                    <svg class="w-6 h-6" style="color: #151b29;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                    </svg>
-                    <div>
-                        <p class="font-semibold text-gray-800">Dashboard</p>
-                        <p class="text-xs text-gray-600">Estatísticas e gráficos</p>
-                    </div>
-                </button>
+                <!-- Grupo 3: Super Admin (Gerenciar Acesso) -->
+                <div id="superadmin-menu-group" class="border border-gray-200 rounded-lg overflow-hidden" style="display: none;">
+                    <button id="menu-manage-admins-btn" class="w-full flex items-center gap-3 p-4 bg-gray-50 hover:bg-gray-100 transition text-left">
+                        <svg class="w-6 h-6" style="color: #151b29;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                        </svg>
+                        <div>
+                            <p class="font-semibold text-gray-800">Gerenciar Acesso</p>
+                            <p class="text-xs text-gray-600">Gerenciar usuários e permissões</p>
+                        </div>
+                    </button>
+                </div>
 
-                <button id="menu-blocked-attempts-btn" class="w-full flex items-center gap-3 p-4 rounded-lg hover:bg-gray-100 transition text-left relative" style="display: none;">
-                    <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                    </svg>
-                    <div class="flex-1">
-                        <p class="font-semibold text-gray-800">Tentativas Bloqueadas</p>
-                        <p class="text-xs text-gray-600">Ver deleções bloqueadas</p>
-                    </div>
-                    <span id="blocked-attempts-badge" class="hidden absolute top-2 right-2 bg-red-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">0</span>
-                </button>
-
-                <button id="menu-pending-escalas-btn" class="w-full flex items-center gap-3 p-4 rounded-lg hover:bg-gray-100 transition text-left relative" style="display: none;">
-                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <div class="flex-1">
-                        <p class="font-semibold text-gray-800">Pendentes para servir</p>
-                        <p class="text-xs text-gray-600">Aprovar ou negar escalas</p>
-                    </div>
-                    <span id="pending-escalas-badge" class="hidden absolute top-2 right-2 bg-red-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">0</span>
-                </button>
-
-                <button id="install-app-btn" class="w-full flex items-center gap-3 p-4 rounded-lg hover:bg-gray-100 transition text-left" style="display: none;">
-                    <svg class="w-6 h-6" style="color: #151b29;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                    </svg>
-                    <div>
-                        <p class="font-semibold text-gray-800">Instalar App</p>
-                        <p class="text-xs text-gray-600">Adicionar à tela inicial</p>
-                    </div>
-                </button>
-
-                <button id="menu-change-photo-btn" class="w-full flex items-center gap-3 p-4 rounded-lg hover:bg-gray-100 transition text-left">
-                    <svg class="w-6 h-6" style="color: #151b29;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
-                    <div>
-                        <p class="font-semibold text-gray-800">Alterar Foto</p>
-                        <p class="text-xs text-gray-600">Escolher foto de perfil</p>
-                    </div>
-                </button>
-
-                <button id="menu-logout-btn" class="w-full flex items-center gap-3 p-4 rounded-lg hover:bg-gray-100 transition text-left">
+                <!-- Botão Sair (fora dos grupos) -->
+                <button id="menu-logout-btn" class="w-full flex items-center gap-3 p-4 rounded-lg hover:bg-gray-100 transition text-left border border-gray-200">
                     <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                     </svg>
@@ -1789,6 +1815,80 @@
                 });
             }
 
+            // Navegação para Próximos Eventos (volta para app-container)
+            const menuUpcomingEventsBtn = document.getElementById('menu-upcoming-events-btn');
+            if (menuUpcomingEventsBtn) {
+                menuUpcomingEventsBtn.addEventListener('click', () => {
+                    closeMenu();
+                    // Fechar todas as outras páginas e mostrar o app principal
+                    adminPage.classList.add('hidden');
+                    manageAdminsPage.classList.add('hidden');
+                    dashboardPage.classList.add('hidden');
+                    const blockedAttemptsPage = document.getElementById('blocked-attempts-page');
+                    if (blockedAttemptsPage) blockedAttemptsPage.classList.add('hidden');
+                    const pendingEscalasPage = document.getElementById('pending-escalas-page');
+                    if (pendingEscalasPage) pendingEscalasPage.classList.add('hidden');
+                    const checkinPage = document.getElementById('checkin-page');
+                    if (checkinPage) checkinPage.classList.add('hidden');
+                    appContainer.classList.remove('hidden');
+                    // Scroll até as escalas
+                    const escalasList = document.getElementById('escalas-list');
+                    if (escalasList) {
+                        setTimeout(() => {
+                            escalasList.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 100);
+                    }
+                });
+            }
+
+            // Navegação para Bloqueio de Datas (volta para app-container e foca no bloqueio)
+            const menuBlockDatesBtn = document.getElementById('menu-block-dates-btn');
+            if (menuBlockDatesBtn) {
+                menuBlockDatesBtn.addEventListener('click', () => {
+                    closeMenu();
+                    // Fechar todas as outras páginas e mostrar o app principal
+                    adminPage.classList.add('hidden');
+                    manageAdminsPage.classList.add('hidden');
+                    dashboardPage.classList.add('hidden');
+                    const blockedAttemptsPage = document.getElementById('blocked-attempts-page');
+                    if (blockedAttemptsPage) blockedAttemptsPage.classList.add('hidden');
+                    const pendingEscalasPage = document.getElementById('pending-escalas-page');
+                    if (pendingEscalasPage) pendingEscalasPage.classList.add('hidden');
+                    const checkinPage = document.getElementById('checkin-page');
+                    if (checkinPage) checkinPage.classList.add('hidden');
+                    appContainer.classList.remove('hidden');
+                    // Aqui poderia abrir um modal de bloqueio de datas se existir
+                });
+            }
+
+            // ===================================
+            // CONTROLE DOS GRUPOS EXPANSÍVEIS DO MENU
+            // ===================================
+
+            // Grupo 1: Meu Menu (sempre aberto por padrão)
+            const toggleMyMenu = document.getElementById('toggle-my-menu');
+            const myMenuItems = document.getElementById('my-menu-items');
+            const myMenuArrow = document.getElementById('my-menu-arrow');
+
+            if (toggleMyMenu) {
+                toggleMyMenu.addEventListener('click', () => {
+                    myMenuItems.classList.toggle('hidden');
+                    myMenuArrow.classList.toggle('rotate-180');
+                });
+            }
+
+            // Grupo 2: Menu da Liderança
+            const toggleLeadershipMenu = document.getElementById('toggle-leadership-menu');
+            const leadershipMenuItems = document.getElementById('leadership-menu-items');
+            const leadershipMenuArrow = document.getElementById('leadership-menu-arrow');
+
+            if (toggleLeadershipMenu) {
+                toggleLeadershipMenu.addEventListener('click', () => {
+                    leadershipMenuItems.classList.toggle('hidden');
+                    leadershipMenuArrow.classList.toggle('rotate-180');
+                });
+            }
+
             // ===================================
             // DETECÇÃO E INSTALAÇÃO PWA
             // ===================================
@@ -2304,11 +2404,16 @@
                         }
                         isAdmin = true;
                         isSuperAdmin = true;
+                        // Mostrar grupo de liderança e super admin
+                        document.getElementById('leadership-menu-group').style.display = 'block';
+                        document.getElementById('superadmin-menu-group').style.display = 'block';
+                        // Itens individuais dentro dos grupos
                         document.getElementById('menu-admin-btn').style.display = 'block';
                         document.getElementById('menu-manage-admins-btn').style.display = 'block';
                         document.getElementById('menu-dashboard-btn').style.display = 'block';
                         document.getElementById('menu-blocked-attempts-btn').style.display = 'block';
                         document.getElementById('menu-pending-escalas-btn').style.display = 'block';
+                        document.getElementById('menu-checkin-btn').style.display = 'block';
                         updateBlockedAttemptsBadge(); // Atualizar badge
                         updatePendingEscalasBadge(); // Atualizar badge
                         console.log('✅ Usuário É SUPER ADMINISTRADOR');
@@ -2323,11 +2428,16 @@
                         if (data.role === 'superadmin') {
                             isAdmin = true;
                             isSuperAdmin = true;
+                            // Mostrar grupo de liderança e super admin
+                            document.getElementById('leadership-menu-group').style.display = 'block';
+                            document.getElementById('superadmin-menu-group').style.display = 'block';
+                            // Itens individuais dentro dos grupos
                             document.getElementById('menu-admin-btn').style.display = 'block';
                             document.getElementById('menu-manage-admins-btn').style.display = 'block';
                             document.getElementById('menu-dashboard-btn').style.display = 'block';
                             document.getElementById('menu-blocked-attempts-btn').style.display = 'block';
                             document.getElementById('menu-pending-escalas-btn').style.display = 'block';
+                            document.getElementById('menu-checkin-btn').style.display = 'block';
                             updateBlockedAttemptsBadge(); // Atualizar badge
                             updatePendingEscalasBadge(); // Atualizar badge
                             console.log('✅ Usuário É SUPER ADMINISTRADOR');
@@ -2335,11 +2445,16 @@
                         } else if (data.role === 'admin') {
                             isAdmin = true;
                             isSuperAdmin = false;
+                            // Mostrar apenas grupo de liderança
+                            document.getElementById('leadership-menu-group').style.display = 'block';
+                            document.getElementById('superadmin-menu-group').style.display = 'none';
+                            // Itens individuais dentro do grupo de liderança
                             document.getElementById('menu-admin-btn').style.display = 'block';
                             document.getElementById('menu-manage-admins-btn').style.display = 'none'; // Admin não gerencia usuários
                             document.getElementById('menu-dashboard-btn').style.display = 'block';
                             document.getElementById('menu-blocked-attempts-btn').style.display = 'block';
                             document.getElementById('menu-pending-escalas-btn').style.display = 'block';
+                            document.getElementById('menu-checkin-btn').style.display = 'block';
                             updateBlockedAttemptsBadge(); // Atualizar badge
                             updatePendingEscalasBadge(); // Atualizar badge
                             console.log('✅ Usuário É ADMINISTRADOR');
@@ -2353,11 +2468,16 @@
                     
                     isAdmin = false;
                     isSuperAdmin = false;
+                    // Ocultar grupos de admin
+                    document.getElementById('leadership-menu-group').style.display = 'none';
+                    document.getElementById('superadmin-menu-group').style.display = 'none';
+                    // Ocultar itens individuais também
                     document.getElementById('menu-admin-btn').style.display = 'none';
                     document.getElementById('menu-manage-admins-btn').style.display = 'none';
                     document.getElementById('menu-dashboard-btn').style.display = 'none';
                     document.getElementById('menu-blocked-attempts-btn').style.display = 'none';
                     document.getElementById('menu-pending-escalas-btn').style.display = 'none';
+                    document.getElementById('menu-checkin-btn').style.display = 'none';
                     return false;
                 } catch (error) {
                     console.error('❌ Erro ao verificar admin:', error);
@@ -7539,10 +7659,24 @@
             
             // Menu button para abrir check-in
             document.getElementById('menu-checkin-btn')?.addEventListener('click', async () => {
-                document.getElementById('menu-overlay').classList.add('hidden');
-                await checkForCheckinEvents();
-                if (!currentCheckinEvent) {
-                    showModal('⏰ Não há eventos disponíveis para check-in no momento.<br><br>O check-in fica disponível 1h antes até 1:30h após o evento.', false, null, false, null, '⏰');
+                closeMenu(); // Fechar menu antes de buscar eventos
+                
+                // Mostrar indicador de carregamento
+                const loadingDiv = document.createElement('div');
+                loadingDiv.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center';
+                loadingDiv.innerHTML = '<div class="bg-white rounded-lg p-6 shadow-2xl"><p class="text-gray-800 font-semibold">⏳ Buscando eventos...</p></div>';
+                document.body.appendChild(loadingDiv);
+                
+                try {
+                    await checkForCheckinEvents();
+                    loadingDiv.remove();
+                    
+                    if (!currentCheckinEvent) {
+                        showModal('⏰ Não há eventos disponíveis para check-in no momento.<br><br>O check-in fica disponível 1h antes até 1:30h após o evento.', false, null, false, null, '⏰');
+                    }
+                } catch (error) {
+                    loadingDiv.remove();
+                    showModal('❌ Erro ao buscar eventos. Tente novamente.');
                 }
             });
 
