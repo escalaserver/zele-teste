@@ -3370,10 +3370,24 @@
                     // Armazenar dados completos
                     allEscalasGrouped = grouped;
                     
-                    // Atualizar filtro
-                    updateVisaoGeralFilter(grouped);
+                    // Filtrar eventos passados antes de renderizar
+                    const now = new Date();
+                    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    const filteredGrouped = {};
                     
-                    renderAdminView(grouped);
+                    Object.keys(grouped).forEach(key => {
+                        const data = grouped[key];
+                        const eventDate = new Date(data.date + 'T' + data.time);
+                        // Só mostrar eventos de hoje em diante
+                        if (eventDate >= today) {
+                            filteredGrouped[key] = data;
+                        }
+                    });
+                    
+                    // Atualizar filtro apenas com eventos futuros
+                    updateVisaoGeralFilter(filteredGrouped);
+                    
+                    renderAdminView(filteredGrouped);
                 } catch (error) {
                     console.error('❌ Erro ao carregar visão geral:', error);
                 }
