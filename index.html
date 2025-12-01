@@ -2200,6 +2200,11 @@
                             photoURL: existingData.photoURL || user.photoURL || '',
                             role: existingData.role || 'user', // Preservar role existente
                             blocked: existingData.blocked || false, // Preservar status de bloqueio
+                            onboardingComplete: existingData.onboardingComplete || false, // Preservar onboarding
+                            onboardingDate: existingData.onboardingDate || null, // Preservar data do onboarding
+                            preferredTeam: existingData.preferredTeam || null, // Preservar time preferido
+                            availability: existingData.availability || null, // Preservar disponibilidade
+                            teamLeader: existingData.teamLeader || [], // Preservar liderança
                             createdAt: existingData.createdAt || new Date().toISOString()
                         }, { merge: true });
                         logger.log('✅ Dados do usuário atualizados');
@@ -4649,11 +4654,9 @@
                     const period = dashboardPeriodSelect.value;
                     let dateFrom, dateTo;
                     
-                    // Obter data atual no horário de São Paulo (UTC-3)
+                    // Obter data atual no horário local
                     const now = new Date();
-                    const saoPauloOffset = -3 * 60; // UTC-3 em minutos
-                    const localOffset = now.getTimezoneOffset();
-                    const saoPauloTime = new Date(now.getTime() + (localOffset + saoPauloOffset) * 60000);
+                    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
                     
                     if (period === 'custom') {
                         const fromInput = document.getElementById('date-from').value;
@@ -4668,19 +4671,18 @@
                         dateTo = new Date(toInput + 'T23:59:59');
                     } else if (period === 'all') {
                         dateFrom = new Date('2020-01-01T00:00:00'); // Data antiga o suficiente
-                        dateTo = new Date(saoPauloTime.getTime() + (365 * 24 * 60 * 60 * 1000)); // 1 ano no futuro
+                        dateTo = new Date(today.getTime() + (365 * 24 * 60 * 60 * 1000)); // 1 ano no futuro
                     } else {
                         const days = parseInt(period);
                         if (days < 0) {
-                            // Período passado (Últimos X dias)
-                            dateFrom = new Date(saoPauloTime.getTime() + (days * 24 * 60 * 60 * 1000));
-                            dateFrom.setHours(0, 0, 0, 0);
-                            dateTo = new Date(saoPauloTime);
+                            // Período passado (Últimos X dias) - incluindo hoje
+                            dateFrom = new Date(today.getTime() + (days * 24 * 60 * 60 * 1000));
+                            dateTo = new Date(today);
                             dateTo.setHours(23, 59, 59, 999);
                         } else {
                             // Período futuro (Próximos X dias) - incluindo o dia corrente
-                            dateFrom = new Date(saoPauloTime.getFullYear(), saoPauloTime.getMonth(), saoPauloTime.getDate(), 0, 0, 0, 0);
-                            dateTo = new Date(dateFrom.getTime() + (days * 24 * 60 * 60 * 1000));
+                            dateFrom = new Date(today);
+                            dateTo = new Date(today.getTime() + (days * 24 * 60 * 60 * 1000));
                             dateTo.setHours(23, 59, 59, 999);
                         }
                     }
