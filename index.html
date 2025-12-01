@@ -2934,13 +2934,12 @@
                         allEscalas.push({ id: doc.id, ...doc.data() });
                     });
 
-                    // Filtrar apenas eventos futuros ou do dia atual para exibição
+                    // Filtrar apenas eventos futuros (baseado em data+hora completa)
                     const now = new Date();
-                    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
                     
                     const escalas = allEscalas.filter(escala => {
-                        const eventDate = new Date(escala.date + 'T00:00:00');
-                        return eventDate >= today; // Mostra apenas de hoje em diante
+                        const eventDateTime = new Date(escala.date + 'T' + escala.time);
+                        return eventDateTime > now; // Mostra apenas eventos futuros
                     });
 
                     // Ordenar por data e horário (ordem crescente)
@@ -3367,16 +3366,15 @@
                         grouped[key][escala.team].push(escala);
                     });
 
-                    // Filtrar eventos passados ANTES de armazenar
+                    // Filtrar eventos passados ANTES de armazenar (baseado na data+hora completa)
                     const now = new Date();
-                    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
                     const filteredGrouped = {};
                     
                     Object.keys(grouped).forEach(key => {
                         const data = grouped[key];
-                        const eventDate = new Date(data.date + 'T' + data.time);
-                        // Só incluir eventos de hoje em diante
-                        if (eventDate >= today) {
+                        const eventDateTime = new Date(data.date + 'T' + data.time);
+                        // Só incluir eventos que ainda não aconteceram (data+hora futura)
+                        if (eventDateTime > now) {
                             filteredGrouped[key] = data;
                         }
                     });
