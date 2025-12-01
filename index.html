@@ -2782,7 +2782,7 @@
                 if (!currentUser) return;
 
                 try {
-                    // Limpar escalas de eventos passados
+                    // Limpar escalas de eventos passados (DESATIVADO - mantém histórico)
                     await cleanPastEscalas();
                     
                     const { collection, query, where, getDocs } = window.firestoreMethods;
@@ -2792,10 +2792,19 @@
                     );
                     
                     const querySnapshot = await getDocs(q);
-                    const escalas = [];
+                    const allEscalas = [];
                     
                     querySnapshot.forEach((doc) => {
-                        escalas.push({ id: doc.id, ...doc.data() });
+                        allEscalas.push({ id: doc.id, ...doc.data() });
+                    });
+
+                    // Filtrar apenas eventos futuros ou do dia atual para exibição
+                    const now = new Date();
+                    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    
+                    const escalas = allEscalas.filter(escala => {
+                        const eventDate = new Date(escala.date + 'T00:00:00');
+                        return eventDate >= today; // Mostra apenas de hoje em diante
                     });
 
                     // Ordenar por data e horário (ordem crescente)
@@ -2898,8 +2907,13 @@
                 );
             }
 
-            // Limpar escalas de eventos passados
+            // Limpar escalas de eventos passados - DESATIVADO para manter histórico
             async function cleanPastEscalas() {
+                // FUNÇÃO DESATIVADA: Não deletar escalas passadas para manter dados históricos nos charts
+                console.log('ℹ️ cleanPastEscalas: Função desativada - mantendo dados históricos');
+                return;
+                
+                /* CÓDIGO ORIGINAL (DESATIVADO)
                 try {
                     const { collection, query, where, getDocs, deleteDoc, doc } = window.firestoreMethods;
                     const now = new Date();
@@ -2933,6 +2947,7 @@
                 } catch (error) {
                     console.error('❌ Erro ao limpar escalas passadas:', error);
                 }
+                */
             }
 
             // Carregar datas disponíveis do Firestore
@@ -3700,10 +3715,19 @@
                     );
                     
                     const querySnapshot = await getDocs(q);
-                    const pendingEscalas = [];
+                    const allPendingEscalas = [];
                     
                     querySnapshot.forEach((doc) => {
-                        pendingEscalas.push({ id: doc.id, ...doc.data() });
+                        allPendingEscalas.push({ id: doc.id, ...doc.data() });
+                    });
+                    
+                    // Filtrar apenas eventos futuros ou do dia atual
+                    const now = new Date();
+                    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    
+                    const pendingEscalas = allPendingEscalas.filter(escala => {
+                        const eventDate = new Date(escala.date + 'T00:00:00');
+                        return eventDate >= today; // Mostra apenas de hoje em diante
                     });
                     
                     // Ordenar por timestamp de solicitação
