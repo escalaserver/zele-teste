@@ -3367,10 +3367,7 @@
                         grouped[key][escala.team].push(escala);
                     });
 
-                    // Armazenar dados completos
-                    allEscalasGrouped = grouped;
-                    
-                    // Filtrar eventos passados antes de renderizar
+                    // Filtrar eventos passados ANTES de armazenar
                     const now = new Date();
                     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
                     const filteredGrouped = {};
@@ -3378,11 +3375,14 @@
                     Object.keys(grouped).forEach(key => {
                         const data = grouped[key];
                         const eventDate = new Date(data.date + 'T' + data.time);
-                        // Só mostrar eventos de hoje em diante
+                        // Só incluir eventos de hoje em diante
                         if (eventDate >= today) {
                             filteredGrouped[key] = data;
                         }
                     });
+
+                    // Armazenar apenas eventos futuros
+                    allEscalasGrouped = filteredGrouped;
                     
                     // Atualizar filtro apenas com eventos futuros
                     updateVisaoGeralFilter(filteredGrouped);
