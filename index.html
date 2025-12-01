@@ -4688,6 +4688,8 @@
                     }
                     
                     console.log('📅 Período:', dateFrom.toLocaleDateString(), 'até', dateTo.toLocaleDateString());
+                    console.log('📅 dateFrom ISO:', dateFrom.toISOString().split('T')[0]);
+                    console.log('📅 dateTo ISO:', dateTo.toISOString().split('T')[0]);
                     
                     // Buscar todas as escalas no período
                     const { collection, query, where, getDocs } = window.firestoreMethods;
@@ -4700,6 +4702,8 @@
                     );
                     
                     const querySnapshot = await getDocs(escalasRef); // Buscar todas e filtrar no cliente
+                    console.log('📊 Total de documentos no Firestore:', querySnapshot.size);
+                    
                     const escalas = [];
                     
                     querySnapshot.forEach(doc => {
@@ -4707,6 +4711,8 @@
                         // Comparar strings de data diretamente (formato YYYY-MM-DD)
                         const dateFromStr = dateFrom.toISOString().split('T')[0];
                         const dateToStr = dateTo.toISOString().split('T')[0];
+                        
+                        console.log('🔍 Escala:', data.date, '- Entre', dateFromStr, 'e', dateToStr, '?', data.date >= dateFromStr && data.date <= dateToStr);
                         
                         if (data.date >= dateFromStr && data.date <= dateToStr) {
                             escalas.push({ id: doc.id, ...data });
