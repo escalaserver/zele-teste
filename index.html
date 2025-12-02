@@ -1928,12 +1928,24 @@
                 e.preventDefault();
                 deferredPrompt = e;
                 console.log('✅ Prompt de instalação capturado e salvo');
+                
+                // Se o botão já existe, mostrar imediatamente
+                const installBtn = document.getElementById('install-app-btn');
+                if (installBtn && !isInStandaloneMode()) {
+                    installBtn.style.display = 'block';
+                    console.log('🔄 Botão de instalação ativado após captura do evento');
+                }
             });
 
             // Configurar botão de instalação
             function setupInstallButton() {
                 isIOS = detectIOS();
                 const installBtn = elements.installAppBtn;
+                
+                if (!installBtn) {
+                    console.error('❌ Botão de instalação não encontrado');
+                    return;
+                }
                 
                 // Não mostrar se já estiver instalado
                 if (isInStandaloneMode()) {
@@ -1942,28 +1954,32 @@
                     return;
                 }
 
+                // Remover event listeners antigos (se existirem)
+                const newBtn = installBtn.cloneNode(true);
+                installBtn.parentNode.replaceChild(newBtn, installBtn);
+                
                 if (isIOS) {
                     // iOS: Mostrar botão com instruções manuais
                     console.log('📱 iOS detectado - mostrando instruções manuais');
-                    installBtn.style.display = 'block';
-                    installBtn.addEventListener('click', () => {
+                    newBtn.style.display = 'block';
+                    newBtn.addEventListener('click', () => {
                         closeMenu();
                         document.getElementById('ios-install-modal').classList.remove('hidden');
                     });
                 } else {
-                    // Android/Desktop/Windows: Mostrar botão se houver deferredPrompt OU sempre (com fallback)
+                    // Android/Desktop/Windows
                     console.log('💻 Desktop/Android detectado');
                     console.log('🔍 deferredPrompt disponível?', !!deferredPrompt);
                     
-                    // Sempre mostrar botão no desktop (com instruções manuais se necessário)
-                    installBtn.style.display = 'block';
+                    // Sempre mostrar botão (mesmo sem deferredPrompt)
+                    newBtn.style.display = 'block';
 
-                    installBtn.addEventListener('click', async () => {
+                    newBtn.addEventListener('click', async () => {
                         console.log('🖱️ Botão de instalação clicado');
                         if (!deferredPrompt) {
                             console.log('❌ Prompt de instalação não disponível - mostrando instruções manuais');
-                            // Instruções manuais para Windows/Desktop
-                            showModal('Para instalar:<br><br><strong>Chrome:</strong><br>• Clique no ícone ⊕ na barra de endereço<br>• Ou vá em Menu (⋮) → Instalar Zele Server<br><br><strong>Edge:</strong><br>• Menu (⋯) → Apps → Instalar Zele Server<br>• Ou pressione Ctrl+Shift+A', false, null, false, null, '💻');
+                            // Instruções manuais para Android/Chrome
+                            showModal('Para instalar no <strong>Android</strong>:<br><br>1. Abra o <strong>Menu</strong> do navegador (⋮)<br>2. Toque em <strong>"Adicionar à tela inicial"</strong> ou <strong>"Instalar app"</strong><br><br>Para <strong>Desktop</strong>:<br>• Chrome: Menu (⋮) → Instalar Zele Server<br>• Edge: Menu (⋯) → Apps → Instalar', false, null, false, null, '📱');
                             return;
                         }
 
@@ -1975,26 +1991,27 @@
                             
                             if (outcome === 'accepted') {
                                 showModal('✅ App instalado com sucesso!');
-                                installBtn.style.display = 'none';
+                                newBtn.style.display = 'none';
                             } else {
-                                showModal('Instalação cancelada.');
+                                showModal('Instalação cancelada. Você pode tentar novamente pelo menu do navegador.');
                             }
                         } catch (error) {
                             console.error('❌ Erro na instalação:', error);
-                            showModal('Erro ao instalar. Tente pelo menu do navegador.');
+                            showModal('Erro ao instalar. Tente pelo menu do navegador: Menu (⋮) → Instalar app');
                         }
                         
                         deferredPrompt = null;
                         closeMenu();
-                    }, { once: false }); // Permitir múltiplos cliques
+                    });
                 }
 
                 // Listener quando o app é instalado
                 window.addEventListener('appinstalled', () => {
                     console.log('✅ PWA instalado com sucesso');
-                    installBtn.style.display = 'none';
+                    const btn = document.getElementById('install-app-btn');
+                    if (btn) btn.style.display = 'none';
                     deferredPrompt = null;
-                });
+                }, { once: true });
             }
 
             // Fechar modal iOS
