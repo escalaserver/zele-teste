@@ -413,7 +413,7 @@
 
                 <div>
                     <label class="block text-sm font-semibold mb-2" style="color: #151b29;">2º - Em qual equipe você vai servir nesta data?</label>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
                         <button class="team-btn rounded-lg" data-team="welcome" 
                                 data-img-normal="Logo Welcome horizontal.png"
                                 data-img-selected="Welcome azul claro.png">
@@ -437,6 +437,12 @@
                                 data-img-selected="Kids azul claro.png">
                             <img src="Logo Kids horizontal.png" alt="Kids" onerror="this.classList.add('error');this.style.display='none';">
                             <div class="team-name-fallback">KIDS</div>
+                        </button>
+                        <button class="team-btn rounded-lg" data-team="comunicacao"
+                                data-img-normal="https://github.com/escalaserver/zele-teste/blob/main/Comunica%C3%A7%C3%A3o%20azul%20escuro.png?raw=true"
+                                data-img-selected="https://github.com/escalaserver/zele-teste/blob/main/Comunica%C3%A7%C3%A3o%20azul%20claro.png?raw=true">
+                            <img src="https://github.com/escalaserver/zele-teste/blob/main/Comunica%C3%A7%C3%A3o%20azul%20escuro.png?raw=true" alt="Comunicação" onerror="this.classList.add('error');this.style.display='none';">
+                            <div class="team-name-fallback">COMUNICAÇÃO</div>
                         </button>
                     </div>
                 </div>
@@ -538,6 +544,10 @@
                             <div>
                                 <label class="block text-xs text-gray-600 mb-1">👶 Kids</label>
                                 <input type="number" id="admin-limit-kids" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="4" min="1" max="20" value="4">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">📢 Comunicação</label>
+                                <input type="number" id="admin-limit-comunicacao" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="4" min="1" max="20" value="4">
                             </div>
                         </div>
                         <span id="limit-error" class="text-xs text-red-600 hidden mt-1"></span>
@@ -823,6 +833,12 @@
                     <span class="text-2xl">👶</span>
                     <span class="font-semibold text-gray-800">Kids</span>
                 </label>
+                
+                <label class="flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer hover:bg-purple-50 transition">
+                    <input type="checkbox" class="leader-team-checkbox w-5 h-5 text-purple-600" data-team="comunicacao">
+                    <span class="text-2xl">📢</span>
+                    <span class="font-semibold text-gray-800">Comunicação</span>
+                </label>
             </div>
             
             <button id="save-team-leader-btn" class="w-full zele-btn text-white font-bold py-3 px-6 rounded-lg">
@@ -906,6 +922,10 @@
                     <button class="onboarding-team-btn p-4 border-2 border-gray-300 rounded-lg hover:border-yellow-500 transition" data-team="kids">
                         <div class="text-3xl mb-2">👶</div>
                         <div class="font-semibold text-yellow-600">Kids</div>
+                    </button>
+                    <button class="onboarding-team-btn p-4 border-2 border-gray-300 rounded-lg hover:border-purple-500 transition" data-team="comunicacao">
+                        <div class="text-3xl mb-2">📢</div>
+                        <div class="font-semibold text-purple-600">Comunicação</div>
                     </button>
                 </div>
             </div>
@@ -1546,7 +1566,8 @@
                     welcome: 'Welcome',
                     backstage: 'Backstage',
                     parking: 'Parking',
-                    kids: 'Kids'
+                    kids: 'Kids',
+                    comunicacao: 'Comunicação'
                 };
                 
                 const eventDate = new Date(escalaData.date + 'T' + escalaData.time);
@@ -2659,7 +2680,8 @@
                     welcome: 'Welcome',
                     backstage: 'Backstage',
                     parking: 'Parking',
-                    kids: 'Kids'
+                    kids: 'Kids',
+                    comunicacao: 'Comunicação'
                 };
 
                 try {
@@ -2943,7 +2965,8 @@
                     welcome: 'Welcome',
                     backstage: 'Backstage',
                     parking: 'Parking',
-                    kids: 'Kids'
+                    kids: 'Kids',
+                    comunicacao: 'Comunicação'
                 };
 
                 const startDateTime = `${date}T${time}:00`;
@@ -3058,7 +3081,8 @@
                     welcome: 'Welcome',
                     backstage: 'Backstage',
                     parking: 'Parking',
-                    kids: 'Kids'
+                    kids: 'Kids',
+                    comunicacao: 'Comunicação'
                 };
                 
                 if (upcomingEvents.length === 0) {
@@ -3277,7 +3301,8 @@
                     welcome: { name: 'Welcome', icon: '👋', color: 'border-[#377db8]', bg: 'bg-blue-50' },
                     backstage: { name: 'Backstage', icon: '🤝', color: 'border-[#0a0e1a]', bg: 'bg-gray-50' },
                     parking: { name: 'Parking', icon: '🚗', color: 'border-[#f87171]', bg: 'bg-red-50' },
-                    kids: { name: 'Kids', icon: '👶', color: 'border-[#fbbf24]', bg: 'bg-yellow-50' }
+                    kids: { name: 'Kids', icon: '👶', color: 'border-[#fbbf24]', bg: 'bg-yellow-50' },
+                    comunicacao: { name: 'Comunicação', icon: '📢', color: 'border-[#9333ea]', bg: 'bg-purple-50' }
                 };
 
                 if (escalas.length === 0) {
@@ -3418,7 +3443,8 @@
                                 welcome: [],
                                 backstage: [],
                                 parking: [],
-                                kids: []
+                                kids: [],
+                                comunicacao: []
                             };
                         }
                         grouped[key][escala.team].push(escala);
@@ -4376,7 +4402,8 @@
                     welcome: parseInt(document.getElementById('admin-limit-welcome').value) || 4,
                     backstage: parseInt(document.getElementById('admin-limit-backstage').value) || 4,
                     parking: parseInt(document.getElementById('admin-limit-parking').value) || 4,
-                    kids: parseInt(document.getElementById('admin-limit-kids').value) || 4
+                    kids: parseInt(document.getElementById('admin-limit-kids').value) || 4,
+                    comunicacao: parseInt(document.getElementById('admin-limit-comunicacao').value) || 4
                 };
                 
                 console.log('📝 Dados coletados:', { dateInput, timeInput, eventInput, teamLimits });
@@ -4409,7 +4436,7 @@
                 
                 // Confirmação antes de adicionar
                 showModal(
-                    `Confirmar criação do evento?<br><br><strong>${text}</strong><br><br>Limites por time:<br>Welcome: ${teamLimits.welcome} | Backstage: ${teamLimits.backstage}<br>Parking: ${teamLimits.parking} | Kids: ${teamLimits.kids}`,
+                    `Confirmar criação do evento?<br><br><strong>${text}</strong><br><br>Limites por time:<br>Welcome: ${teamLimits.welcome} | Backstage: ${teamLimits.backstage}<br>Parking: ${teamLimits.parking} | Kids: ${teamLimits.kids}<br>Comunicação: ${teamLimits.comunicacao}`,
                     true,
                     async () => {
                         try {
@@ -4767,7 +4794,7 @@
                     return `
                         <div class="border border-gray-200 rounded-lg p-4" style="border: 2px solid #e5e5e5; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
                             <h3 class="font-bold text-lg mb-3" style="color: #151b29;">📅 ${dateStr}${eventName} - 🕐 ${data.time}</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                            <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
                                 <div class="bg-gray-50 p-3 rounded border-l-4" style="border-color: #151b29;">
                                     <h4 class="font-semibold mb-2" style="color: #151b29;">Welcome (${data.welcome.length})</h4>
                                     <div class="text-sm space-y-1">
@@ -4790,6 +4817,12 @@
                                     <h4 class="font-semibold mb-2" style="color: #151b29;">Kids (${data.kids.length})</h4>
                                     <div class="text-sm space-y-1">
                                         ${renderVolunteers(data.kids, 'Kids')}
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 p-3 rounded border-l-4" style="border-color: #9333ea;">
+                                    <h4 class="font-semibold mb-2" style="color: #9333ea;">Comunicação (${data.comunicacao.length})</h4>
+                                    <div class="text-sm space-y-1">
+                                        ${renderVolunteers(data.comunicacao, 'Comunicação')}
                                     </div>
                                 </div>
                             </div>
@@ -6226,7 +6259,7 @@
                                     ${isUserAdmin && !isUserSuperAdmin ? '<p class="text-xs text-yellow-600 font-bold">👑 Administrador</p>' : ''}
                                     ${isBlocked ? '<p class="text-xs text-red-600 font-bold">⚠️ Usuário bloqueado</p>' : ''}
                                     ${teamLeader.length > 0 ? `<p class="text-xs text-blue-600 font-bold">🏆 Líder de: ${teamLeader.map(t => {
-                                        const names = { welcome: 'Welcome', backstage: 'Backstage', parking: 'Parking', kids: 'Kids' };
+                                        const names = { welcome: 'Welcome', backstage: 'Backstage', parking: 'Parking', kids: 'Kids', comunicacao: 'Comunicação' };
                                         return names[t];
                                     }).join(', ')}</p>` : ''}
                                 </div>
