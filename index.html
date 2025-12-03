@@ -7038,7 +7038,7 @@
                     const userDocRef = doc(window.firebaseDb, 'users', currentUser.uid);
 
                     // Sanitizar e validar dados
-                    const allowedTeams = ['welcome','backstage','parking','kids'];
+                    const allowedTeams = ['welcome','backstage','parking','kids','comunicacao'];
                     if (!allowedTeams.includes(onboardingData.preferredTeam)) {
                         showModal('⚠️ Selecione um time válido antes de salvar.');
                         return;
