@@ -3580,6 +3580,16 @@
 
                     console.log('🔍 DEBUG loadAllEscalas - Total de escalas carregadas do Firestore:', escalas.length);
                     
+                    // Log de TODAS as escalas do evento 04/12 19:00 ANTES do filtro
+                    const escalas0412 = escalas.filter(e => e.date === '2025-12-04' && e.time === '19:00');
+                    console.log('🔍 DEBUG loadAllEscalas - TODAS as escalas do evento 04/12 19:00 (antes do filtro):', escalas0412.length);
+                    console.log('🔍 DEBUG loadAllEscalas - Detalhes:', escalas0412.map(e => ({
+                        nome: e.userName,
+                        team: e.team,
+                        status: e.status || 'SEM STATUS',
+                        userId: e.userId
+                    })));
+                    
                     // Filtrar apenas escalas aprovadas para a visão geral
                     const approvedEscalas = escalas.filter(e => {
                         const status = e.status || 'approved'; // Default é approved se não tiver status
@@ -3587,11 +3597,11 @@
                     });
                     
                     console.log('🔍 DEBUG loadAllEscalas - Escalas aprovadas:', approvedEscalas.length);
-                    console.log('🔍 DEBUG loadAllEscalas - Escalas do evento 04/12 19:00:', 
+                    console.log('🔍 DEBUG loadAllEscalas - Escalas APROVADAS do evento 04/12 19:00:', 
                         approvedEscalas.filter(e => e.date === '2025-12-04' && e.time === '19:00').map(e => ({
                             nome: e.userName,
                             team: e.team,
-                            status: e.status
+                            status: e.status || 'SEM STATUS'
                         }))
                     );
 
