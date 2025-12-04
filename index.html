@@ -4345,17 +4345,28 @@
                 try {
                     console.log('🔍 DEBUG - Tentando criar log de auditoria...');
                     console.log('🔍 DEBUG - Action:', action);
-                    console.log('🔍 DEBUG - Details:', details);
+                    console.log('🔍 DEBUG - Details antes de limpar:', details);
                     console.log('🔍 DEBUG - currentUser:', currentUser);
                     
                     const { collection, addDoc } = window.firestoreMethods;
+                    
+                    // Limpar campos undefined do details
+                    const cleanedDetails = {};
+                    for (const key in details) {
+                        if (details[key] !== undefined && details[key] !== null && details[key] !== '') {
+                            cleanedDetails[key] = details[key];
+                        }
+                    }
+                    
+                    console.log('🔍 DEBUG - Details após limpar:', cleanedDetails);
+                    
                     const logData = {
                         action: action,
                         userId: currentUser.uid,
                         userEmail: currentUser.email,
                         userName: currentUser.displayName || currentUser.email,
                         timestamp: new Date().toISOString(),
-                        details: details
+                        details: cleanedDetails
                     };
                     
                     console.log('🔍 DEBUG - Log data a ser salvo:', logData);
