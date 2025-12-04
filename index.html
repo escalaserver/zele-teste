@@ -2563,14 +2563,21 @@
                         isAdmin = true;
                         isSuperAdmin = true;
                         // Mostrar grupo de liderança e menu administrativo
-                        document.getElementById('leadership-menu-group').style.display = 'block';
-                        document.getElementById('admin-menu-group').style.display = 'block';
+                        const leadershipGroup = document.getElementById('leadership-menu-group');
+                        const adminGroup = document.getElementById('admin-menu-group');
+                        if (leadershipGroup) leadershipGroup.style.display = 'block';
+                        if (adminGroup) adminGroup.style.display = 'block';
                         // Itens individuais dentro do grupo de liderança
-                        document.getElementById('menu-admin-btn').style.display = 'block';
-                        document.getElementById('menu-dashboard-btn').style.display = 'block';
-                        document.getElementById('menu-blocked-attempts-btn').style.display = 'block';
-                        document.getElementById('menu-pending-escalas-btn').style.display = 'block';
-                        document.getElementById('menu-checkin-btn').style.display = 'block';
+                        const menuAdminBtn = document.getElementById('menu-admin-btn');
+                        const menuDashboardBtn = document.getElementById('menu-dashboard-btn');
+                        const menuBlockedBtn = document.getElementById('menu-blocked-attempts-btn');
+                        const menuPendingBtn = document.getElementById('menu-pending-escalas-btn');
+                        const menuCheckinBtn = document.getElementById('menu-checkin-btn');
+                        if (menuAdminBtn) menuAdminBtn.style.display = 'block';
+                        if (menuDashboardBtn) menuDashboardBtn.style.display = 'block';
+                        if (menuBlockedBtn) menuBlockedBtn.style.display = 'block';
+                        if (menuPendingBtn) menuPendingBtn.style.display = 'block';
+                        if (menuCheckinBtn) menuCheckinBtn.style.display = 'block';
                         updateBlockedAttemptsBadge(); // Atualizar badge
                         updatePendingEscalasBadge(); // Atualizar badge
                         console.log('✅ Usuário É SUPER ADMINISTRADOR');
@@ -2586,14 +2593,21 @@
                             isAdmin = true;
                             isSuperAdmin = true;
                             // Mostrar grupo de liderança e menu administrativo
-                            document.getElementById('leadership-menu-group').style.display = 'block';
-                            document.getElementById('admin-menu-group').style.display = 'block';
+                            const leadershipGroup = document.getElementById('leadership-menu-group');
+                            const adminGroup = document.getElementById('admin-menu-group');
+                            if (leadershipGroup) leadershipGroup.style.display = 'block';
+                            if (adminGroup) adminGroup.style.display = 'block';
                             // Itens individuais dentro do grupo de liderança
-                            document.getElementById('menu-admin-btn').style.display = 'block';
-                            document.getElementById('menu-dashboard-btn').style.display = 'block';
-                            document.getElementById('menu-blocked-attempts-btn').style.display = 'block';
-                            document.getElementById('menu-pending-escalas-btn').style.display = 'block';
-                            document.getElementById('menu-checkin-btn').style.display = 'block';
+                            const menuAdminBtn = document.getElementById('menu-admin-btn');
+                            const menuDashboardBtn = document.getElementById('menu-dashboard-btn');
+                            const menuBlockedBtn = document.getElementById('menu-blocked-attempts-btn');
+                            const menuPendingBtn = document.getElementById('menu-pending-escalas-btn');
+                            const menuCheckinBtn = document.getElementById('menu-checkin-btn');
+                            if (menuAdminBtn) menuAdminBtn.style.display = 'block';
+                            if (menuDashboardBtn) menuDashboardBtn.style.display = 'block';
+                            if (menuBlockedBtn) menuBlockedBtn.style.display = 'block';
+                            if (menuPendingBtn) menuPendingBtn.style.display = 'block';
+                            if (menuCheckinBtn) menuCheckinBtn.style.display = 'block';
                             updateBlockedAttemptsBadge(); // Atualizar badge
                             updatePendingEscalasBadge(); // Atualizar badge
                             console.log('✅ Usuário É SUPER ADMINISTRADOR');
@@ -2602,11 +2616,15 @@
                             isAdmin = true;
                             isSuperAdmin = false;
                             // Mostrar apenas grupo de liderança
-                            document.getElementById('leadership-menu-group').style.display = 'block';
-                            document.getElementById('admin-menu-group').style.display = 'none';
+                            const leadershipGroup = document.getElementById('leadership-menu-group');
+                            const adminGroup = document.getElementById('admin-menu-group');
+                            if (leadershipGroup) leadershipGroup.style.display = 'block';
+                            if (adminGroup) adminGroup.style.display = 'none';
                             // Itens individuais dentro do grupo de liderança
-                            document.getElementById('menu-admin-btn').style.display = 'block';
-                            document.getElementById('menu-dashboard-btn').style.display = 'block';
+                            const menuAdminBtn = document.getElementById('menu-admin-btn');
+                            const menuDashboardBtn = document.getElementById('menu-dashboard-btn');
+                            if (menuAdminBtn) menuAdminBtn.style.display = 'block';
+                            if (menuDashboardBtn) menuDashboardBtn.style.display = 'block';
                             document.getElementById('menu-blocked-attempts-btn').style.display = 'block';
                             document.getElementById('menu-pending-escalas-btn').style.display = 'block';
                             document.getElementById('menu-checkin-btn').style.display = 'block';
@@ -2624,11 +2642,15 @@
                     isAdmin = false;
                     isSuperAdmin = false;
                     // Ocultar grupos de admin
-                    document.getElementById('leadership-menu-group').style.display = 'none';
-                    document.getElementById('admin-menu-group').style.display = 'none';
+                    const leadershipGroup = document.getElementById('leadership-menu-group');
+                    const adminGroup = document.getElementById('admin-menu-group');
+                    if (leadershipGroup) leadershipGroup.style.display = 'none';
+                    if (adminGroup) adminGroup.style.display = 'none';
                     // Ocultar itens individuais do grupo de liderança
-                    document.getElementById('menu-admin-btn').style.display = 'none';
-                    document.getElementById('menu-dashboard-btn').style.display = 'none';
+                    const menuAdminBtn = document.getElementById('menu-admin-btn');
+                    const menuDashboardBtn = document.getElementById('menu-dashboard-btn');
+                    if (menuAdminBtn) menuAdminBtn.style.display = 'none';
+                    if (menuDashboardBtn) menuDashboardBtn.style.display = 'none';
                     document.getElementById('menu-blocked-attempts-btn').style.display = 'none';
                     document.getElementById('menu-pending-escalas-btn').style.display = 'none';
                     document.getElementById('menu-checkin-btn').style.display = 'none';
