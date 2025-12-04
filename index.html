@@ -5358,8 +5358,20 @@
                     }
                     
                     console.log('📅 Período:', dateFrom.toLocaleDateString(), 'até', dateTo.toLocaleDateString());
-                    console.log('📅 dateFrom ISO:', dateFrom.toISOString().split('T')[0]);
-                    console.log('📅 dateTo ISO:', dateTo.toISOString().split('T')[0]);
+                    
+                    // Converter para formato YYYY-MM-DD usando data local (não UTC)
+                    const formatDateLocal = (date) => {
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
+                        return `${year}-${month}-${day}`;
+                    };
+                    
+                    const dateFromStr = formatDateLocal(dateFrom);
+                    const dateToStr = formatDateLocal(dateTo);
+                    
+                    console.log('📅 dateFromStr:', dateFromStr);
+                    console.log('📅 dateToStr:', dateToStr);
                     
                     // Buscar todas as escalas no período
                     const { collection, getDocs } = window.firestoreMethods;
@@ -5370,8 +5382,6 @@
                     console.log('📊 Total de documentos no Firestore:', querySnapshot.size);
                     
                     const escalas = [];
-                    const dateFromStr = dateFrom.toISOString().split('T')[0];
-                    const dateToStr = dateTo.toISOString().split('T')[0];
                     
                     console.log('📊 Filtrando escalas entre:', dateFromStr, 'e', dateToStr);
                     
@@ -5472,18 +5482,18 @@
                             label: 'Voluntários Únicos',
                             data: [teamCount.welcome, teamCount.backstage, teamCount.parking, teamCount.kids, teamCount.comunicacao],
                             backgroundColor: [
-                                'rgba(55, 125, 184, 0.7)', // Azul Welcome
-                                'rgba(128, 128, 128, 0.7)', // Cinza Backstage
-                                'rgba(248, 113, 113, 0.7)', // Vermelho Parking
-                                'rgba(251, 191, 36, 0.7)',  // Amarelo Kids
-                                'rgba(147, 51, 234, 0.7)'   // Roxo Comunicação
+                                'rgba(254, 243, 199, 0.7)',  // Amarelo claro (1º)
+                                'rgba(245, 208, 71, 0.7)',   // Amarelo mais escuro (2º)
+                                'rgba(254, 180, 123, 0.7)',  // Laranja claro (3º)
+                                'rgba(251, 146, 60, 0.7)',   // Laranja escuro (4º)
+                                'rgba(239, 68, 68, 0.7)'     // Vermelho (5º)
                             ],
                             borderColor: [
-                                'rgba(55, 125, 184, 1)',
-                                'rgba(128, 128, 128, 1)',
-                                'rgba(248, 113, 113, 1)',
-                                'rgba(251, 191, 36, 1)',
-                                'rgba(147, 51, 234, 1)'
+                                'rgba(254, 243, 199, 1)',    // Amarelo claro (1º)
+                                'rgba(245, 208, 71, 1)',     // Amarelo mais escuro (2º)
+                                'rgba(254, 180, 123, 1)',    // Laranja claro (3º)
+                                'rgba(251, 146, 60, 1)',     // Laranja escuro (4º)
+                                'rgba(239, 68, 68, 1)'       // Vermelho (5º)
                             ],
                             borderWidth: 2
                         }]
