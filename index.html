@@ -3333,16 +3333,17 @@
                             return date;
                         });
                         
-                        // Filtrar apenas eventos futuros
+                        // Filtrar apenas eventos futuros (até 1h após o início)
                         const now = new Date();
                         console.log('🔍 DEBUG - Data/hora atual:', now.toISOString());
                         const initialCount = availableDates.length;
                         availableDates = availableDates.filter(d => {
                             const [date, time] = d.value.split('|');
                             const eventDateTime = new Date(date + 'T' + time);
-                            const isFuture = eventDateTime > now;
-                            console.log(`🔍 DEBUG - Evento: ${d.text} (${d.value}) → ${eventDateTime.toISOString()} → Futuro? ${isFuture}`);
-                            return isFuture;
+                            const eventEndTime = new Date(eventDateTime.getTime() + (1 * 60 * 60 * 1000)); // 1h após início
+                            const isVisible = eventEndTime > now; // Visível até 1h após início
+                            console.log(`🔍 DEBUG - Evento: ${d.text} (${d.value}) → ${eventDateTime.toISOString()} → Fim janela: ${eventEndTime.toISOString()} → Visível? ${isVisible}`);
+                            return isVisible;
                         });
                         
                         console.log(`🧹 Filtrado: ${initialCount} → ${availableDates.length} eventos futuros`);
@@ -3392,12 +3393,13 @@
                 defaultOption.textContent = 'Escolha uma data...';
                 select.appendChild(defaultOption);
 
-                // Filtrar apenas eventos futuros e ordenar por data
+                // Filtrar eventos visíveis (até 1h após o início) e ordenar por data
                 const sortedDates = [...availableDates]
                     .filter(option => {
                         const [date, time] = option.value.split('|');
                         const eventDateTime = new Date(date + 'T' + time);
-                        return eventDateTime > now;
+                        const eventEndTime = new Date(eventDateTime.getTime() + (1 * 60 * 60 * 1000)); // 1h após início
+                        return eventEndTime > now; // Visível até 1h após início
                     })
                     .sort((a, b) => {
                         const dateA = a.value.split('|')[0];
@@ -3583,15 +3585,16 @@
                         grouped[key][escala.team].push(escala);
                     });
 
-                    // Filtrar eventos passados ANTES de armazenar (baseado na data+hora completa)
+                    // Filtrar eventos visíveis (até 1h após início) ANTES de armazenar
                     const now = new Date();
                     const filteredGrouped = {};
                     
                     Object.keys(grouped).forEach(key => {
                         const data = grouped[key];
                         const eventDateTime = new Date(data.date + 'T' + data.time);
-                        // Só incluir eventos que ainda não aconteceram (data+hora futura)
-                        if (eventDateTime > now) {
+                        const eventEndTime = new Date(eventDateTime.getTime() + (1 * 60 * 60 * 1000)); // 1h após início
+                        // Incluir eventos até 1h após o início
+                        if (eventEndTime > now) {
                             filteredGrouped[key] = data;
                         }
                     });
