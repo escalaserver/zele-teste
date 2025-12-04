@@ -3148,12 +3148,13 @@
                         allEscalas.push({ id: doc.id, ...doc.data() });
                     });
 
-                    // Filtrar apenas eventos futuros (baseado em data+hora completa)
+                    // Filtrar eventos visíveis (até 1h após início)
                     const now = new Date();
                     
                     const escalas = allEscalas.filter(escala => {
                         const eventDateTime = new Date(escala.date + 'T' + escala.time);
-                        return eventDateTime > now; // Mostra apenas eventos futuros
+                        const eventEndTime = new Date(eventDateTime.getTime() + (1 * 60 * 60 * 1000)); // 1h após início
+                        return eventEndTime > now; // Mostra até 1h após início
                     });
 
                     // Ordenar por data e horário (ordem crescente)
