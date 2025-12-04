@@ -31,7 +31,7 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, updateProfile } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, query, where, getDocs, deleteDoc, orderBy, addDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, query, where, getDocs, deleteDoc, orderBy, addDoc, updateDoc, limit } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
         
         console.log('🔥 Firebase imports carregados - versão com orderBy, addDoc, updateDoc e Storage');
@@ -63,7 +63,7 @@
         window.firebaseStorage = storage;
         window.firebaseProvider = provider;
         window.firebaseAuthMethods = { signInWithPopup, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, updateProfile };
-        window.firestoreMethods = { doc, setDoc, getDoc, onSnapshot, collection, query, where, getDocs, deleteDoc, orderBy, addDoc, updateDoc };
+        window.firestoreMethods = { doc, setDoc, getDoc, onSnapshot, collection, query, where, getDocs, deleteDoc, orderBy, addDoc, updateDoc, limit };
         window.firebaseStorageMethods = { ref, uploadBytes, getDownloadURL };
         
         console.log('✅ Firebase inicializado e exportado para window');
@@ -1215,27 +1215,35 @@
                     </div>
                 </div>
 
-                <!-- Grupo 3: Super Admin (Gerenciar Acesso) -->
-                <div id="superadmin-menu-group" class="border border-gray-200 rounded-lg overflow-hidden" style="display: none;">
-                    <button id="menu-manage-admins-btn" class="w-full flex items-center gap-3 p-4 bg-gray-50 hover:bg-gray-100 transition text-left border-b border-gray-200">
-                        <svg class="w-6 h-6" style="color: #151b29;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                <!-- Grupo 3: Menu Administrativo -->
+                <div id="admin-menu-group" class="border border-gray-200 rounded-lg overflow-hidden" style="display: none;">
+                    <button id="toggle-admin-menu" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition">
+                        <span class="font-semibold text-gray-800">🔧 Menu Administrativo</span>
+                        <svg class="w-5 h-5 transform transition-transform" id="admin-menu-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                         </svg>
-                        <div>
-                            <p class="font-semibold text-gray-800">Gerenciar Acesso</p>
-                            <p class="text-xs text-gray-600">Gerenciar usuários e permissões</p>
-                        </div>
                     </button>
-                    
-                    <button id="menu-audit-logs-btn" class="w-full flex items-center gap-3 p-4 bg-gray-50 hover:bg-gray-100 transition text-left">
-                        <svg class="w-6 h-6" style="color: #151b29;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        <div>
-                            <p class="font-semibold text-gray-800">Logs de Auditoria</p>
-                            <p class="text-xs text-gray-600">Histórico de ações</p>
-                        </div>
-                    </button>
+                    <div id="admin-menu-items" class="hidden bg-white">
+                        <button id="menu-manage-admins-btn" class="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition text-left border-b border-gray-100">
+                            <svg class="w-6 h-6" style="color: #151b29;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                            </svg>
+                            <div>
+                                <p class="font-semibold text-gray-800">Gerenciar Acesso</p>
+                                <p class="text-xs text-gray-600">Gerenciar usuários e permissões</p>
+                            </div>
+                        </button>
+                        
+                        <button id="menu-audit-logs-btn" class="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition text-left">
+                            <svg class="w-6 h-6" style="color: #151b29;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            <div>
+                                <p class="font-semibold text-gray-800">Logs de Auditoria</p>
+                                <p class="text-xs text-gray-600">Histórico de ações</p>
+                            </div>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Botão Sair (fora dos grupos) -->
@@ -1954,14 +1962,25 @@
             const leadershipMenuItems = document.getElementById('leadership-menu-items');
             const leadershipMenuArrow = document.getElementById('leadership-menu-arrow');
 
+            // Grupo 3: Menu Administrativo
+            const toggleAdminMenu = document.getElementById('toggle-admin-menu');
+            const adminMenuItems = document.getElementById('admin-menu-items');
+            const adminMenuArrow = document.getElementById('admin-menu-arrow');
+
             if (toggleMyMenu) {
                 toggleMyMenu.addEventListener('click', () => {
                     const isExpanding = myMenuItems.classList.contains('hidden');
                     
-                    // Se estiver expandindo o grupo 1, retrair o grupo 2
-                    if (isExpanding && leadershipMenuItems) {
-                        leadershipMenuItems.classList.add('hidden');
-                        leadershipMenuArrow.classList.remove('rotate-90');
+                    // Se estiver expandindo o grupo 1, retrair os outros
+                    if (isExpanding) {
+                        if (leadershipMenuItems) {
+                            leadershipMenuItems.classList.add('hidden');
+                            leadershipMenuArrow.classList.remove('rotate-90');
+                        }
+                        if (adminMenuItems) {
+                            adminMenuItems.classList.add('hidden');
+                            adminMenuArrow.classList.remove('rotate-90');
+                        }
                     }
                     
                     myMenuItems.classList.toggle('hidden');
@@ -1973,14 +1992,41 @@
                 toggleLeadershipMenu.addEventListener('click', () => {
                     const isExpanding = leadershipMenuItems.classList.contains('hidden');
                     
-                    // Se estiver expandindo o grupo 2, retrair o grupo 1
-                    if (isExpanding && myMenuItems) {
-                        myMenuItems.classList.add('hidden');
-                        myMenuArrow.classList.remove('rotate-90');
+                    // Se estiver expandindo o grupo 2, retrair os outros
+                    if (isExpanding) {
+                        if (myMenuItems) {
+                            myMenuItems.classList.add('hidden');
+                            myMenuArrow.classList.remove('rotate-90');
+                        }
+                        if (adminMenuItems) {
+                            adminMenuItems.classList.add('hidden');
+                            adminMenuArrow.classList.remove('rotate-90');
+                        }
                     }
                     
                     leadershipMenuItems.classList.toggle('hidden');
                     leadershipMenuArrow.classList.toggle('rotate-90');
+                });
+            }
+
+            if (toggleAdminMenu) {
+                toggleAdminMenu.addEventListener('click', () => {
+                    const isExpanding = adminMenuItems.classList.contains('hidden');
+                    
+                    // Se estiver expandindo o grupo 3, retrair os outros
+                    if (isExpanding) {
+                        if (myMenuItems) {
+                            myMenuItems.classList.add('hidden');
+                            myMenuArrow.classList.remove('rotate-90');
+                        }
+                        if (leadershipMenuItems) {
+                            leadershipMenuItems.classList.add('hidden');
+                            leadershipMenuArrow.classList.remove('rotate-90');
+                        }
+                    }
+                    
+                    adminMenuItems.classList.toggle('hidden');
+                    adminMenuArrow.classList.toggle('rotate-90');
                 });
             }
 
@@ -2516,9 +2562,9 @@
                         }
                         isAdmin = true;
                         isSuperAdmin = true;
-                        // Mostrar grupo de liderança e super admin
+                        // Mostrar grupo de liderança e menu administrativo
                         document.getElementById('leadership-menu-group').style.display = 'block';
-                        document.getElementById('superadmin-menu-group').style.display = 'block';
+                        document.getElementById('admin-menu-group').style.display = 'block';
                         // Itens individuais dentro dos grupos
                         document.getElementById('menu-admin-btn').style.display = 'block';
                         document.getElementById('menu-manage-admins-btn').style.display = 'block';
@@ -2540,9 +2586,9 @@
                         if (data.role === 'superadmin') {
                             isAdmin = true;
                             isSuperAdmin = true;
-                            // Mostrar grupo de liderança e super admin
+                            // Mostrar grupo de liderança e menu administrativo
                             document.getElementById('leadership-menu-group').style.display = 'block';
-                            document.getElementById('superadmin-menu-group').style.display = 'block';
+                            document.getElementById('admin-menu-group').style.display = 'block';
                             // Itens individuais dentro dos grupos
                             document.getElementById('menu-admin-btn').style.display = 'block';
                             document.getElementById('menu-manage-admins-btn').style.display = 'block';
@@ -2559,7 +2605,7 @@
                             isSuperAdmin = false;
                             // Mostrar apenas grupo de liderança
                             document.getElementById('leadership-menu-group').style.display = 'block';
-                            document.getElementById('superadmin-menu-group').style.display = 'none';
+                            document.getElementById('admin-menu-group').style.display = 'none';
                             // Itens individuais dentro do grupo de liderança
                             document.getElementById('menu-admin-btn').style.display = 'block';
                             document.getElementById('menu-manage-admins-btn').style.display = 'none'; // Admin não gerencia usuários
@@ -2582,7 +2628,7 @@
                     isSuperAdmin = false;
                     // Ocultar grupos de admin
                     document.getElementById('leadership-menu-group').style.display = 'none';
-                    document.getElementById('superadmin-menu-group').style.display = 'none';
+                    document.getElementById('admin-menu-group').style.display = 'none';
                     // Ocultar itens individuais também
                     document.getElementById('menu-admin-btn').style.display = 'none';
                     document.getElementById('menu-manage-admins-btn').style.display = 'none';
