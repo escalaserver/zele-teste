@@ -4726,11 +4726,11 @@
                 } else {
                     const now = new Date();
                     const eventDateTime = new Date(dateInput.value + 'T' + (document.getElementById('admin-new-time').value || '00:00'));
-                    const oneHourFromNow = new Date(now.getTime() + (60 * 60 * 1000));
                     
-                    if (eventDateTime < oneHourFromNow) {
+                    // Permitir qualquer data/hora futura, bloqueando apenas passado
+                    if (eventDateTime < now) {
                         dateInput.classList.add('border-red-500');
-                        dateError.textContent = 'Data deve ser futura (mínimo 1 hora)';
+                        dateError.textContent = 'Data não pode ser no passado';
                         dateError.classList.remove('hidden');
                         isValid = false;
                     } else {
