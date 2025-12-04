@@ -604,6 +604,64 @@
         </main>
     </div>
 
+    <!-- Página de Logs de Auditoria -->
+    <div id="audit-logs-page" class="hidden">
+        <!-- Header -->
+        <header class="zele-primary text-white" style="box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <button id="back-from-audit-logs" class="zele-btn p-2 rounded-lg">
+                            <svg class="w-6 h-6" fill="none" stroke="white" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                            </svg>
+                        </button>
+                        <img src="Volunteers logo.png" alt="Logo" class="w-10 h-10 object-contain">
+                        <h1 class="text-2xl font-bold">Logs de Auditoria</h1>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Conteúdo -->
+        <main class="container mx-auto px-4 py-8 max-w-6xl">
+            <div class="card-float rounded-xl p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold" style="color: #151b29;">📋 Histórico de Ações</h2>
+                    <button id="refresh-audit-logs" class="zele-btn text-white font-bold py-2 px-4 rounded-lg text-sm">
+                        🔄 Atualizar
+                    </button>
+                </div>
+                
+                <p class="text-sm text-gray-600 mb-6">Registro completo de aprovações, negações, exclusões e mudanças de time.</p>
+                
+                <!-- Filtros -->
+                <div class="flex flex-wrap gap-3 mb-6 pb-6 border-b border-gray-200">
+                    <select id="audit-log-filter" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                        <option value="all">Todas as ações</option>
+                        <option value="APPROVE_PENDING">✅ Aprovações</option>
+                        <option value="DENY_PENDING">❌ Negações</option>
+                        <option value="DELETE_ESCALA">🗑️ Exclusões</option>
+                    </select>
+                    
+                    <select id="audit-log-period" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                        <option value="7">Últimos 7 dias</option>
+                        <option value="30" selected>Últimos 30 dias</option>
+                        <option value="90">Últimos 3 meses</option>
+                        <option value="all">Todo o período</option>
+                    </select>
+                </div>
+                
+                <!-- Lista de Logs -->
+                <div id="audit-logs-list" class="space-y-3">
+                    <div class="flex items-center justify-center py-8">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2" style="border-color: #377db8;"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
     <!-- Página de Dashboard -->
     <div id="dashboard-page" class="hidden">
         <!-- Header -->
@@ -1159,13 +1217,23 @@
 
                 <!-- Grupo 3: Super Admin (Gerenciar Acesso) -->
                 <div id="superadmin-menu-group" class="border border-gray-200 rounded-lg overflow-hidden" style="display: none;">
-                    <button id="menu-manage-admins-btn" class="w-full flex items-center gap-3 p-4 bg-gray-50 hover:bg-gray-100 transition text-left">
+                    <button id="menu-manage-admins-btn" class="w-full flex items-center gap-3 p-4 bg-gray-50 hover:bg-gray-100 transition text-left border-b border-gray-200">
                         <svg class="w-6 h-6" style="color: #151b29;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                         </svg>
                         <div>
                             <p class="font-semibold text-gray-800">Gerenciar Acesso</p>
                             <p class="text-xs text-gray-600">Gerenciar usuários e permissões</p>
+                        </div>
+                    </button>
+                    
+                    <button id="menu-audit-logs-btn" class="w-full flex items-center gap-3 p-4 bg-gray-50 hover:bg-gray-100 transition text-left">
+                        <svg class="w-6 h-6" style="color: #151b29;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <div>
+                            <p class="font-semibold text-gray-800">Logs de Auditoria</p>
+                            <p class="text-xs text-gray-600">Histórico de ações</p>
                         </div>
                     </button>
                 </div>
@@ -1767,6 +1835,42 @@
                     manageAdminsPage.classList.add('hidden');
                     appContainer.classList.remove('hidden');
                 });
+            }
+
+            // Navegação para página de Logs de Auditoria
+            const menuAuditLogsBtn = document.getElementById('menu-audit-logs-btn');
+            const backFromAuditLogsBtn = document.getElementById('back-from-audit-logs');
+            const auditLogsPage = document.getElementById('audit-logs-page');
+            const refreshAuditLogsBtn = document.getElementById('refresh-audit-logs');
+            const auditLogFilter = document.getElementById('audit-log-filter');
+            const auditLogPeriod = document.getElementById('audit-log-period');
+
+            if (menuAuditLogsBtn) {
+                menuAuditLogsBtn.addEventListener('click', () => {
+                    closeMenu();
+                    appContainer.classList.add('hidden');
+                    auditLogsPage.classList.remove('hidden');
+                    loadAuditLogs();
+                });
+            }
+
+            if (backFromAuditLogsBtn) {
+                backFromAuditLogsBtn.addEventListener('click', () => {
+                    auditLogsPage.classList.add('hidden');
+                    appContainer.classList.remove('hidden');
+                });
+            }
+
+            if (refreshAuditLogsBtn) {
+                refreshAuditLogsBtn.addEventListener('click', () => loadAuditLogs());
+            }
+
+            if (auditLogFilter) {
+                auditLogFilter.addEventListener('change', () => loadAuditLogs());
+            }
+
+            if (auditLogPeriod) {
+                auditLogPeriod.addEventListener('change', () => loadAuditLogs());
             }
 
             // Navegação para página de Dashboard
@@ -4123,6 +4227,19 @@
                     // Atualizar escala
                     await updateDoc(escalaRef, updateData);
                     
+                    // Registrar log de auditoria
+                    await logAudit('APPROVE_PENDING', {
+                        escalaId: escalaId,
+                        volunteerName: escalaData.userName || escalaData.userEmail,
+                        volunteerId: escalaData.userId,
+                        date: escalaData.date,
+                        time: escalaData.time,
+                        eventName: escalaData.eventName,
+                        requestedTeam: requestedTeam,
+                        approvedTeam: selectedTeam,
+                        teamChanged: teamChanged
+                    });
+                    
                     console.log('✅ Escala aprovada com sucesso!');
                     showModal(`✅ Escala aprovada! ${teamChanged ? 'Time ajustado para melhor organização.' : ''}`);
                     
@@ -4135,6 +4252,161 @@
                 }
             }
             
+            // Registrar log de auditoria
+            async function logAudit(action, details) {
+                try {
+                    const { collection, addDoc } = window.firestoreMethods;
+                    await addDoc(collection(window.firebaseDb, 'audit_logs'), {
+                        action: action,
+                        userId: currentUser.uid,
+                        userEmail: currentUser.email,
+                        userName: currentUser.displayName || currentUser.email,
+                        timestamp: new Date().toISOString(),
+                        details: details
+                    });
+                    console.log('📋 Log de auditoria registrado:', action);
+                } catch (error) {
+                    console.error('❌ Erro ao registrar log:', error);
+                }
+            }
+
+            // Carregar logs de auditoria (apenas superadmin)
+            async function loadAuditLogs() {
+                if (!isSuperAdmin) {
+                    document.getElementById('audit-logs-list').innerHTML = 
+                        '<p class="text-center text-red-500 py-8">⚠️ Acesso negado. Apenas Super Administradores podem visualizar logs.</p>';
+                    return;
+                }
+                
+                try {
+                    const { collection, getDocs, query, orderBy: orderByField, where, limit } = window.firestoreMethods;
+                    const logsList = document.getElementById('audit-logs-list');
+                    const filterValue = document.getElementById('audit-log-filter').value;
+                    const periodValue = document.getElementById('audit-log-period').value;
+                    
+                    logsList.innerHTML = '<div class="text-center py-8"><div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 mx-auto"></div><p class="text-gray-600 mt-4">Carregando logs...</p></div>';
+                    
+                    const logsRef = collection(window.firebaseDb, 'audit_logs');
+                    let q = query(logsRef, orderByField('timestamp', 'desc'), limit(100));
+                    
+                    // Aplicar filtro de ação
+                    if (filterValue !== 'all') {
+                        q = query(logsRef, where('action', '==', filterValue), orderByField('timestamp', 'desc'), limit(100));
+                    }
+                    
+                    const logsSnapshot = await getDocs(q);
+                    
+                    if (logsSnapshot.empty) {
+                        logsList.innerHTML = '<p class="text-center text-gray-500 py-8">Nenhum log encontrado.</p>';
+                        return;
+                    }
+                    
+                    const logs = [];
+                    const now = new Date();
+                    const periodDays = periodValue === 'all' ? null : parseInt(periodValue);
+                    
+                    logsSnapshot.forEach(doc => {
+                        const data = doc.data();
+                        const logDate = new Date(data.timestamp);
+                        
+                        // Filtrar por período
+                        if (periodDays) {
+                            const diffDays = (now - logDate) / (1000 * 60 * 60 * 24);
+                            if (diffDays > periodDays) return;
+                        }
+                        
+                        logs.push({ id: doc.id, ...data });
+                    });
+                    
+                    if (logs.length === 0) {
+                        logsList.innerHTML = '<p class="text-center text-gray-500 py-8">Nenhum log encontrado no período selecionado.</p>';
+                        return;
+                    }
+                    
+                    // Renderizar logs
+                    const actionIcons = {
+                        'APPROVE_PENDING': '✅',
+                        'DENY_PENDING': '❌',
+                        'DELETE_ESCALA': '🗑️'
+                    };
+                    
+                    const actionLabels = {
+                        'APPROVE_PENDING': 'Aprovação',
+                        'DENY_PENDING': 'Negação',
+                        'DELETE_ESCALA': 'Exclusão'
+                    };
+                    
+                    const teamNames = {
+                        welcome: 'Welcome',
+                        backstage: 'Backstage',
+                        parking: 'Parking',
+                        kids: 'Kids'
+                    };
+                    
+                    logsList.innerHTML = logs.map(log => {
+                        const logDate = new Date(log.timestamp);
+                        const formattedDate = logDate.toLocaleDateString('pt-BR', { 
+                            day: '2-digit', 
+                            month: '2-digit', 
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                        
+                        const icon = actionIcons[log.action] || '📋';
+                        const label = actionLabels[log.action] || log.action;
+                        
+                        let detailsHtml = '';
+                        if (log.action === 'APPROVE_PENDING') {
+                            const teamChanged = log.details.teamChanged ? 
+                                `<span class="text-orange-600 font-semibold">mudou ${teamNames[log.details.requestedTeam]} → ${teamNames[log.details.approvedTeam]}</span>` : 
+                                `manteve ${teamNames[log.details.approvedTeam]}`;
+                            detailsHtml = `
+                                <p class="text-sm"><strong>Voluntário:</strong> ${log.details.volunteerName}</p>
+                                <p class="text-sm"><strong>Evento:</strong> ${log.details.eventName || 'Sem nome'} - ${new Date(log.details.date).toLocaleDateString('pt-BR')} às ${log.details.time}</p>
+                                <p class="text-sm"><strong>Time:</strong> ${teamChanged}</p>
+                            `;
+                        } else if (log.action === 'DENY_PENDING') {
+                            detailsHtml = `
+                                <p class="text-sm"><strong>Voluntário:</strong> ${log.details.volunteerName}</p>
+                                <p class="text-sm"><strong>Evento:</strong> ${log.details.eventName || 'Sem nome'} - ${new Date(log.details.date).toLocaleDateString('pt-BR')} às ${log.details.time}</p>
+                                <p class="text-sm"><strong>Time solicitado:</strong> ${teamNames[log.details.requestedTeam]}</p>
+                            `;
+                        } else if (log.action === 'DELETE_ESCALA') {
+                            detailsHtml = `
+                                <p class="text-sm"><strong>Voluntário:</strong> ${log.details.volunteerName}</p>
+                                <p class="text-sm"><strong>Evento:</strong> ${log.details.eventName || 'Sem nome'} - ${new Date(log.details.date).toLocaleDateString('pt-BR')} às ${log.details.time}</p>
+                                <p class="text-sm"><strong>Time:</strong> ${teamNames[log.details.team]}</p>
+                                <p class="text-sm"><strong>Status:</strong> ${log.details.status}</p>
+                            `;
+                        }
+                        
+                        return `
+                            <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
+                                <div class="flex items-start gap-3">
+                                    <span class="text-2xl">${icon}</span>
+                                    <div class="flex-1">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <h3 class="font-bold text-gray-800">${label}</h3>
+                                            <span class="text-xs text-gray-500">${formattedDate}</span>
+                                        </div>
+                                        <p class="text-sm text-gray-600 mb-2"><strong>Por:</strong> ${log.userName} (${log.userEmail})</p>
+                                        <div class="bg-gray-50 rounded p-2 text-gray-700">
+                                            ${detailsHtml}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao carregar logs:', error);
+                    document.getElementById('audit-logs-list').innerHTML = 
+                        `<p class="text-center text-red-500 py-8">❌ Erro ao carregar logs: ${error.message}</p>`;
+                }
+            }
+
             // Negar escala pendente
             async function denyPendingEscala(escalaId) {
                 showModal(
@@ -4142,15 +4414,30 @@
                     true,
                     async () => {
                         try {
-                            const { doc, updateDoc } = window.firestoreMethods;
+                            const { doc, updateDoc, getDoc } = window.firestoreMethods;
+                            
+                            // Buscar dados da escala
+                            const escalaRef = doc(window.firebaseDb, 'escalas', escalaId);
+                            const escalaDoc = await getDoc(escalaRef);
+                            const escalaData = escalaDoc.exists() ? escalaDoc.data() : {};
                             
                             // Atualizar status para denied
-                            const escalaRef = doc(window.firebaseDb, 'escalas', escalaId);
                             await updateDoc(escalaRef, {
                                 status: 'denied',
                                 deniedAt: new Date().toISOString(),
                                 deniedBy: currentUser.uid,
                                 deniedReason: 'Escala não aprovada pelo administrador'
+                            });
+                            
+                            // Registrar log de auditoria
+                            await logAudit('DENY_PENDING', {
+                                escalaId: escalaId,
+                                volunteerName: escalaData.userName || escalaData.userEmail,
+                                volunteerId: escalaData.userId,
+                                date: escalaData.date,
+                                time: escalaData.time,
+                                eventName: escalaData.eventName,
+                                requestedTeam: escalaData.team
                             });
                             
                             console.log('✅ Escala negada com sucesso!');
@@ -4194,8 +4481,26 @@
             // Deletar escala
             async function deleteEscala(escalaId) {
                 try {
-                    const { doc, deleteDoc } = window.firestoreMethods;
-                    await deleteDoc(doc(window.firebaseDb, 'escalas', escalaId));
+                    const { doc, deleteDoc, getDoc } = window.firestoreMethods;
+                    
+                    // Buscar dados da escala antes de deletar
+                    const escalaRef = doc(window.firebaseDb, 'escalas', escalaId);
+                    const escalaDoc = await getDoc(escalaRef);
+                    const escalaData = escalaDoc.exists() ? escalaDoc.data() : {};
+                    
+                    await deleteDoc(escalaRef);
+                    
+                    // Registrar log de auditoria
+                    await logAudit('DELETE_ESCALA', {
+                        escalaId: escalaId,
+                        volunteerName: escalaData.userName || escalaData.userEmail,
+                        volunteerId: escalaData.userId,
+                        date: escalaData.date,
+                        time: escalaData.time,
+                        eventName: escalaData.eventName,
+                        team: escalaData.team,
+                        status: escalaData.status
+                    });
                     
                     console.log('✅ Escala deletada com sucesso!');
                     showModal('Escala removida com sucesso!');
