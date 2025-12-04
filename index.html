@@ -3590,16 +3590,25 @@
                     const now = new Date();
                     const filteredGrouped = {};
                     
+                    console.log('🔍 DEBUG loadAllEscalas - Data/hora atual:', now.toISOString());
+                    console.log('🔍 DEBUG loadAllEscalas - Total de eventos agrupados:', Object.keys(grouped).length);
+                    
                     Object.keys(grouped).forEach(key => {
                         const data = grouped[key];
                         const eventDateTime = new Date(data.date + 'T' + data.time);
                         const eventEndTime = new Date(eventDateTime.getTime() + (1 * 60 * 60 * 1000)); // 1h após início
+                        const isVisible = eventEndTime > now;
+                        
+                        console.log(`🔍 DEBUG loadAllEscalas - Evento ${key}: início=${eventDateTime.toISOString()}, fim=${eventEndTime.toISOString()}, visível=${isVisible}`);
+                        
                         // Incluir eventos até 1h após o início
-                        if (eventEndTime > now) {
+                        if (isVisible) {
                             filteredGrouped[key] = data;
                         }
                     });
 
+                    console.log('🔍 DEBUG loadAllEscalas - Eventos após filtro:', Object.keys(filteredGrouped).length);
+                    
                     // Armazenar apenas eventos futuros
                     allEscalasGrouped = filteredGrouped;
                     
