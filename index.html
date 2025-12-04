@@ -2658,18 +2658,28 @@
                     }
 
                     // Verificar se falta menos de 24h para o evento OU se é time KIDS
+                    // Permitir inscrição até 1h APÓS o início do evento (para última hora)
                     const eventDateTime = new Date(`${date}T${time}`);
+                    const eventEndTime = new Date(eventDateTime.getTime() + (1 * 60 * 60 * 1000)); // 1h após início
                     const now = new Date();
                     const hoursUntilEvent = (eventDateTime - now) / (1000 * 60 * 60);
+                    const hoursUntilEventEnd = (eventEndTime - now) / (1000 * 60 * 60);
                     
-                    console.log('⏰ Verificação 24h:');
+                    console.log('⏰ Verificação 24h (com janela de 1h após início):');
                     console.log('  Data/Hora evento:', eventDateTime);
+                    console.log('  Data/Hora fim (evento + 1h):', eventEndTime);
                     console.log('  Data/Hora atual:', now);
                     console.log('  Horas até evento:', hoursUntilEvent);
+                    console.log('  Horas até fim da janela:', hoursUntilEventEnd);
                     console.log('  Time selecionado:', team);
                     
-                    // Kids sempre vai para pendente, independente do horário
-                    const isPending = (hoursUntilEvent < 24 && hoursUntilEvent > 0) || team === 'kids';
+                    // Determinar se é pending
+                    // - Se falta < 24h E evento ainda não começou → PENDING
+                    // - Se evento já começou E está dentro da janela de 1h → CONFIRMADO (entrada rápida)
+                    // - Kids sempre vai para PENDING
+                    const isDuringQuickEntryWindow = hoursUntilEvent < 0 && hoursUntilEventEnd > 0; // Evento iniciado, dentro de 1h
+                    const isPending = ((hoursUntilEvent < 24 && hoursUntilEvent > 0) || team === 'kids') && !isDuringQuickEntryWindow;
+                    console.log('  Está na janela de entrada rápida (1h após início)?', isDuringQuickEntryWindow);
                     console.log('  É pendente (<24h ou Kids)?', isPending);
                     
                     // Verificar limite de voluntários no time para esta data/hora
