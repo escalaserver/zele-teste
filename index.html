@@ -641,7 +641,8 @@
                         <option value="all">Todas as ações</option>
                         <option value="APPROVE_PENDING">✅ Aprovações</option>
                         <option value="DENY_PENDING">❌ Negações</option>
-                        <option value="DELETE_ESCALA">🗑️ Exclusões</option>
+                        <option value="DELETE_ESCALA">🗑️ Exclusões de Escalas</option>
+                        <option value="DELETE_BLOCKED_ATTEMPT">🔓 Remoções de Bloqueios</option>
                     </select>
                     
                     <select id="audit-log-period" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
@@ -4015,9 +4016,9 @@
                             console.log('🔍 firebaseDb existe?', !!window.firebaseDb);
                             console.log('🔍 firestoreMethods existe?', !!window.firestoreMethods);
                             
-                            const { doc, deleteDoc } = window.firestoreMethods;
+                            const { doc, deleteDoc, getDoc } = window.firestoreMethods;
                             
-                            if (!doc || !deleteDoc) {
+                            if (!doc || !deleteDoc || !getDoc) {
                                 throw new Error('Métodos Firestore não disponíveis');
                             }
                             
@@ -4025,8 +4026,31 @@
                             const docRef = doc(window.firebaseDb, 'blockedAttempts', attemptId);
                             console.log('🔵 Referência criada:', docRef);
                             
+                            // Buscar dados da tentativa antes de deletar (para o log)
+                            console.log('🔵 Buscando dados da tentativa bloqueada...');
+                            const attemptDoc = await getDoc(docRef);
+                            
+                            if (!attemptDoc.exists()) {
+                                throw new Error('Tentativa bloqueada não encontrada');
+                            }
+                            
+                            const attemptData = attemptDoc.data();
+                            console.log('🔵 Dados da tentativa:', attemptData);
+                            
                             console.log('🔵 Executando deleteDoc...');
                             await deleteDoc(docRef);
+                            
+                            // Registrar log de auditoria
+                            await logAudit('DELETE_BLOCKED_ATTEMPT', {
+                                attemptId: attemptId,
+                                userName: attemptData.userName || attemptData.userEmail,
+                                userId: attemptData.userId,
+                                date: attemptData.date,
+                                time: attemptData.time,
+                                eventName: attemptData.eventName,
+                                team: attemptData.team,
+                                reason: attemptData.reason || 'Não especificado'
+                            });
                             
                             console.log('✅ Tentativa excluída com sucesso!');
                             showModal('✅ Tentativa excluída com sucesso!');
@@ -4413,13 +4437,15 @@
                     const actionIcons = {
                         'APPROVE_PENDING': '✅',
                         'DENY_PENDING': '❌',
-                        'DELETE_ESCALA': '🗑️'
+                        'DELETE_ESCALA': '🗑️',
+                        'DELETE_BLOCKED_ATTEMPT': '🔓'
                     };
                     
                     const actionLabels = {
                         'APPROVE_PENDING': 'Aprovação',
                         'DENY_PENDING': 'Negação',
-                        'DELETE_ESCALA': 'Exclusão'
+                        'DELETE_ESCALA': 'Exclusão',
+                        'DELETE_BLOCKED_ATTEMPT': 'Remoção de Bloqueio'
                     };
                     
                     const teamNames = {
@@ -4464,6 +4490,13 @@
                                 <p class="text-sm"><strong>Evento:</strong> ${log.details.eventName || 'Sem nome'} - ${new Date(log.details.date).toLocaleDateString('pt-BR')} às ${log.details.time}</p>
                                 <p class="text-sm"><strong>Time:</strong> ${teamNames[log.details.team]}</p>
                                 <p class="text-sm"><strong>Status:</strong> ${log.details.status}</p>
+                            `;
+                        } else if (log.action === 'DELETE_BLOCKED_ATTEMPT') {
+                            detailsHtml = `
+                                <p class="text-sm"><strong>Usuário:</strong> ${log.details.userName}</p>
+                                <p class="text-sm"><strong>Evento:</strong> ${log.details.eventName || 'Sem nome'} - ${new Date(log.details.date).toLocaleDateString('pt-BR')} às ${log.details.time}</p>
+                                <p class="text-sm"><strong>Time:</strong> ${teamNames[log.details.team]}</p>
+                                <p class="text-sm"><strong>Motivo do bloqueio:</strong> ${log.details.reason}</p>
                             `;
                         }
                         
