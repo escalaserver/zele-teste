@@ -4319,18 +4319,28 @@
             // Registrar log de auditoria
             async function logAudit(action, details) {
                 try {
+                    console.log('🔍 DEBUG - Tentando criar log de auditoria...');
+                    console.log('🔍 DEBUG - Action:', action);
+                    console.log('🔍 DEBUG - Details:', details);
+                    console.log('🔍 DEBUG - currentUser:', currentUser);
+                    
                     const { collection, addDoc } = window.firestoreMethods;
-                    await addDoc(collection(window.firebaseDb, 'audit_logs'), {
+                    const logData = {
                         action: action,
                         userId: currentUser.uid,
                         userEmail: currentUser.email,
                         userName: currentUser.displayName || currentUser.email,
                         timestamp: new Date().toISOString(),
                         details: details
-                    });
+                    };
+                    
+                    console.log('🔍 DEBUG - Log data a ser salvo:', logData);
+                    const docRef = await addDoc(collection(window.firebaseDb, 'audit_logs'), logData);
+                    console.log('✅ Log de auditoria registrado com ID:', docRef.id);
                     console.log('📋 Log de auditoria registrado:', action);
                 } catch (error) {
                     console.error('❌ Erro ao registrar log:', error);
+                    console.error('❌ Stack trace:', error.stack);
                 }
             }
 
@@ -4343,10 +4353,15 @@
                 }
                 
                 try {
+                    console.log('🔍 DEBUG - Carregando logs de auditoria...');
+                    console.log('🔍 DEBUG - isSuperAdmin:', isSuperAdmin);
+                    
                     const { collection, getDocs, query, orderBy: orderByField, where, limit } = window.firestoreMethods;
                     const logsList = document.getElementById('audit-logs-list');
                     const filterValue = document.getElementById('audit-log-filter').value;
                     const periodValue = document.getElementById('audit-log-period').value;
+                    
+                    console.log('🔍 DEBUG - Filtro:', filterValue, 'Período:', periodValue);
                     
                     logsList.innerHTML = '<div class="text-center py-8"><div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 mx-auto"></div><p class="text-gray-600 mt-4">Carregando logs...</p></div>';
                     
@@ -4355,10 +4370,13 @@
                     
                     // Aplicar filtro de ação
                     if (filterValue !== 'all') {
+                        console.log('🔍 DEBUG - Aplicando filtro de ação:', filterValue);
                         q = query(logsRef, where('action', '==', filterValue), orderByField('timestamp', 'desc'), limit(100));
                     }
                     
+                    console.log('🔍 DEBUG - Executando query...');
                     const logsSnapshot = await getDocs(q);
+                    console.log('🔍 DEBUG - Logs encontrados:', logsSnapshot.size);
                     
                     if (logsSnapshot.empty) {
                         logsList.innerHTML = '<p class="text-center text-gray-500 py-8">Nenhum log encontrado.</p>';
@@ -4371,12 +4389,16 @@
                     
                     logsSnapshot.forEach(doc => {
                         const data = doc.data();
+                        console.log('🔍 DEBUG - Log doc:', doc.id, data);
                         const logDate = new Date(data.timestamp);
                         
                         // Filtrar por período
                         if (periodDays) {
                             const diffDays = (now - logDate) / (1000 * 60 * 60 * 24);
-                            if (diffDays > periodDays) return;
+                            if (diffDays > periodDays) {
+                                console.log('🔍 DEBUG - Log ignorado (fora do período):', doc.id);
+                                return;
+                            }
                         }
                         
                         logs.push({ id: doc.id, ...data });
