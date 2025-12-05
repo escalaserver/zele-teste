@@ -5573,9 +5573,12 @@
                         scales: {
                             y: {
                                 beginAtZero: true,
-                                max: 5,
+                                suggestedMax: 6,
                                 ticks: {
-                                    stepSize: 1
+                                    stepSize: 1,
+                                    callback: function(value) {
+                                        return Number.isInteger(value) ? value : '';
+                                    }
                                 }
                             }
                         },
@@ -5757,7 +5760,11 @@
                     eventCount[eventKey]++;
                     
                     // Adicionar voluntário ao time correspondente
-                    const team = escala.team?.toLowerCase();
+                    let team = escala.team?.toLowerCase();
+                    // Normalizar variações de comunicação
+                    if (team === 'comunicação' || team === 'comunicacao') {
+                        team = 'comunicacao';
+                    }
                     if (eventDetails[eventKey].teams[team]) {
                         eventDetails[eventKey].teams[team].push({
                             name: escala.userName || 'Desconhecido',
@@ -5973,9 +5980,12 @@
                                 },
                                 y: {
                                     beginAtZero: true,
-                                    max: 4,
+                                    suggestedMax: 5,
                                     ticks: {
-                                        stepSize: 1
+                                        stepSize: 1,
+                                        callback: function(value) {
+                                            return Number.isInteger(value) ? value : '';
+                                        }
                                     }
                                 }
                             },
