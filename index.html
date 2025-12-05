@@ -446,13 +446,6 @@
                         </button>
                     </div>
                 </div>
-
-                <div class="mt-6">
-                    <label class="block text-sm font-semibold mb-2" style="color: #151b29;">3º - Salve a data e time que vai servir</label>
-                    <button id="save-escala-btn" class="w-full zele-btn text-white font-bold py-3 px-6 rounded-lg">
-                        💾 Salvar Escala
-                    </button>
-                </div>
             </div>
 
             <!-- Calendário/Lista de Escalas -->
@@ -2347,13 +2340,8 @@
                     
                     selectedTeam = btn.dataset.team;
                     
-                    // Animar botão Salvar Escala após selecionar o time
-                    setTimeout(() => {
-                        elements.saveEscalaBtn.classList.add('pulse-save');
-                        setTimeout(() => {
-                            elements.saveEscalaBtn.classList.remove('pulse-save');
-                        }, 1000); // 2 piscadas x 0.5s = 1s
-                    }, 200); // pequeno delay para o usuário perceber a transição
+                    // Chamar saveEscala diretamente após selecionar o time
+                    saveEscala();
                 });
             });
 
