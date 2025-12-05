@@ -3615,6 +3615,28 @@
                         grouped[key][escala.team].push(escala);
                     });
 
+                    // Garantir que eventos futuros sem inscrições também apareçam na visão admin
+                    const nowForAvailable = new Date();
+                    availableDates.forEach(dateObj => {
+                        const [date, time] = dateObj.value.split('|');
+                        const eventDateTime = new Date(date + 'T' + time);
+                        const eventEndTime = new Date(eventDateTime.getTime() + (1 * 60 * 60 * 1000));
+                        const isVisible = eventEndTime > nowForAvailable; // segue a regra de 1h após início
+                        const key = `${date}_${time}`;
+                        if (isVisible && !grouped[key]) {
+                            grouped[key] = {
+                                date,
+                                time,
+                                eventName: dateObj.text || '',
+                                welcome: [],
+                                backstage: [],
+                                parking: [],
+                                kids: [],
+                                comunicacao: []
+                            };
+                        }
+                    });
+
                     // Filtrar eventos visíveis (até 1h após início) ANTES de armazenar
                     const now = new Date();
                     const filteredGrouped = {};
