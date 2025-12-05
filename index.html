@@ -4455,7 +4455,7 @@
                     console.log('🔍 DEBUG - Carregando logs de auditoria...');
                     console.log('🔍 DEBUG - isSuperAdmin:', isSuperAdmin);
                     
-                    const { collection, getDocs, query, orderBy: orderByField, where, limit } = window.firestoreMethods;
+                    const { collection, getDocs, query, orderBy: orderByField, limit } = window.firestoreMethods;
                     const logsList = document.getElementById('audit-logs-list');
                     const filterValue = document.getElementById('audit-log-filter').value;
                     const periodValue = document.getElementById('audit-log-period').value;
@@ -4465,13 +4465,8 @@
                     logsList.innerHTML = '<div class="text-center py-8"><div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 mx-auto"></div><p class="text-gray-600 mt-4">Carregando logs...</p></div>';
                     
                     const logsRef = collection(window.firebaseDb, 'audit_logs');
-                    let q = query(logsRef, orderByField('timestamp', 'desc'), limit(100));
-                    
-                    // Aplicar filtro de ação
-                    if (filterValue !== 'all') {
-                        console.log('🔍 DEBUG - Aplicando filtro de ação:', filterValue);
-                        q = query(logsRef, where('action', '==', filterValue), orderByField('timestamp', 'desc'), limit(100));
-                    }
+                    // Buscar todos os logs ordenados, sem filtro de action (para evitar índice composto)
+                    const q = query(logsRef, orderByField('timestamp', 'desc'), limit(200));
                     
                     console.log('🔍 DEBUG - Executando query...');
                     const logsSnapshot = await getDocs(q);
@@ -4488,16 +4483,19 @@
                     
                     logsSnapshot.forEach(doc => {
                         const data = doc.data();
-                        console.log('🔍 DEBUG - Log doc:', doc.id, data);
                         const logDate = new Date(data.timestamp);
                         
                         // Filtrar por período
                         if (periodDays) {
                             const diffDays = (now - logDate) / (1000 * 60 * 60 * 24);
                             if (diffDays > periodDays) {
-                                console.log('🔍 DEBUG - Log ignorado (fora do período):', doc.id);
                                 return;
                             }
+                        }
+                        
+                        // Filtrar por ação (client-side)
+                        if (filterValue !== 'all' && data.action !== filterValue) {
+                            return;
                         }
                         
                         logs.push({ id: doc.id, ...data });
@@ -5563,12 +5561,19 @@
                         maintainAspectRatio: false,
                         plugins: {
                             legend: {
-                                display: false
+                                display: true,
+                                position: 'bottom',
+                                labels: {
+                                    font: { size: 12 },
+                                    padding: 15,
+                                    usePointStyle: true
+                                }
                             }
                         },
                         scales: {
                             y: {
                                 beginAtZero: true,
+                                max: 5,
                                 ticks: {
                                     stepSize: 1
                                 }
@@ -8436,11 +8441,12 @@
                     await checkForCheckinEvents();
                     loadingDiv.remove();
                     
-                    if (!currentCheckinEvent) {
-                        showModal('⏰ Não há eventos disponíveis para check-in no momento.<br><br>O check-in fica disponível 1h antes até 1:30h após o evento.', false, null, false, null, '⏰');
+                    if (!currentCheckinEvents || currentCheckinEvents.length === 0) {
+                        showModal('⏰ Não há eventos disponíveis para check-in no momento.<br><br>O check-in fica disponível 2h antes até 2h após o evento.', false, null, false, null, '⏰');
                     }
                 } catch (error) {
                     loadingDiv.remove();
+                    console.error('❌ Erro ao buscar eventos para check-in:', error);
                     showModal('❌ Erro ao buscar eventos. Tente novamente.');
                 }
             });
