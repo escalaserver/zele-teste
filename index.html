@@ -8346,32 +8346,27 @@
 
                     console.log(`✅ Check-in registrado: ${escalaId} = ${status}`);
                     
-                    // Atualizar visualmente os botões - resetar ambos primeiro
-                    const allButtons = document.querySelectorAll(`[data-escala-id="${escalaId}"]`);
+                    // Atualizar visualmente os botões
+                    const presentBtn = document.querySelector(`.checkin-present-btn[data-escala-id="${escalaId}"]`);
+                    const absentBtn = document.querySelector(`.checkin-absent-btn[data-escala-id="${escalaId}"]`);
                     
-                    // Resetar todos os botões dessa escala
-                    allButtons.forEach(btn => {
-                        btn.classList.remove('bg-green-100', 'border-2', 'border-green-600', 'bg-red-100', 'border-red-600');
-                        btn.classList.add('bg-gray-200', 'hover:bg-gray-300');
-                        btn.disabled = false;
-                    });
-                    
-                    // Aplicar estilo apenas ao botão correspondente ao status
-                    allButtons.forEach(btn => {
-                        const btnText = btn.textContent.toLowerCase();
+                    if (presentBtn && absentBtn) {
+                        // Resetar ambos os botões
+                        presentBtn.classList.remove('bg-green-500', 'text-white');
+                        presentBtn.classList.add('bg-green-50', 'text-green-600', 'border', 'border-green-200');
                         
-                        if (status === 'present' && btnText.includes('presente')) {
-                            btn.classList.remove('bg-gray-200', 'hover:bg-gray-300');
-                            btn.classList.add('bg-green-100', 'border-2', 'border-green-600');
-                            btn.innerHTML = '✅ Presente';
-                            btn.disabled = true;
-                        } else if (status === 'absent' && btnText.includes('ausente')) {
-                            btn.classList.remove('bg-gray-200', 'hover:bg-gray-300');
-                            btn.classList.add('bg-red-100', 'border-2', 'border-red-600');
-                            btn.innerHTML = '❌ Ausente';
-                            btn.disabled = true;
+                        absentBtn.classList.remove('bg-red-500', 'text-white');
+                        absentBtn.classList.add('bg-red-50', 'text-red-600', 'border', 'border-red-200');
+                        
+                        // Aplicar estilo ao botão selecionado
+                        if (status === 'present') {
+                            presentBtn.classList.remove('bg-green-50', 'text-green-600', 'border', 'border-green-200');
+                            presentBtn.classList.add('bg-green-500', 'text-white');
+                        } else if (status === 'absent') {
+                            absentBtn.classList.remove('bg-red-50', 'text-red-600', 'border', 'border-red-200');
+                            absentBtn.classList.add('bg-red-500', 'text-white');
                         }
-                    });
+                    }
                 } catch (error) {
                     console.error('❌ Erro ao registrar check-in:', error);
                     showModal('Erro ao registrar presença. Tente novamente.');
