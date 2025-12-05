@@ -3312,6 +3312,7 @@
                     if (datesDoc.exists()) {
                         availableDates = datesDoc.data().dates || [];
                         console.log('📦 Datas encontradas no Firestore:', availableDates.length);
+                        console.log('🔍 DEBUG - TODAS as datas do Firestore:', availableDates.map(d => d.value));
                         console.log('🔍 DEBUG - Primeira data (exemplo):', availableDates[0]);
                         
                         // Adicionar teamLimits padrão se não existir (retrocompatibilidade)
@@ -3376,9 +3377,11 @@
                 console.log('🔍 updateCultoDropdown chamado');
                 console.log('🔍 Datas disponíveis:', availableDates.length);
                 console.log('🔍 Escalas do usuário:', escalas.length);
+                console.log('🔍 Escalas detalhes:', escalas.map(e => `${e.date}_${e.time} (${e.team})`));
 
                 // Criar set com data+hora já escaladas (formato: date_time)
                 const escaladasDateTimes = new Set(escalas.map(e => `${e.date}_${e.time}`));
+                console.log('🔍 Datas já escaladas:', Array.from(escaladasDateTimes));
                 
                 // Data/hora atual
                 const now = new Date();
@@ -3410,6 +3413,7 @@
                 sortedDates.forEach(option => {
                     const [date, time] = option.value.split('|');
                     const dateTimeKey = `${date}_${time}`;
+                    console.log(`🔍 Verificando ${dateTimeKey}: já escalado? ${escaladasDateTimes.has(dateTimeKey)}`);
                     if (!escaladasDateTimes.has(dateTimeKey)) {
                         const optionElement = document.createElement('option');
                         optionElement.value = option.value;
@@ -8156,7 +8160,7 @@
             });
 
             // ===== CHECK-IN DE VOLUNTÁRIOS =====
-            let currentCheckinEvent = null;
+            let currentCheckinEvents = []; // Agora é um array
 
             async function checkForCheckinEvents() {
                 // Só executar para líderes de time
@@ -8169,9 +8173,9 @@
                     const { collection, query, where, getDocs } = window.firestoreMethods;
                     const now = new Date();
                     const twoHoursBefore = new Date(now.getTime() - (2 * 60 * 60 * 1000));
-                    const threeHoursAfter = new Date(now.getTime() + (3 * 60 * 60 * 1000));
+                    const twoHoursAfter = new Date(now.getTime() + (2 * 60 * 60 * 1000));
 
-                    console.log('🔍 Check-in: Buscando eventos entre', twoHoursBefore, 'e', threeHoursAfter);
+                    console.log('🔍 Check-in: Buscando eventos entre', twoHoursBefore, 'e', twoHoursAfter);
 
                     // Buscar escalas dos times que lidera
                     const escalasRef = collection(window.firebaseDb, 'escalas');
@@ -8183,11 +8187,11 @@
                         const escala = { id: doc.id, ...doc.data() };
                         const eventDateTime = new Date(escala.date + 'T' + escala.time);
                         
-                        // Verificar se está na janela: 2h antes até 3h depois
+                        // Verificar se está na janela: 2h antes até 2h depois
                         const twoHoursBeforeEvent = new Date(eventDateTime.getTime() - (2 * 60 * 60 * 1000));
-                        const threeHoursAfterEvent = new Date(eventDateTime.getTime() + (3 * 60 * 60 * 1000));
+                        const twoHoursAfterEvent = new Date(eventDateTime.getTime() + (2 * 60 * 60 * 1000));
 
-                        if (now >= twoHoursBeforeEvent && now <= threeHoursAfterEvent) {
+                        if (now >= twoHoursBeforeEvent && now <= twoHoursAfterEvent) {
                             eventsInWindow.push({ ...escala, eventDateTime });
                         }
                     });
@@ -8214,16 +8218,15 @@
                             groupedByEvent[key].teams[escala.team].push(escala);
                         });
 
-                        // Pegar o evento mais recente (que já começou ou está mais próximo de agora)
+                        // Ordenar eventos por data/hora
                         const sortedEvents = Object.entries(groupedByEvent).sort((a, b) => {
-                            return b[1].eventDateTime - a[1].eventDateTime; // Mais recente primeiro
+                            return a[1].eventDateTime - b[1].eventDateTime; // Mais antigo primeiro
                         });
                         
-                        // Pegar o evento que já começou, ou o mais próximo
-                        const eventToShow = sortedEvents.find(([key, event]) => event.eventDateTime <= now) || sortedEvents[0];
-                        currentCheckinEvent = eventToShow[1];
+                        // Armazenar todos os eventos (não apenas um)
+                        currentCheckinEvents = sortedEvents.map(entry => entry[1]);
                         
-                        console.log('🎯 Check-in: Evento selecionado:', currentCheckinEvent.date, currentCheckinEvent.time, currentCheckinEvent.eventName);
+                        console.log('🎯 Check-in: Eventos selecionados:', currentCheckinEvents.map(e => `${e.date}_${e.time}`).join(', '));
                         
                         openCheckinModal();
                     }
@@ -8233,75 +8236,88 @@
             }
 
             function openCheckinModal() {
-                if (!currentCheckinEvent) return;
+                if (!currentCheckinEvents || currentCheckinEvents.length === 0) return;
 
                 const modal = document.getElementById('checkin-modal');
                 const eventInfo = document.getElementById('checkin-event-info');
                 const teamsList = document.getElementById('checkin-teams-list');
 
-                // Info do evento
-                const dateObj = new Date(currentCheckinEvent.date + 'T' + currentCheckinEvent.time);
-                const dateStr = dateObj.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
-                const eventNameDisplay = currentCheckinEvent.eventName ? ` - ${currentCheckinEvent.eventName}` : '';
-                eventInfo.innerHTML = `
-                    <div class="font-semibold">Evento: ${dateStr}${eventNameDisplay}</div>
-                    <div class="text-xs text-gray-600">Horário: ${currentCheckinEvent.time}</div>
-                `;
-
-                // Listar times e voluntários
-                const teamNames = {
-                    welcome: { name: 'Welcome', icon: '👋', color: 'bg-blue-50 border-blue-200' },
-                    backstage: { name: 'Backstage', icon: '🤝', color: 'bg-gray-50 border-gray-200' },
-                    parking: { name: 'Parking', icon: '🚗', color: 'bg-red-50 border-red-200' },
-                    kids: { name: 'Kids', icon: '👶', color: 'bg-yellow-50 border-yellow-200' },
-                    comunicacao: { name: 'Comunicação', icon: '📢', color: 'bg-purple-50 border-purple-200' }
-                };
-
-                let html = '';
-                Object.entries(currentCheckinEvent.teams).forEach(([teamKey, volunteers]) => {
-                    const teamInfo = teamNames[teamKey] || { name: teamKey, icon: '👥', color: 'bg-gray-50' };
-                    html += `
-                        <div class="border-l-4 ${teamInfo.color} border rounded p-3">
-                            <h4 class="font-semibold mb-2 flex items-center gap-2">
-                                <span>${teamInfo.icon}</span>
-                                <span>${teamInfo.name}</span>
-                                <span class="text-xs text-gray-500">(${volunteers.length})</span>
-                            </h4>
-                            <div class="space-y-2">
-                                ${volunteers.map(v => {
-                                    const checkInStatus = v.checkIn?.status || 'pending';
-                                    const photoUrl = v.userPhoto || 'Zele logo.png';
-                                    return `
-                                        <div class="flex items-center justify-between bg-white p-2 rounded border">
-                                            <div class="flex items-center gap-2">
-                                                <img src="${photoUrl}" alt="${v.userName}" class="w-8 h-8 rounded-full object-cover" onerror="this.src='Zele logo.png'">
-                                                <span class="font-medium text-sm">${v.userName}</span>
-                                                ${checkInStatus === 'present' ? '<span class="text-xs text-green-600 font-semibold">✓ Presente</span>' : ''}
-                                                ${checkInStatus === 'absent' ? '<span class="text-xs text-red-600 font-semibold">✗ Ausente</span>' : ''}
-                                            </div>
-                                            <div class="flex gap-2">
-                                                <button class="checkin-present-btn w-10 h-10 flex items-center justify-center rounded ${checkInStatus === 'present' ? 'bg-green-500 text-white' : 'bg-green-50 text-green-600 border border-green-200'} hover:bg-green-600 hover:text-white transition"
-                                                        data-escala-id="${v.id}"
-                                                        data-volunteer-name="${v.userName}"
-                                                        title="Marcar ${v.userName} como presente">
-                                                    ✓
-                                                </button>
-                                                <button class="checkin-absent-btn w-10 h-10 flex items-center justify-center rounded ${checkInStatus === 'absent' ? 'bg-red-500 text-white' : 'bg-red-50 text-red-600 border border-red-200'} hover:bg-red-600 hover:text-white transition"
-                                                        data-escala-id="${v.id}"
-                                                        data-volunteer-name="${v.userName}"
-                                                        title="Marcar ${v.userName} como ausente">
-                                                    ✗
-                                                </button>
-                                            </div>
-                                        </div>
-                                    `;
-                                }).join('')}
+                // Renderizar todos os eventos em seções
+                let eventsHtml = '';
+                
+                currentCheckinEvents.forEach((event, eventIndex) => {
+                    const dateObj = new Date(event.date + 'T' + event.time);
+                    const dateStr = dateObj.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+                    const eventNameDisplay = event.eventName ? ` - ${event.eventName}` : '';
+                    
+                    eventsHtml += `
+                        <div class="mb-6 pb-6 border-b border-gray-200 last:border-b-0">
+                            <div class="bg-blue-50 border-l-4 border-blue-500 p-3 rounded text-sm mb-4">
+                                <div class="font-semibold">📅 ${dateStr}${eventNameDisplay}</div>
+                                <div class="text-xs text-gray-600">🕐 ${event.time}</div>
                             </div>
-                        </div>
                     `;
+
+                    // Listar times e voluntários
+                    const teamNames = {
+                        welcome: { name: 'Welcome', icon: '👋', color: 'bg-blue-50 border-blue-200' },
+                        backstage: { name: 'Backstage', icon: '🤝', color: 'bg-gray-50 border-gray-200' },
+                        parking: { name: 'Parking', icon: '🚗', color: 'bg-red-50 border-red-200' },
+                        kids: { name: 'Kids', icon: '👶', color: 'bg-yellow-50 border-yellow-200' },
+                        comunicacao: { name: 'Comunicação', icon: '📢', color: 'bg-purple-50 border-purple-200' }
+                    };
+
+                    Object.entries(event.teams).forEach(([teamKey, volunteers]) => {
+                        const teamInfo = teamNames[teamKey] || { name: teamKey, icon: '👥', color: 'bg-gray-50' };
+                        eventsHtml += `
+                            <div class="border-l-4 ${teamInfo.color} border rounded p-3 mb-3">
+                                <h4 class="font-semibold mb-2 flex items-center gap-2">
+                                    <span>${teamInfo.icon}</span>
+                                    <span>${teamInfo.name}</span>
+                                    <span class="text-xs text-gray-500">(${volunteers.length})</span>
+                                </h4>
+                                <div class="space-y-2">
+                                    ${volunteers.map(v => {
+                                        const checkInStatus = v.checkIn?.status || 'pending';
+                                        const photoUrl = v.userPhoto || 'Zele logo.png';
+                                        return `
+                                            <div class="flex items-center justify-between bg-white p-2 rounded border">
+                                                <div class="flex items-center gap-2">
+                                                    <img src="${photoUrl}" alt="${v.userName}" class="w-8 h-8 rounded-full object-cover" onerror="this.src='Zele logo.png'">
+                                                    <span class="font-medium text-sm">${v.userName}</span>
+                                                    ${checkInStatus === 'present' ? '<span class="text-xs text-green-600 font-semibold">✓ Presente</span>' : ''}
+                                                    ${checkInStatus === 'absent' ? '<span class="text-xs text-red-600 font-semibold">✗ Ausente</span>' : ''}
+                                                </div>
+                                                <div class="flex gap-2">
+                                                    <button class="checkin-present-btn w-10 h-10 flex items-center justify-center rounded ${checkInStatus === 'present' ? 'bg-green-500 text-white' : 'bg-green-50 text-green-600 border border-green-200'} hover:bg-green-600 hover:text-white transition"
+                                                            data-escala-id="${v.id}"
+                                                            data-volunteer-name="${v.userName}"
+                                                            title="Marcar ${v.userName} como presente">
+                                                        ✓
+                                                    </button>
+                                                    <button class="checkin-absent-btn w-10 h-10 flex items-center justify-center rounded ${checkInStatus === 'absent' ? 'bg-red-500 text-white' : 'bg-red-50 text-red-600 border border-red-200'} hover:bg-red-600 hover:text-white transition"
+                                                            data-escala-id="${v.id}"
+                                                            data-volunteer-name="${v.userName}"
+                                                            title="Marcar ${v.userName} como ausente">
+                                                        ✗
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    eventsHtml += `</div>`; // Fechar seção do evento
                 });
 
-                teamsList.innerHTML = html;
+                // Atualizar header
+                eventInfo.innerHTML = `<div class="font-semibold">✅ Check-in de Voluntários (${currentCheckinEvents.length} evento${currentCheckinEvents.length > 1 ? 's' : ''})</div>`;
+
+                // Inserir conteúdo dos eventos
+                teamsList.innerHTML = eventsHtml;
 
                 // Event listeners para os botões
                 document.querySelectorAll('.checkin-present-btn').forEach(btn => {
