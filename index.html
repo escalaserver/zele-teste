@@ -2830,11 +2830,11 @@
                     console.log('  Time selecionado:', team);
                     
                     // Determinar se é pending
-                    // - Se falta < 24h E evento ainda não começou → PENDING
-                    // - Se evento já começou E está dentro da janela de 1h → CONFIRMADO (entrada rápida)
-                    // - Kids sempre vai para PENDING
+                    // - Kids SEMPRE vai para PENDING (mesmo dentro da janela rápida)
+                    // - Se falta < 24h e ainda não começou → PENDING
+                    // - Se evento já começou e está dentro da janela de 1h → CONFIRMADO (entrada rápida) exceto Kids
                     const isDuringQuickEntryWindow = hoursUntilEvent < 0 && hoursUntilEventEnd > 0; // Evento iniciado, dentro de 1h
-                    const isPending = ((hoursUntilEvent < 24 && hoursUntilEvent > 0) || team === 'kids') && !isDuringQuickEntryWindow;
+                    const isPending = team === 'kids' || ((hoursUntilEvent < 24 && hoursUntilEvent > 0) && !isDuringQuickEntryWindow);
                     console.log('  Está na janela de entrada rápida (1h após início)?', isDuringQuickEntryWindow);
                     console.log('  É pendente (<24h ou Kids)?', isPending);
                     
