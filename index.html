@@ -708,6 +708,77 @@
 
             <!-- Grid de Gráficos -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Card de Voluntários e Líderes (Estatísticas Principais) -->
+                <div class="card-float rounded-xl p-6 lg:col-span-2">
+                    <h3 class="font-bold text-lg mb-6" style="color: #151b29;">👥 Estatísticas de Voluntários</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Card: Total de Voluntários -->
+                        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border-l-4 border-blue-500">
+                            <div class="flex items-end justify-between">
+                                <div>
+                                    <p class="text-gray-600 text-sm font-medium">Total de Voluntários</p>
+                                    <p class="text-3xl font-bold text-blue-600 mt-2" id="stat-total-volunteers">-</p>
+                                </div>
+                                <span class="text-4xl opacity-50">📋</span>
+                            </div>
+                        </div>
+
+                        <!-- Card: Total de Líderes de Time -->
+                        <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border-l-4 border-purple-500">
+                            <div class="flex items-end justify-between">
+                                <div>
+                                    <p class="text-gray-600 text-sm font-medium">Líderes de Time</p>
+                                    <p class="text-3xl font-bold text-purple-600 mt-2" id="stat-total-leaders">-</p>
+                                </div>
+                                <span class="text-4xl opacity-50">👑</span>
+                            </div>
+                        </div>
+
+                        <!-- Card: Voluntários Únicos (com escalas) -->
+                        <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border-l-4 border-green-500">
+                            <div class="flex items-end justify-between">
+                                <div>
+                                    <p class="text-gray-600 text-sm font-medium">Escalados Este Mês</p>
+                                    <p class="text-3xl font-bold text-green-600 mt-2" id="stat-active-volunteers">-</p>
+                                </div>
+                                <span class="text-4xl opacity-50">✅</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-4 text-center">Última atualização: <span id="stat-update-time">-</span></p>
+                </div>
+
+                <!-- Card de Engajamento (Voluntários com/sem Escalas) -->
+                <div class="card-float rounded-xl p-6 lg:col-span-2">
+                    <h3 class="font-bold text-lg mb-6" style="color: #151b29;">📊 Engajamento de Voluntários</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Card: Voluntários com Escalas -->
+                        <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg p-4 border-l-4 border-emerald-500">
+                            <div class="flex items-end justify-between">
+                                <div>
+                                    <p class="text-gray-600 text-sm font-medium">Voluntários Ativos</p>
+                                    <p class="text-sm text-gray-500 mb-2">(Já fizeram escalas)</p>
+                                    <p class="text-3xl font-bold text-emerald-600 mt-2" id="stat-volunteers-with-escalas">-</p>
+                                </div>
+                                <span class="text-4xl opacity-50">✅</span>
+                            </div>
+                        </div>
+
+                        <!-- Card: Voluntários sem Escalas -->
+                        <div class="bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg p-4 border-l-4 border-slate-500">
+                            <div class="flex items-end justify-between">
+                                <div>
+                                    <p class="text-gray-600 text-sm font-medium">Voluntários Inativos</p>
+                                    <p class="text-sm text-gray-500 mb-2">(Só acessaram o app)</p>
+                                    <p class="text-3xl font-bold text-slate-600 mt-2" id="stat-volunteers-without-escalas">-</p>
+                                </div>
+                                <span class="text-4xl opacity-50">🔍</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-4 text-center">Mostra o histórico total de escalas</p>
+                </div>
+
                 <!-- Gráfico 1: Times com Menos de 5 Voluntários (ALERTA) -->
                 <div class="card-float rounded-xl p-6">
                     <div class="flex items-center justify-between mb-4">
@@ -5459,6 +5530,9 @@
                     // Armazenar escalas globalmente para atualização do gráfico
                     window.currentDashboardEscalas = escalas;
                     
+                    // Atualizar estatísticas de voluntários
+                    await getVolunteerStats(escalas);
+                    
                     // Gerar dados dos gráficos
                     await generateChart1_TeamParticipation(escalas);
                     await generateChart2_TopVolunteers(escalas);
@@ -5475,6 +5549,87 @@
                 } catch (error) {
                     console.error('❌ Erro ao carregar Dashboard:', error);
                     showModal('❌ Erro ao carregar Dashboard. Tente novamente.', false, null, true);
+                }
+            }
+
+            // ===== ESTATÍSTICAS DE VOLUNTÁRIOS =====
+            
+            async function getVolunteerStats(escalas) {
+                try {
+                    const { collection, getDocs, query, orderBy } = window.firestoreMethods;
+                    
+                    // 1. Contar total de voluntários no sistema
+                    const usersRef = collection(window.firebaseDb, 'users');
+                    const usersSnapshot = await getDocs(usersRef);
+                    const totalVolunteers = usersSnapshot.size;
+                    
+                    // 2. Contar líderes de times (usuários com teamLeader array não vazio)
+                    let totalLeaders = 0;
+                    usersSnapshot.forEach(doc => {
+                        const data = doc.data();
+                        if (data.teamLeader && Array.isArray(data.teamLeader) && data.teamLeader.length > 0) {
+                            totalLeaders++;
+                        }
+                    });
+                    
+                    // 3. Contar voluntários únicos com escalas aprovadas neste mês
+                    const now = new Date();
+                    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                    const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+                    
+                    const escalasThisMonth = escalas.filter(e => {
+                        if (!e.eventDateTime) return false;
+                        const escalaDate = new Date(e.eventDateTime);
+                        return escalaDate >= firstDayOfMonth && escalaDate <= lastDayOfMonth && (e.status === 'approved' || !e.status);
+                    });
+                    
+                    // Contar usuários únicos com escalas
+                    const uniqueVolunteersWithEscalas = new Set(escalasThisMonth.map(e => e.userId));
+                    const activeVolunteers = uniqueVolunteersWithEscalas.size;
+                    
+                    // 4. Contar voluntários com escalas no histórico total (ANY escalas, não apenas este mês)
+                    const allEscalasRef = collection(window.firebaseDb, 'escalas');
+                    const allEscalasSnapshot = await getDocs(allEscalasRef);
+                    const usersWithAnyEscalas = new Set();
+                    
+                    allEscalasSnapshot.forEach(doc => {
+                        const data = doc.data();
+                        if (data.userId && (data.status === 'approved' || !data.status)) {
+                            usersWithAnyEscalas.add(data.userId);
+                        }
+                    });
+                    
+                    // Contar voluntários sem escalas (total - com escalas)
+                    const volunteersWithEscalas = usersWithAnyEscalas.size;
+                    const volunteersWithoutEscalas = Math.max(0, totalVolunteers - volunteersWithEscalas);
+                    
+                    // Atualizar o card com as estatísticas
+                    document.getElementById('stat-total-volunteers').textContent = totalVolunteers;
+                    document.getElementById('stat-total-leaders').textContent = totalLeaders;
+                    document.getElementById('stat-active-volunteers').textContent = activeVolunteers;
+                    document.getElementById('stat-volunteers-with-escalas').textContent = volunteersWithEscalas;
+                    document.getElementById('stat-volunteers-without-escalas').textContent = volunteersWithoutEscalas;
+                    
+                    // Atualizar timestamp
+                    const now_formatted = new Date();
+                    const timeStr = now_formatted.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                    document.getElementById('stat-update-time').textContent = timeStr;
+                    
+                    console.log('📊 Estatísticas atualizadas:', {
+                        totalVolunteers,
+                        totalLeaders,
+                        activeVolunteers,
+                        volunteersWithEscalas,
+                        volunteersWithoutEscalas
+                    });
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao carregar estatísticas:', error);
+                    document.getElementById('stat-total-volunteers').textContent = '?';
+                    document.getElementById('stat-total-leaders').textContent = '?';
+                    document.getElementById('stat-active-volunteers').textContent = '?';
+                    document.getElementById('stat-volunteers-with-escalas').textContent = '?';
+                    document.getElementById('stat-volunteers-without-escalas').textContent = '?';
                 }
             }
 
