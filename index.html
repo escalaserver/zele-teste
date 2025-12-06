@@ -1688,24 +1688,51 @@
                 const allEscalasForMonthRef = collection(window.firebaseDb, 'escalas');
                 const allEscalasForMonthSnapshot = await getDocs(allEscalasForMonthRef);
                 
+                console.log('📊 Total de escalas no Firestore:', allEscalasForMonthSnapshot.size);
+                
                 const escalasThisMonth = [];
+                let escalasWithoutEventDateTime = 0;
+                let escalasOutsideMonth = 0;
+                
                 allEscalasForMonthSnapshot.forEach(doc => {
                     const data = doc.data();
-                    if (data.eventDateTime && (data.status === 'approved' || !data.status)) {
+                    
+                    if (!data.eventDateTime) {
+                        escalasWithoutEventDateTime++;
+                        return;
+                    }
+                    
+                    if (data.status === 'approved' || !data.status) {
                         const escalaDate = new Date(data.eventDateTime);
+                        
                         if (escalaDate >= firstDayOfMonth && escalaDate <= lastDayOfMonth) {
                             escalasThisMonth.push(data);
+                        } else {
+                            escalasOutsideMonth++;
                         }
                     }
                 });
                 
                 console.log('📊 Escalas encontradas neste mês:', escalasThisMonth.length);
+                console.log('⚠️ Escalas SEM eventDateTime:', escalasWithoutEventDateTime);
+                console.log('📅 Escalas FORA do mês:', escalasOutsideMonth);
+                
+                // Debug: mostrar exemplo das primeiras 3 escalas
+                if (escalasThisMonth.length > 0) {
+                    console.log('📋 Exemplos de escalas do mês:', escalasThisMonth.slice(0, 3).map(e => ({
+                        userId: e.userId,
+                        volunteerName: e.volunteerName,
+                        eventDateTime: e.eventDateTime,
+                        date: new Date(e.eventDateTime).toLocaleString('pt-BR')
+                    })));
+                }
                 
                 // Contar usuários únicos com escalas
                 const uniqueVolunteersWithEscalas = new Set(escalasThisMonth.map(e => e.userId).filter(id => id));
                 const activeVolunteers = uniqueVolunteersWithEscalas.size;
                 
                 console.log('👥 Voluntários únicos escalados:', activeVolunteers);
+                console.log('📋 IDs dos voluntários:', Array.from(uniqueVolunteersWithEscalas));
                 
                 // 4. Contar voluntários com escalas no histórico total (ANY escalas, não apenas este mês)
                 const allEscalasRef = collection(window.firebaseDb, 'escalas');
