@@ -4060,6 +4060,65 @@
                 }
             }
             
+            // Listener em tempo real para escalas do usuário
+            let unsubscribeUserEscalas = null;
+            function setupUserEscalasListener() {
+                if (!currentUser) return;
+                
+                try {
+                    const { collection, query, where, onSnapshot } = window.firestoreMethods;
+                    
+                    // Desinscrever de listener anterior se existir
+                    if (unsubscribeUserEscalas) {
+                        unsubscribeUserEscalas();
+                    }
+                    
+                    const q = query(
+                        collection(window.firebaseDb, 'escalas'),
+                        where('userId', '==', currentUser.uid)
+                    );
+                    
+                    unsubscribeUserEscalas = onSnapshot(q, (snapshot) => {
+                        const allEscalas = [];
+                        snapshot.forEach((doc) => {
+                            allEscalas.push({ id: doc.id, ...doc.data() });
+                        });
+                        
+                        // Filtrar eventos visíveis
+                        const now = new Date();
+                        const escalas = allEscalas.filter(escala => {
+                            const eventDateTime = new Date(escala.date + 'T' + escala.time);
+                            const eventEndTime = new Date(eventDateTime.getTime() + (1 * 60 * 60 * 1000));
+                            return eventEndTime > now;
+                        });
+                        
+                        // Ordenar por data e horário
+                        escalas.sort((a, b) => {
+                            const dateTimeA = new Date(a.date + 'T' + a.time);
+                            const dateTimeB = new Date(b.date + 'T' + b.time);
+                            return dateTimeA - dateTimeB;
+                        });
+                        
+                        // Atualizar dados
+                        allUserEscalas = escalas;
+                        
+                        // Atualizar filtro e renderização
+                        updateMinhasEscalasFilter(escalas);
+                        renderUserEscalas(escalas);
+                        updateCultoDropdown(escalas);
+                        updateUpcomingEventsBadge(escalas);
+                        
+                        console.log('🔄 Escalas atualizadas em tempo real:', escalas.length);
+                    }, (error) => {
+                        console.error('❌ Erro no listener de escalas:', error);
+                    });
+                    
+                    console.log('✅ Listener de escalas configurado');
+                } catch (error) {
+                    console.error('❌ Erro ao configurar listener:', error);
+                }
+            }
+            
             // Atualizar filtro de Minhas Escalas
             function updateMinhasEscalasFilter(escalas) {
                 const filter = elements.filterMinhasEscalas;
@@ -5775,6 +5834,9 @@
                 // Limpar inputs
                 document.getElementById('manual-scale-volunteer-search').value = '';
                 document.getElementById('manual-scale-volunteer-search').focus();
+                
+                // Recarregar lista de voluntários
+                loadVolunteersForManualScale();
             }
 
             // Carregar voluntários para escala manual
@@ -5814,6 +5876,8 @@
             // Exibir voluntários
             function displayVolunteersForManualScale(volunteers) {
                 const list = document.getElementById('manual-scale-volunteers-list');
+                
+                if (!list) return;
                 
                 if (volunteers.length === 0) {
                     list.innerHTML = '<p class="text-gray-500 text-center py-8">Nenhum voluntário encontrado</p>';
@@ -6080,14 +6144,20 @@
                         createdBy: currentUser.displayName
                     });
                     
-                    showModal(`✅ Escala criada com sucesso!<br><br>Voluntário: <strong>${selectedVolunteer.name}</strong><br>Evento: <strong>${selectedEvent.text}</strong><br>Time: <strong>${selectedTeam}</strong>`);
+                    showModal(
+                        `✅ Escala criada com sucesso!<br><br>Voluntário: <strong>${selectedVolunteer.name}</strong><br>Evento: <strong>${selectedEvent.text}</strong><br>Time: <strong>${selectedTeam}</strong>`,
+                        false,
+                        null,
+                        false,
+                        () => {
+                            // Callback ao fechar o modal - recarregar lista
+                            resetManualScalePanel();
+                        }
+                    );
                     
                     // Recarregar dados
                     await loadUserEscalas();
                     await loadAllEscalas();
-                    
-                    // Resetar e voltar
-                    resetManualScalePanel();
                     
                 } catch (error) {
                     console.error('❌ Erro ao salvar escala:', error);
@@ -9606,6 +9676,7 @@
                     updateUserUI(user);
                     showApp();
                     await loadUserEscalas(); // Agora sim carregar escalas
+                    setupUserEscalasListener(); // Configurar listener em tempo real
                     await loadAllEscalas();
                     setupInstallButton(); // Configurar botão de instalação após login
                     await checkOnboarding(user); // Verificar se precisa mostrar onboarding
