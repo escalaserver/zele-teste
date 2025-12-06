@@ -2158,6 +2158,20 @@
             const modal = document.getElementById('stat-volunteers-without-escalas-modal');
             if (modal) {
                 modal.classList.remove('hidden');
+                
+                // Fechar ao clicar no X
+                const closeBtn = document.getElementById('stat-volunteers-without-escalas-modal-close');
+                if (closeBtn) {
+                    closeBtn.onclick = () => modal.classList.add('hidden');
+                }
+                
+                // Fechar ao clicar fora do modal
+                modal.onclick = (e) => {
+                    if (e.target === modal) {
+                        modal.classList.add('hidden');
+                    }
+                };
+                
                 console.log('✅ Modal de voluntários sem escalas aberto');
             } else {
                 console.error('❌ Modal não encontrado');
