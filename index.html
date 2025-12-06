@@ -1682,7 +1682,11 @@
                 const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
                 const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
                 
-                console.log('📅 Buscando escalas entre:', firstDayOfMonth.toISOString(), 'e', lastDayOfMonth.toISOString());
+                // Formatar datas como strings YYYY-MM-DD para comparação
+                const firstDayStr = firstDayOfMonth.toISOString().split('T')[0];
+                const lastDayStr = lastDayOfMonth.toISOString().split('T')[0];
+                
+                console.log('📅 Buscando escalas entre:', firstDayStr, 'e', lastDayStr);
                 
                 // Buscar TODAS as escalas do Firestore para calcular corretamente
                 const allEscalasForMonthRef = collection(window.firebaseDb, 'escalas');
@@ -1691,21 +1695,21 @@
                 console.log('📊 Total de escalas no Firestore:', allEscalasForMonthSnapshot.size);
                 
                 const escalasThisMonth = [];
-                let escalasWithoutEventDateTime = 0;
+                let escalasWithoutDate = 0;
                 let escalasOutsideMonth = 0;
                 
                 allEscalasForMonthSnapshot.forEach(doc => {
                     const data = doc.data();
                     
-                    if (!data.eventDateTime) {
-                        escalasWithoutEventDateTime++;
+                    // Verificar se tem o campo date (formato: YYYY-MM-DD)
+                    if (!data.date) {
+                        escalasWithoutDate++;
                         return;
                     }
                     
                     if (data.status === 'approved' || !data.status) {
-                        const escalaDate = new Date(data.eventDateTime);
-                        
-                        if (escalaDate >= firstDayOfMonth && escalaDate <= lastDayOfMonth) {
+                        // Comparar strings de data (YYYY-MM-DD)
+                        if (data.date >= firstDayStr && data.date <= lastDayStr) {
                             escalasThisMonth.push(data);
                         } else {
                             escalasOutsideMonth++;
@@ -1714,7 +1718,7 @@
                 });
                 
                 console.log('📊 Escalas encontradas neste mês:', escalasThisMonth.length);
-                console.log('⚠️ Escalas SEM eventDateTime:', escalasWithoutEventDateTime);
+                console.log('⚠️ Escalas SEM campo date:', escalasWithoutDate);
                 console.log('📅 Escalas FORA do mês:', escalasOutsideMonth);
                 
                 // Debug: mostrar exemplo das primeiras 3 escalas
@@ -1722,8 +1726,8 @@
                     console.log('📋 Exemplos de escalas do mês:', escalasThisMonth.slice(0, 3).map(e => ({
                         userId: e.userId,
                         volunteerName: e.volunteerName,
-                        eventDateTime: e.eventDateTime,
-                        date: new Date(e.eventDateTime).toLocaleString('pt-BR')
+                        date: e.date,
+                        team: e.team
                     })));
                 }
                 
