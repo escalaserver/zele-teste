@@ -1626,7 +1626,483 @@
             if (typeof emailjs !== 'undefined' && CONFIG.EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY') {
                 emailjs.init(CONFIG.EMAILJS_PUBLIC_KEY);
                 console.log('📧 EmailJS inicializado');
-            }        
+            }
+
+        // ========================================
+        // 📊 FUNÇÕES DE ESTATÍSTICAS E MODAIS (GLOBAL)
+        // ========================================
+        
+        async function getVolunteerStats(escalas) {
+            try {
+                const { collection, getDocs, query, orderBy } = window.firestoreMethods;
+                
+                // 1. Contar total de voluntários no sistema
+                const usersRef = collection(window.firebaseDb, 'users');
+                const usersSnapshot = await getDocs(usersRef);
+                const totalVolunteers = usersSnapshot.size;
+                
+                // 2. Contar líderes de times (usuários com teamLeader array não vazio)
+                let totalLeaders = 0;
+                usersSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.teamLeader && Array.isArray(data.teamLeader) && data.teamLeader.length > 0) {
+                        totalLeaders++;
+                    }
+                });
+                
+                // 3. Contar voluntários únicos com escalas aprovadas neste mês
+                const now = new Date();
+                const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+                
+                const escalasThisMonth = escalas.filter(e => {
+                    if (!e.eventDateTime) return false;
+                    const escalaDate = new Date(e.eventDateTime);
+                    return escalaDate >= firstDayOfMonth && escalaDate <= lastDayOfMonth && (e.status === 'approved' || !e.status);
+                });
+                
+                // Contar usuários únicos com escalas
+                const uniqueVolunteersWithEscalas = new Set(escalasThisMonth.map(e => e.userId));
+                const activeVolunteers = uniqueVolunteersWithEscalas.size;
+                
+                // 4. Contar voluntários com escalas no histórico total (ANY escalas, não apenas este mês)
+                const allEscalasRef = collection(window.firebaseDb, 'escalas');
+                const allEscalasSnapshot = await getDocs(allEscalasRef);
+                const usersWithAnyEscalas = new Set();
+                
+                allEscalasSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.userId && (data.status === 'approved' || !data.status)) {
+                        usersWithAnyEscalas.add(data.userId);
+                    }
+                });
+                
+                // Contar voluntários sem escalas (total - com escalas)
+                const volunteersWithEscalas = usersWithAnyEscalas.size;
+                const volunteersWithoutEscalas = Math.max(0, totalVolunteers - volunteersWithEscalas);
+                
+                // Atualizar o card com as estatísticas
+                document.getElementById('stat-total-volunteers').textContent = totalVolunteers;
+                document.getElementById('stat-total-leaders').textContent = totalLeaders;
+                document.getElementById('stat-active-volunteers').textContent = activeVolunteers;
+                document.getElementById('stat-volunteers-with-escalas').textContent = volunteersWithEscalas;
+                document.getElementById('stat-volunteers-without-escalas').textContent = volunteersWithoutEscalas;
+                
+                // Atualizar timestamp
+                const now_formatted = new Date();
+                const timeStr = now_formatted.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                document.getElementById('stat-update-time').textContent = timeStr;
+                
+                console.log('📊 Estatísticas atualizadas:', {
+                    totalVolunteers,
+                    totalLeaders,
+                    activeVolunteers,
+                    volunteersWithEscalas,
+                    volunteersWithoutEscalas
+                });
+                
+            } catch (error) {
+                console.error('❌ Erro ao carregar estatísticas:', error);
+                document.getElementById('stat-total-volunteers').textContent = '?';
+                document.getElementById('stat-total-leaders').textContent = '?';
+                document.getElementById('stat-active-volunteers').textContent = '?';
+                document.getElementById('stat-volunteers-with-escalas').textContent = '?';
+                document.getElementById('stat-volunteers-without-escalas').textContent = '?';
+            }
+        }
+
+        async function openTotalVolunteersModal() {
+            console.log('🔵 openTotalVolunteersModal chamada');
+            const { collection, getDocs, query, orderBy } = window.firestoreMethods;
+            const usersRef = collection(window.firebaseDb, 'users');
+            const q = query(usersRef, orderBy('email', 'asc'));
+            const snapshot = await getDocs(q);
+            
+            const users = [];
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                users.push({
+                    id: doc.id,
+                    email: data.email || 'Sem email',
+                    displayName: data.displayName || data.email?.split('@')[0] || 'Sem nome',
+                    lastLoginFormatted: data.lastLoginFormatted || '🔴 Nunca acessou'
+                });
+            });
+            
+            const listElement = document.getElementById('stat-total-volunteers-list');
+            const searchInput = document.getElementById('stat-total-volunteers-search');
+            
+            function renderList(filtered) {
+                listElement.innerHTML = filtered.map(user => `
+                    <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <p class="font-semibold text-gray-800">${user.displayName}</p>
+                                <p class="text-sm text-gray-600">${user.email}</p>
+                                <p class="text-xs text-gray-500 mt-2">🕐 Último acesso: ${user.lastLoginFormatted}</p>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            renderList(users);
+            
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                const filtered = users.filter(u => 
+                    u.displayName.toLowerCase().includes(term) || 
+                    u.email.toLowerCase().includes(term)
+                );
+                renderList(filtered);
+            });
+            
+            // Abrir modal
+            const modal = document.getElementById('stat-total-volunteers-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                
+                // Fechar ao clicar no X
+                const closeBtn = document.getElementById('stat-total-volunteers-modal-close');
+                if (closeBtn) {
+                    closeBtn.onclick = () => modal.classList.add('hidden');
+                }
+                
+                // Fechar ao clicar fora do modal
+                modal.onclick = (e) => {
+                    if (e.target === modal) {
+                        modal.classList.add('hidden');
+                    }
+                };
+                
+                console.log('✅ Modal aberto');
+            } else {
+                console.error('❌ Modal não encontrado');
+            }
+        }
+
+        async function openTotalLeadersModal() {
+            console.log('👑 openTotalLeadersModal chamada');
+            const { collection, getDocs, query, orderBy } = window.firestoreMethods;
+            const usersRef = collection(window.firebaseDb, 'users');
+            const q = query(usersRef, orderBy('email', 'asc'));
+            const snapshot = await getDocs(q);
+            
+            const leaders = [];
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                if (data.teamLeader && Array.isArray(data.teamLeader) && data.teamLeader.length > 0) {
+                    const teamEmojis = {
+                        welcome: '👋',
+                        backstage: '🤝',
+                        parking: '🚗',
+                        kids: '👶',
+                        comunicacao: '📢'
+                    };
+                    leaders.push({
+                        id: doc.id,
+                        email: data.email || 'Sem email',
+                        displayName: data.displayName || data.email?.split('@')[0] || 'Sem nome',
+                        lastLoginFormatted: data.lastLoginFormatted || '🔴 Nunca acessou',
+                        teams: data.teamLeader.map(t => `${teamEmojis[t] || ''} ${t}`).join(', ')
+                    });
+                }
+            });
+            
+            const listElement = document.getElementById('stat-total-leaders-list');
+            const searchInput = document.getElementById('stat-total-leaders-search');
+            
+            function renderList(filtered) {
+                listElement.innerHTML = filtered.map(leader => `
+                    <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <p class="font-semibold text-gray-800">${leader.displayName}</p>
+                                <p class="text-sm text-gray-600">${leader.email}</p>
+                                <p class="text-xs text-purple-600 font-medium mt-1">Líder de: ${leader.teams}</p>
+                                <p class="text-xs text-gray-500 mt-2">🕐 Último acesso: ${leader.lastLoginFormatted}</p>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            renderList(leaders);
+            
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                const filtered = leaders.filter(u => 
+                    u.displayName.toLowerCase().includes(term) || 
+                    u.email.toLowerCase().includes(term)
+                );
+                renderList(filtered);
+            });
+            
+            // Abrir modal
+            const modal = document.getElementById('stat-total-leaders-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                
+                // Fechar ao clicar no X
+                const closeBtn = document.getElementById('stat-total-leaders-modal-close');
+                if (closeBtn) {
+                    closeBtn.onclick = () => modal.classList.add('hidden');
+                }
+                
+                // Fechar ao clicar fora do modal
+                modal.onclick = (e) => {
+                    if (e.target === modal) {
+                        modal.classList.add('hidden');
+                    }
+                };
+                
+                console.log('✅ Modal de líderes aberto');
+            } else {
+                console.error('❌ Modal de líderes não encontrado');
+            }
+        }
+
+        async function openVolunteersWithEscalasModal() {
+            console.log('✅ openVolunteersWithEscalasModal chamada');
+            const { collection, getDocs } = window.firestoreMethods;
+            const escalasRef = collection(window.firebaseDb, 'escalas');
+            const snapshot = await getDocs(escalasRef);
+            
+            const usersWithEscalas = new Map();
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                if (data.userId && (data.status === 'approved' || !data.status)) {
+                    if (!usersWithEscalas.has(data.userId)) {
+                        usersWithEscalas.set(data.userId, {
+                            email: data.userEmail || 'Sem email',
+                            displayName: data.volunteerName || 'Sem nome',
+                            count: 0
+                        });
+                    }
+                    usersWithEscalas.get(data.userId).count++;
+                }
+            });
+            
+            // Buscar últimos acessos dos usuários
+            const usersRef = collection(window.firebaseDb, 'users');
+            const usersSnapshot = await getDocs(usersRef);
+            const userMap = new Map();
+            usersSnapshot.forEach(doc => {
+                userMap.set(doc.id, doc.data());
+            });
+            
+            const users = Array.from(usersWithEscalas.values()).map((u, index) => {
+                // Tentar encontrar o último acesso
+                let lastLogin = '📝 -';
+                usersSnapshot.forEach(doc => {
+                    if (doc.data().email === u.email) {
+                        lastLogin = doc.data().lastLoginFormatted || '🔴 Nunca acessou';
+                    }
+                });
+                return { ...u, lastLogin };
+            }).sort((a, b) => b.count - a.count);
+            
+            const listElement = document.getElementById('stat-volunteers-with-escalas-list');
+            const searchInput = document.getElementById('stat-volunteers-with-escalas-search');
+            
+            function renderList(filtered) {
+                listElement.innerHTML = filtered.map(user => `
+                    <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <p class="font-semibold text-gray-800">${user.displayName}</p>
+                                <p class="text-sm text-gray-600">${user.email}</p>
+                                <p class="text-xs text-emerald-600 font-medium mt-1">📊 ${user.count} escala(s)</p>
+                                <p class="text-xs text-gray-500 mt-2">🕐 Último acesso: ${user.lastLogin}</p>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            renderList(users);
+            
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                const filtered = users.filter(u => 
+                    u.displayName.toLowerCase().includes(term) || 
+                    u.email.toLowerCase().includes(term)
+                );
+                renderList(filtered);
+            });
+            
+            // Abrir modal
+            const modal = document.getElementById('stat-volunteers-with-escalas-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                console.log('✅ Modal de voluntários com escalas aberto');
+            } else {
+                console.error('❌ Modal não encontrado');
+            }
+        }
+
+        async function openActiveVolunteersModal() {
+            const now = new Date();
+            const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+            const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+            
+            const { collection, getDocs, query, orderBy } = window.firestoreMethods;
+            
+            // Buscar todas as escalas deste mês
+            const escalasRef = collection(window.firebaseDb, 'escalas');
+            const escalasSnapshot = await getDocs(escalasRef);
+            
+            const usersEscalas = new Map();
+            escalasSnapshot.forEach(doc => {
+                const data = doc.data();
+                if (data.userId && (data.status === 'approved' || !data.status) && data.eventDateTime) {
+                    const escalaDate = new Date(data.eventDateTime);
+                    if (escalaDate >= firstDayOfMonth && escalaDate <= lastDayOfMonth) {
+                        if (!usersEscalas.has(data.userId)) {
+                            usersEscalas.set(data.userId, {
+                                email: data.userEmail || 'Sem email',
+                                displayName: data.volunteerName || 'Sem nome',
+                                count: 0
+                            });
+                        }
+                        usersEscalas.get(data.userId).count++;
+                    }
+                }
+            });
+            
+            // Buscar últimos acessos dos usuários
+            const usersRef = collection(window.firebaseDb, 'users');
+            const usersSnapshot = await getDocs(usersRef);
+            
+            const users = Array.from(usersEscalas.values()).map(u => {
+                let lastLogin = '📝 -';
+                usersSnapshot.forEach(doc => {
+                    if (doc.data().email === u.email) {
+                        lastLogin = doc.data().lastLoginFormatted || '🔴 Nunca acessou';
+                    }
+                });
+                return { ...u, lastLogin };
+            }).sort((a, b) => b.count - a.count);
+            
+            const listElement = document.getElementById('stat-active-volunteers-list');
+            const searchInput = document.getElementById('stat-active-volunteers-search');
+            
+            function renderList(filtered) {
+                if (filtered.length === 0) {
+                    listElement.innerHTML = '<p class="text-center text-gray-500 py-4">Nenhum voluntário escalado neste mês</p>';
+                    return;
+                }
+                listElement.innerHTML = filtered.map(user => `
+                    <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <p class="font-semibold text-gray-800">${user.displayName}</p>
+                                <p class="text-sm text-gray-600">${user.email}</p>
+                                <p class="text-xs text-green-600 font-medium mt-1">📊 ${user.count} escala(s) este mês</p>
+                                <p class="text-xs text-gray-500 mt-2">🕐 Último acesso: ${user.lastLogin}</p>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            renderList(users);
+            
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                const filtered = users.filter(u => 
+                    u.displayName.toLowerCase().includes(term) || 
+                    u.email.toLowerCase().includes(term)
+                );
+                renderList(filtered);
+            });
+            
+            // Abrir modal - precisa criar elemento primeiro
+            let modal = document.getElementById('stat-active-volunteers-modal');
+            if (!modal) {
+                console.error('Modal não encontrado: stat-active-volunteers-modal');
+                return;
+            }
+            
+            modal.classList.remove('hidden');
+            modal.onclick = (e) => {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            };
+        }
+
+        async function openVolunteersWithoutEscalasModal() {
+            const { collection, getDocs, query, orderBy } = window.firestoreMethods;
+            const usersRef = collection(window.firebaseDb, 'users');
+            const q = query(usersRef, orderBy('email', 'asc'));
+            const usersSnapshot = await getDocs(q);
+            
+            // Buscar todos os usuários com escalas
+            const escalasRef = collection(window.firebaseDb, 'escalas');
+            const escalasSnapshot = await getDocs(escalasRef);
+            const usersWithEscalas = new Set();
+            
+            escalasSnapshot.forEach(doc => {
+                const data = doc.data();
+                if (data.userId && (data.status === 'approved' || !data.status)) {
+                    usersWithEscalas.add(data.userId);
+                }
+            });
+            
+            // Filtrar usuários sem escalas
+            const users = [];
+            usersSnapshot.forEach(doc => {
+                const data = doc.data();
+                if (!usersWithEscalas.has(doc.id)) {
+                    users.push({
+                        id: doc.id,
+                        email: data.email || 'Sem email',
+                        displayName: data.displayName || data.email?.split('@')[0] || 'Sem nome',
+                        lastLoginFormatted: data.lastLoginFormatted || '🔴 Nunca acessou'
+                    });
+                }
+            });
+            
+            const listElement = document.getElementById('stat-volunteers-without-escalas-list');
+            const searchInput = document.getElementById('stat-volunteers-without-escalas-search');
+            
+            function renderList(filtered) {
+                listElement.innerHTML = filtered.map(user => `
+                    <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <p class="font-semibold text-gray-800">${user.displayName}</p>
+                                <p class="text-sm text-gray-600">${user.email}</p>
+                                <p class="text-xs text-slate-600 font-medium mt-1">❌ Sem escalas</p>
+                                <p class="text-xs text-gray-500 mt-2">🕐 Último acesso: ${user.lastLoginFormatted}</p>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            renderList(users);
+            
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                const filtered = users.filter(u => 
+                    u.displayName.toLowerCase().includes(term) || 
+                    u.email.toLowerCase().includes(term)
+                );
+                renderList(filtered);
+            });
+            
+            // Abrir modal
+            const modal = document.getElementById('stat-volunteers-without-escalas-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                console.log('✅ Modal de voluntários sem escalas aberto');
+            } else {
+                console.error('❌ Modal não encontrado');
+            }
+        }
+
         // ========================================
         // 🚀 INICIALIZAÇÃO DO APP - v2.4.0
         // ========================================
@@ -5645,504 +6121,6 @@
                 } catch (error) {
                     console.error('❌ Erro ao carregar Dashboard:', error);
                     showModal('❌ Erro ao carregar Dashboard. Tente novamente.', false, null, true);
-                }
-            }
-
-            // ===== ESTATÍSTICAS DE VOLUNTÁRIOS =====
-            
-            async function getVolunteerStats(escalas) {
-                try {
-                    const { collection, getDocs, query, orderBy } = window.firestoreMethods;
-                    
-                    // 1. Contar total de voluntários no sistema
-                    const usersRef = collection(window.firebaseDb, 'users');
-                    const usersSnapshot = await getDocs(usersRef);
-                    const totalVolunteers = usersSnapshot.size;
-                    
-                    // 2. Contar líderes de times (usuários com teamLeader array não vazio)
-                    let totalLeaders = 0;
-                    usersSnapshot.forEach(doc => {
-                        const data = doc.data();
-                        if (data.teamLeader && Array.isArray(data.teamLeader) && data.teamLeader.length > 0) {
-                            totalLeaders++;
-                        }
-                    });
-                    
-                    // 3. Contar voluntários únicos com escalas aprovadas neste mês
-                    const now = new Date();
-                    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-                    const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
-                    
-                    const escalasThisMonth = escalas.filter(e => {
-                        if (!e.eventDateTime) return false;
-                        const escalaDate = new Date(e.eventDateTime);
-                        return escalaDate >= firstDayOfMonth && escalaDate <= lastDayOfMonth && (e.status === 'approved' || !e.status);
-                    });
-                    
-                    // Contar usuários únicos com escalas
-                    const uniqueVolunteersWithEscalas = new Set(escalasThisMonth.map(e => e.userId));
-                    const activeVolunteers = uniqueVolunteersWithEscalas.size;
-                    
-                    // 4. Contar voluntários com escalas no histórico total (ANY escalas, não apenas este mês)
-                    const allEscalasRef = collection(window.firebaseDb, 'escalas');
-                    const allEscalasSnapshot = await getDocs(allEscalasRef);
-                    const usersWithAnyEscalas = new Set();
-                    
-                    allEscalasSnapshot.forEach(doc => {
-                        const data = doc.data();
-                        if (data.userId && (data.status === 'approved' || !data.status)) {
-                            usersWithAnyEscalas.add(data.userId);
-                        }
-                    });
-                    
-                    // Contar voluntários sem escalas (total - com escalas)
-                    const volunteersWithEscalas = usersWithAnyEscalas.size;
-                    const volunteersWithoutEscalas = Math.max(0, totalVolunteers - volunteersWithEscalas);
-                    
-                    // Atualizar o card com as estatísticas
-                    document.getElementById('stat-total-volunteers').textContent = totalVolunteers;
-                    document.getElementById('stat-total-leaders').textContent = totalLeaders;
-                    document.getElementById('stat-active-volunteers').textContent = activeVolunteers;
-                    document.getElementById('stat-volunteers-with-escalas').textContent = volunteersWithEscalas;
-                    document.getElementById('stat-volunteers-without-escalas').textContent = volunteersWithoutEscalas;
-                    
-                    // Atualizar timestamp
-                    const now_formatted = new Date();
-                    const timeStr = now_formatted.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-                    document.getElementById('stat-update-time').textContent = timeStr;
-                    
-                    console.log('📊 Estatísticas atualizadas:', {
-                        totalVolunteers,
-                        totalLeaders,
-                        activeVolunteers,
-                        volunteersWithEscalas,
-                        volunteersWithoutEscalas
-                    });
-                    
-                } catch (error) {
-                    console.error('❌ Erro ao carregar estatísticas:', error);
-                    document.getElementById('stat-total-volunteers').textContent = '?';
-                    document.getElementById('stat-total-leaders').textContent = '?';
-                    document.getElementById('stat-active-volunteers').textContent = '?';
-                    document.getElementById('stat-volunteers-with-escalas').textContent = '?';
-                    document.getElementById('stat-volunteers-without-escalas').textContent = '?';
-                }
-            }
-
-            // ===== FUNÇÕES PARA ABRIR MODAIS DE ESTATÍSTICAS =====
-
-            async function openTotalVolunteersModal() {
-                console.log('🔵 openTotalVolunteersModal chamada');
-                const { collection, getDocs, query, orderBy } = window.firestoreMethods;
-                const usersRef = collection(window.firebaseDb, 'users');
-                const q = query(usersRef, orderBy('email', 'asc'));
-                const snapshot = await getDocs(q);
-                
-                const users = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    users.push({
-                        id: doc.id,
-                        email: data.email || 'Sem email',
-                        displayName: data.displayName || data.email?.split('@')[0] || 'Sem nome',
-                        lastLoginFormatted: data.lastLoginFormatted || '🔴 Nunca acessou'
-                    });
-                });
-                
-                const listElement = document.getElementById('stat-total-volunteers-list');
-                const searchInput = document.getElementById('stat-total-volunteers-search');
-                
-                function renderList(filtered) {
-                    listElement.innerHTML = filtered.map(user => `
-                        <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <p class="font-semibold text-gray-800">${user.displayName}</p>
-                                    <p class="text-sm text-gray-600">${user.email}</p>
-                                    <p class="text-xs text-gray-500 mt-2">🕐 Último acesso: ${user.lastLoginFormatted}</p>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-                
-                renderList(users);
-                
-                searchInput.addEventListener('input', (e) => {
-                    const term = e.target.value.toLowerCase();
-                    const filtered = users.filter(u => 
-                        u.displayName.toLowerCase().includes(term) || 
-                        u.email.toLowerCase().includes(term)
-                    );
-                    renderList(filtered);
-                });
-                
-                // Abrir modal
-                const modal = document.getElementById('stat-total-volunteers-modal');
-                if (modal) {
-                    modal.classList.remove('hidden');
-                    
-                    // Fechar ao clicar no X
-                    const closeBtn = document.getElementById('stat-total-volunteers-modal-close');
-                    if (closeBtn) {
-                        closeBtn.onclick = () => modal.classList.add('hidden');
-                    }
-                    
-                    // Fechar ao clicar fora do modal
-                    modal.onclick = (e) => {
-                        if (e.target === modal) {
-                            modal.classList.add('hidden');
-                        }
-                    };
-                    
-                    console.log('✅ Modal aberto');
-                } else {
-                    console.error('❌ Modal não encontrado');
-                }
-            }
-
-            async function openTotalLeadersModal() {
-                console.log('👑 openTotalLeadersModal chamada');                const leaders = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (data.teamLeader && Array.isArray(data.teamLeader) && data.teamLeader.length > 0) {
-                        const teamEmojis = {
-                            welcome: '👋',
-                            backstage: '🤝',
-                            parking: '🚗',
-                            kids: '👶',
-                            comunicacao: '📢'
-                        };
-                        leaders.push({
-                            id: doc.id,
-                            email: data.email || 'Sem email',
-                            displayName: data.displayName || data.email?.split('@')[0] || 'Sem nome',
-                            lastLoginFormatted: data.lastLoginFormatted || '🔴 Nunca acessou',
-                            teams: data.teamLeader.map(t => `${teamEmojis[t] || ''} ${t}`).join(', ')
-                        });
-                    }
-                });
-                
-                const listElement = document.getElementById('stat-total-leaders-list');
-                const searchInput = document.getElementById('stat-total-leaders-search');
-                
-                function renderList(filtered) {
-                    listElement.innerHTML = filtered.map(leader => `
-                        <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <p class="font-semibold text-gray-800">${leader.displayName}</p>
-                                    <p class="text-sm text-gray-600">${leader.email}</p>
-                                    <p class="text-xs text-purple-600 font-medium mt-1">Líder de: ${leader.teams}</p>
-                                    <p class="text-xs text-gray-500 mt-2">🕐 Último acesso: ${leader.lastLoginFormatted}</p>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-                
-                renderList(leaders);
-                
-                searchInput.addEventListener('input', (e) => {
-                    const term = e.target.value.toLowerCase();
-                    const filtered = leaders.filter(u => 
-                        u.displayName.toLowerCase().includes(term) || 
-                        u.email.toLowerCase().includes(term)
-                    );
-                    renderList(filtered);
-                });
-                
-                // Abrir modal
-                const modal = document.getElementById('stat-total-leaders-modal');
-                if (modal) {
-                    modal.classList.remove('hidden');
-                    
-                    // Fechar ao clicar no X
-                    const closeBtn = document.getElementById('stat-total-leaders-modal-close');
-                    if (closeBtn) {
-                        closeBtn.onclick = () => modal.classList.add('hidden');
-                    }
-                    
-                    // Fechar ao clicar fora do modal
-                    modal.onclick = (e) => {
-                        if (e.target === modal) {
-                            modal.classList.add('hidden');
-                        }
-                    };
-                    
-                    console.log('✅ Modal de líderes aberto');
-                } else {
-                    console.error('❌ Modal de líderes não encontrado');
-                }
-            }
-
-            async function openVolunteersWithEscalasModal() {
-                console.log('✅ openVolunteersWithEscalasModal chamada');
-                const { collection, getDocs } = window.firestoreMethods;
-                const escalasRef = collection(window.firebaseDb, 'escalas');
-                const snapshot = await getDocs(escalasRef);
-                
-                const usersWithEscalas = new Map();
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (data.userId && (data.status === 'approved' || !data.status)) {
-                        if (!usersWithEscalas.has(data.userId)) {
-                            usersWithEscalas.set(data.userId, {
-                                email: data.userEmail || 'Sem email',
-                                displayName: data.volunteerName || 'Sem nome',
-                                count: 0
-                            });
-                        }
-                        usersWithEscalas.get(data.userId).count++;
-                    }
-                });
-                
-                // Buscar últimos acessos dos usuários
-                const usersRef = collection(window.firebaseDb, 'users');
-                const usersSnapshot = await getDocs(usersRef);
-                const userMap = new Map();
-                usersSnapshot.forEach(doc => {
-                    userMap.set(doc.id, doc.data());
-                });
-                
-                const users = Array.from(usersWithEscalas.values()).map((u, index) => {
-                    // Tentar encontrar o último acesso
-                    let lastLogin = '📝 -';
-                    usersSnapshot.forEach(doc => {
-                        if (doc.data().email === u.email) {
-                            lastLogin = doc.data().lastLoginFormatted || '🔴 Nunca acessou';
-                        }
-                    });
-                    return { ...u, lastLogin };
-                }).sort((a, b) => b.count - a.count);
-                
-                const listElement = document.getElementById('stat-volunteers-with-escalas-list');
-                const searchInput = document.getElementById('stat-volunteers-with-escalas-search');
-                
-                function renderList(filtered) {
-                    listElement.innerHTML = filtered.map(user => `
-                        <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <p class="font-semibold text-gray-800">${user.displayName}</p>
-                                    <p class="text-sm text-gray-600">${user.email}</p>
-                                    <p class="text-xs text-emerald-600 font-medium mt-1">📊 ${user.count} escala(s)</p>
-                                    <p class="text-xs text-gray-500 mt-2">🕐 Último acesso: ${user.lastLogin}</p>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-                
-                renderList(users);
-                
-                searchInput.addEventListener('input', (e) => {
-                    const term = e.target.value.toLowerCase();
-                    const filtered = users.filter(u => 
-                        u.displayName.toLowerCase().includes(term) || 
-                        u.email.toLowerCase().includes(term)
-                    );
-                    renderList(filtered);
-                });
-                
-                // Abrir modal
-                const modal = document.getElementById('stat-volunteers-with-escalas-modal');
-                if (modal) {
-                    modal.classList.remove('hidden');
-                    console.log('✅ Modal de voluntários com escalas aberto');
-                } else {
-                    console.error('❌ Modal não encontrado');
-                }
-            }
-
-            // Voluntários escalados este mês (usando o filtro do período do dashboard)
-            async function openActiveVolunteersModal() {
-                const now = new Date();
-                const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-                const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
-                
-                const { collection, getDocs, query, orderBy } = window.firestoreMethods;
-                
-                // Buscar todas as escalas deste mês
-                const escalasRef = collection(window.firebaseDb, 'escalas');
-                const escalasSnapshot = await getDocs(escalasRef);
-                
-                const usersEscalas = new Map();
-                escalasSnapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (data.userId && (data.status === 'approved' || !data.status) && data.eventDateTime) {
-                        const escalaDate = new Date(data.eventDateTime);
-                        if (escalaDate >= firstDayOfMonth && escalaDate <= lastDayOfMonth) {
-                            if (!usersEscalas.has(data.userId)) {
-                                usersEscalas.set(data.userId, {
-                                    email: data.userEmail || 'Sem email',
-                                    displayName: data.volunteerName || 'Sem nome',
-                                    count: 0
-                                });
-                            }
-                            usersEscalas.get(data.userId).count++;
-                        }
-                    }
-                });
-                
-                // Buscar últimos acessos dos usuários
-                const usersRef = collection(window.firebaseDb, 'users');
-                const usersSnapshot = await getDocs(usersRef);
-                
-                const users = Array.from(usersEscalas.values()).map(u => {
-                    let lastLogin = '📝 -';
-                    usersSnapshot.forEach(doc => {
-                        if (doc.data().email === u.email) {
-                            lastLogin = doc.data().lastLoginFormatted || '🔴 Nunca acessou';
-                        }
-                    });
-                    return { ...u, lastLogin };
-                }).sort((a, b) => b.count - a.count);
-                
-                const listElement = document.getElementById('stat-active-volunteers-list');
-                const searchInput = document.getElementById('stat-active-volunteers-search');
-                
-                function renderList(filtered) {
-                    if (filtered.length === 0) {
-                        listElement.innerHTML = '<p class="text-center text-gray-500 py-4">Nenhum voluntário escalado neste mês</p>';
-                        return;
-                    }
-                    listElement.innerHTML = filtered.map(user => `
-                        <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <p class="font-semibold text-gray-800">${user.displayName}</p>
-                                    <p class="text-sm text-gray-600">${user.email}</p>
-                                    <p class="text-xs text-green-600 font-medium mt-1">📊 ${user.count} escala(s) este mês</p>
-                                    <p class="text-xs text-gray-500 mt-2">🕐 Último acesso: ${user.lastLogin}</p>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-                
-                renderList(users);
-                
-                searchInput.addEventListener('input', (e) => {
-                    const term = e.target.value.toLowerCase();
-                    const filtered = users.filter(u => 
-                        u.displayName.toLowerCase().includes(term) || 
-                        u.email.toLowerCase().includes(term)
-                    );
-                    renderList(filtered);
-                });
-                
-                // Abrir modal - precisa criar elemento primeiro
-                const modal = document.getElementById('stat-active-volunteers-modal');
-                if (!modal) {
-                    console.error('Modal não encontrado: stat-active-volunteers-modal');
-                    return;
-                }
-                
-                // Criar modal dinamicamente se não existir (fallback)
-                let modalDiv = document.getElementById('stat-active-volunteers-modal');
-                if (!modalDiv) {
-                    modalDiv = document.createElement('div');
-                    modalDiv.id = 'stat-active-volunteers-modal';
-                    modalDiv.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4';
-                    const html = `
-                        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl relative" style="max-height: 90vh; overflow-y: auto;">
-                            <button class="sticky top-4 right-4 float-right z-10 bg-white rounded-full p-2 shadow-lg text-gray-400 hover:text-gray-600" onclick="document.getElementById('stat-active-volunteers-modal').classList.add('hidden')">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                            </button>
-                            <div class="p-6">
-                                <h3 class="text-2xl font-bold mb-2" style="color: #151b29;">✅ Escalados Este Mês</h3>
-                                <p class="text-sm text-gray-600 mb-4">Voluntários com escalas aprovadas neste período</p>
-                                <div class="mb-4">
-                                    <input type="text" id="stat-active-volunteers-search" placeholder="Buscar voluntário..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
-                                </div>
-                                <div class="space-y-2" id="stat-active-volunteers-list"></div>
-                            </div>
-                        </div>
-                    `;
-                    modalDiv.innerHTML = html;
-                    document.body.appendChild(modalDiv);
-                }
-                
-                modal = document.getElementById('stat-active-volunteers-modal');
-                modal.classList.remove('hidden');
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) {
-                        modal.classList.add('hidden');
-                    }
-                });
-            }
-
-            async function openVolunteersWithoutEscalasModal() {
-                const { collection, getDocs, query, orderBy } = window.firestoreMethods;
-                const usersRef = collection(window.firebaseDb, 'users');
-                const q = query(usersRef, orderBy('email', 'asc'));
-                const usersSnapshot = await getDocs(q);
-                
-                // Buscar todos os usuários com escalas
-                const escalasRef = collection(window.firebaseDb, 'escalas');
-                const escalasSnapshot = await getDocs(escalasRef);
-                const usersWithEscalas = new Set();
-                
-                escalasSnapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (data.userId && (data.status === 'approved' || !data.status)) {
-                        usersWithEscalas.add(data.userId);
-                    }
-                });
-                
-                // Filtrar usuários sem escalas
-                const users = [];
-                usersSnapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (!usersWithEscalas.has(doc.id)) {
-                        users.push({
-                            id: doc.id,
-                            email: data.email || 'Sem email',
-                            displayName: data.displayName || data.email?.split('@')[0] || 'Sem nome',
-                            lastLoginFormatted: data.lastLoginFormatted || '🔴 Nunca acessou'
-                        });
-                    }
-                });
-                
-                const listElement = document.getElementById('stat-volunteers-without-escalas-list');
-                const searchInput = document.getElementById('stat-volunteers-without-escalas-search');
-                
-                function renderList(filtered) {
-                    listElement.innerHTML = filtered.map(user => `
-                        <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <p class="font-semibold text-gray-800">${user.displayName}</p>
-                                    <p class="text-sm text-gray-600">${user.email}</p>
-                                    <p class="text-xs text-slate-600 font-medium mt-1">❌ Sem escalas</p>
-                                    <p class="text-xs text-gray-500 mt-2">🕐 Último acesso: ${user.lastLoginFormatted}</p>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-                
-                renderList(users);
-                
-                searchInput.addEventListener('input', (e) => {
-                    const term = e.target.value.toLowerCase();
-                    const filtered = users.filter(u => 
-                        u.displayName.toLowerCase().includes(term) || 
-                        u.email.toLowerCase().includes(term)
-                    );
-                    renderList(filtered);
-                });
-                
-                // Abrir modal
-                const modal = document.getElementById('stat-volunteers-without-escalas-modal');
-                if (modal) {
-                    modal.classList.remove('hidden');
-                    console.log('✅ Modal de voluntários sem escalas aberto');
-                } else {
-                    console.error('❌ Modal não encontrado');
                 }
             }
 
