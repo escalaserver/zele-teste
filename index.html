@@ -38,14 +38,13 @@
         
         // Your web app's Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyBlMfqUkpQQrLHD13Hq3UJ43D4N1U1JviE",
-            authDomain: "zele-teste.firebaseapp.com",
-            projectId: "zele-teste",
-            storageBucket: "zele-teste.firebasestorage.app",
-            messagingSenderId: "758471959826",
-            appId: "1:758471959826:web:374288feffb10f31fc7fcb"
+            apiKey: "AIzaSyBGMYUmA0hJs1v2IlU-fdFDucYFp6LZaCg",
+            authDomain: "z-ele-church-escalas.firebaseapp.com",
+            projectId: "z-ele-church-escalas",
+            storageBucket: "z-ele-church-escalas.firebasestorage.app",
+            messagingSenderId: "473523773124",
+            appId: "1:473523773124:web:9c57a51236a5a8fabc3391"
         };
-
         
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
@@ -3625,9 +3624,13 @@
                     const menuDashboardBtn = document.getElementById('menu-dashboard-btn');
                     if (menuAdminBtn) menuAdminBtn.style.display = 'none';
                     if (menuDashboardBtn) menuDashboardBtn.style.display = 'none';
-                    document.getElementById('menu-blocked-attempts-btn').style.display = 'none';
-                    document.getElementById('menu-pending-escalas-btn').style.display = 'none';
-                    document.getElementById('menu-checkin-btn').style.display = 'none';
+                    // Mostrar botão de tentativas bloqueadas e check-in para líderes
+                    const blockedAttemptsBtn = document.getElementById('menu-blocked-attempts-btn');
+                    const pendingBtn = document.getElementById('menu-pending-escalas-btn');
+                    const checkinBtn = document.getElementById('menu-checkin-btn');
+                    if (blockedAttemptsBtn) blockedAttemptsBtn.style.display = isTeamLeader ? 'block' : 'none';
+                    if (pendingBtn) pendingBtn.style.display = 'none';
+                    if (checkinBtn) checkinBtn.style.display = isTeamLeader ? 'block' : 'none';
                     return false;
                 } catch (error) {
                     console.error('❌ Erro ao verificar admin:', error);
@@ -4903,16 +4906,16 @@
                 }
             }
             
-            // Carregar tentativas bloqueadas (apenas superadmin)
+            // Carregar tentativas bloqueadas (superadmin, admin e líderes)
             let blockedAttemptsUnsubscribe = null; // Guardar referência do listener
             
             async function loadBlockedAttempts() {
-                // Apenas superadmin pode ver tentativas bloqueadas
-                if (!isSuperAdmin) {
-                    console.log('⚠️ Usuário não é super admin. Acesso negado.');
+                // Superadmin, admin e líderes podem ver tentativas bloqueadas
+                if (!isSuperAdmin && !isAdmin && !isTeamLeader) {
+                    console.log('⚠️ Usuário não tem permissão. Acesso negado.');
                     const listEl = document.getElementById('blocked-attempts-list');
                     if (listEl) {
-                        listEl.innerHTML = '<p class="text-red-500 text-center py-8">⚠️ Apenas Super Administradores podem acessar esta área.</p>';
+                        listEl.innerHTML = '<p class="text-red-500 text-center py-8">⚠️ Apenas Administradores e Líderes de Time podem acessar esta área.</p>';
                     }
                     return;
                 }
