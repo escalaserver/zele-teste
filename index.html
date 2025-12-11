@@ -38,13 +38,14 @@
         
         // Your web app's Firebase configuration
         const firebaseConfig = {
-          apiKey: "AIzaSyBlMfqUkpQQrLHD13Hq3UJ43D4N1U1JviE",
-          authDomain: "zele-teste.firebaseapp.com",
-          projectId: "zele-teste",
-          storageBucket: "zele-teste.firebasestorage.app",
-          messagingSenderId: "758471959826",
-          appId: "1:758471959826:web:374288feffb10f31fc7fcb"
+            apiKey: "AIzaSyBlMfqUkpQQrLHD13Hq3UJ43D4N1U1JviE",
+            authDomain: "zele-teste.firebaseapp.com",
+            projectId: "zele-teste",
+            storageBucket: "zele-teste.firebasestorage.app",
+            messagingSenderId: "758471959826",
+            appId: "1:758471959826:web:374288feffb10f31fc7fcb"
         };
+
         
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
@@ -810,9 +811,17 @@
                         <!-- Card: Total de Voluntários -->
                         <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border-l-4 border-blue-500 cursor-pointer hover:shadow-lg transition-all" onclick="openTotalVolunteersModal()">
                             <div class="flex items-end justify-between">
-                                <div>
+                                <div class="w-full">
                                     <p class="text-gray-600 text-sm font-medium">Total de Voluntários</p>
                                     <p class="text-3xl font-bold text-blue-600 mt-2" id="stat-total-volunteers">-</p>
+                                    
+                                    <!-- Seção de Onboarding Consolidado -->
+                                    <div class="mt-3 pt-3 border-t border-blue-200" id="onboarding-stats-container" style="display: none;">
+                                        <p class="text-xs font-semibold text-gray-700 mb-2">📋 Info Onboarding:</p>
+                                        <div class="space-y-1 text-xs text-gray-600" id="onboarding-stats-content">
+                                            <!-- Conteúdo será inserido dinamicamente -->
+                                        </div>
+                                    </div>
                                 </div>
                                 <span class="text-4xl opacity-50">📋</span>
                             </div>
@@ -1868,6 +1877,9 @@
                 const timeStr = now_formatted.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
                 document.getElementById('stat-update-time').textContent = timeStr;
                 
+                // Calcular estatísticas de onboarding (disponibilidade por time)
+                await calculateOnboardingStats(usersSnapshot);
+                
                 console.log('📊 Estatísticas atualizadas:', {
                     totalVolunteers,
                     totalLeaders,
@@ -1883,6 +1895,104 @@
                 document.getElementById('stat-active-volunteers').textContent = '?';
                 document.getElementById('stat-volunteers-with-escalas').textContent = '?';
                 document.getElementById('stat-volunteers-without-escalas').textContent = '?';
+            }
+        }
+
+        async function calculateOnboardingStats(usersSnapshot) {
+            try {
+                const teams = ['welcome', 'backstage', 'parking', 'kids', 'comunicacao'];
+                const teamNames = {
+                    welcome: '👋 Welcome',
+                    backstage: '🤝 Backstage',
+                    parking: '🚗 Parking',
+                    kids: '👶 Kids',
+                    comunicacao: '📢 Comunicação'
+                };
+                
+                const teamStats = {};
+                
+                teams.forEach(team => {
+                    teamStats[team] = {
+                        total: 0,
+                        thursdayOnly: 0,
+                        sundayOnly: 0,
+                        both: 0
+                    };
+                });
+                
+                usersSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    
+                    // Verificar se tem onboarding completo
+                    if (!data.preferredTeam || !data.availability || data.onboardingComplete !== true) {
+                        return;
+                    }
+                    
+                    const team = data.preferredTeam;
+                    if (!teamStats[team]) return;
+                    
+                    const availability = data.availability || {};
+                    
+                    // Verificar quinta à noite
+                    const hasThursdayNight = availability.thursday && 
+                                           Array.isArray(availability.thursday) && 
+                                           availability.thursday.includes('night');
+                    
+                    // Verificar domingo de manhã
+                    const hasSundayMorning = availability.sunday && 
+                                            Array.isArray(availability.sunday) && 
+                                            availability.sunday.includes('morning');
+                    
+                    // Contar apenas quinta à noite ou domingo de manhã (ignorar sábado)
+                    if (hasThursdayNight || hasSundayMorning) {
+                        teamStats[team].total++;
+                        
+                        if (hasThursdayNight && hasSundayMorning) {
+                            teamStats[team].both++;
+                        } else if (hasThursdayNight) {
+                            teamStats[team].thursdayOnly++;
+                        } else if (hasSundayMorning) {
+                            teamStats[team].sundayOnly++;
+                        }
+                    }
+                });
+                
+                // Montar HTML com as estatísticas
+                let html = '';
+                let hasData = false;
+                
+                teams.forEach(team => {
+                    const stats = teamStats[team];
+                    if (stats.total > 0) {
+                        hasData = true;
+                        html += `
+                            <div class="mb-2">
+                                <p class="font-semibold text-gray-800">${teamNames[team]}: ${stats.total}</p>
+                                <div class="ml-3 text-xs text-gray-600 space-y-0.5">
+                                    <p>🌙 Só quinta: ${stats.thursdayOnly}</p>
+                                    <p>☀️ Só domingo: ${stats.sundayOnly}</p>
+                                    <p>✅ Ambos: ${stats.both}</p>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+                
+                // Exibir ou ocultar a seção
+                const container = document.getElementById('onboarding-stats-container');
+                const content = document.getElementById('onboarding-stats-content');
+                
+                if (hasData && container && content) {
+                    content.innerHTML = html;
+                    container.style.display = 'block';
+                } else if (container) {
+                    container.style.display = 'none';
+                }
+                
+                console.log('📊 Estatísticas de onboarding calculadas:', teamStats);
+                
+            } catch (error) {
+                console.error('❌ Erro ao calcular estatísticas de onboarding:', error);
             }
         }
 
