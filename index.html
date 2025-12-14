@@ -3325,6 +3325,7 @@
                                     }, 1500); // 3 piscadas x 0.5s = 1.5s
                                 }, 100); // Delay para iOS processar fechamento do modal
                             }
+                        );
                         return;
                     }
                     
@@ -3981,6 +3982,7 @@
                                 async () => {
                                     await saveEscalaToFirestore(escalaId, date, time, team, eventName, false, 'approved');
                                 }
+                            );
                         }
                     }
                     
@@ -4285,6 +4287,7 @@
                     false,
                     null,
                     null
+                );
             }
 
             // Limpar escalas de eventos passados - DESATIVADO para manter histórico
@@ -4785,6 +4788,7 @@
                     false,
                     null,
                     null
+                );
             }
             
             // Atualizar badge de tentativas bloqueadas no menu
@@ -5051,10 +5055,6 @@
                     true,
                     async () => {
                         try {
-
-
-
-                            
                             const { doc, deleteDoc, getDoc } = window.firestoreMethods;
                             
                             if (!doc || !deleteDoc || !getDoc) {
@@ -5096,6 +5096,7 @@
                         }
                     },
                     true
+                );
             }
 
             // Verificar se pode deletar escala (impede deleção na véspera e no dia)
