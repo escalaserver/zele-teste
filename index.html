@@ -2633,6 +2633,7 @@
                         CONFIG.EMAILJS_SERVICE_ID,
                         CONFIG.EMAILJS_TEMPLATE_ID,
                         templateParams
+                    );
                 } catch (error) {
                     console.error('❌ Erro ao enviar email:', error);
                 }
@@ -3071,7 +3072,6 @@
 
             // Capturar evento beforeinstallprompt GLOBALMENTE (antes do login)
             window.addEventListener('beforeinstallprompt', (e) => {
-');
                 e.preventDefault();
                 deferredPrompt = e;
                 
@@ -3866,6 +3866,7 @@
                             false,
                             null,
                             '⛔'
+                        );
                         return;
                     }
                     
@@ -3876,7 +3877,6 @@
                         if (existingTeam === team) {
                             // Mostrar confirmação antes de salvar
                             if (isPending) {
-');
                                 // Salvar automaticamente sem botões SIM/NÃO
                                 await saveEscalaToFirestore(escalaId, date, time, team, eventName, true, 'pending');
                                 
@@ -3889,6 +3889,7 @@
                                         false,
                                         null,
                                         '👶'
+                                    );
                                 } else {
                                     showModal(
                                         `⛔ Atenção: faltam menos de 24 horas para o evento. Sua solicitação foi enviada para aprovação do líder do time.`,
@@ -3897,21 +3898,21 @@
                                         false,
                                         null,
                                         '⛔'
+                                    );
                                 }
                                 return;
                             } else {
-');
                                 showModal(
                                     `Confirmar escala no time ${teamNames[team]}?`,
                                     true,
                                     async () => {
                                         await saveEscalaToFirestore(escalaId, date, time, team, eventName, true, 'approved');
                                     }
+                                );
                             }
                         } else {
                             // Times diferentes - pedir confirmação
                             if (isPending) {
-');
                                 // Salvar automaticamente sem botões SIM/NÃO
                                 await saveEscalaToFirestore(escalaId, date, time, team, eventName, false, 'pending');
                                 
@@ -3924,6 +3925,7 @@
                                         false,
                                         null,
                                         '👶'
+                                    );
                                 } else {
                                     showModal(
                                         `⛔ Você já está escalado no time ${teamNames[existingTeam]}. Como faltam menos de 24 horas para o evento, sua mudança para o time ${teamNames[team]} foi enviada para aprovação.`,
@@ -3932,22 +3934,22 @@
                                         false,
                                         null,
                                         '⛔'
+                                    );
                                 }
                                 return;
                             } else {
-');
                                 showModal(
                                     `Você já escolheu servir no time ${teamNames[existingTeam]}. Deseja confirmar a mudança para o time ${teamNames[team]} nesta escala?`,
                                     true,
                                     async () => {
                                         await saveEscalaToFirestore(escalaId, date, time, team, eventName, false, 'approved');
                                     }
+                                );
                             }
                         }
                     } else {
                         // Nova escala - verificar se é pendente ou aprovada
                         if (isPending) {
-');
                             // Escala pendente (menos de 24h ou Kids) - salvar automaticamente
                             await saveEscalaToFirestore(escalaId, date, time, team, eventName, false, 'pending');
                             
@@ -3960,6 +3962,7 @@
                                     false,
                                     null,
                                     '👶'
+                                );
                             } else {
                                 showModal(
                                     `⛔ Atenção: faltam menos de 24 horas para o evento. Sua solicitação foi enviada para aprovação do líder do time.`,
@@ -3968,10 +3971,10 @@
                                     false,
                                     null,
                                     '⛔'
+                                );
                             }
                             return;
                         } else {
-');
                             // Escala normal - mostrar confirmação
                             showModal(
                                 `Confirmar escala no time ${teamNames[team]}?`,
@@ -4561,6 +4564,7 @@
                                 false,
                                 null,
                                 '⛔'
+                            );
                             return;
                         }
                         
