@@ -3267,7 +3267,6 @@
                         reader.onerror = reject;
                         reader.readAsDataURL(file);
                     });
- + 'KB)');
                     
                     // Salvar apenas no Firestore (Firebase Auth tem limite de tamanho)
                     const { doc, updateDoc } = window.firestoreMethods;
