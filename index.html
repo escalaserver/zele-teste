@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zele Teste 2</title>
-    <meta name="application-name" content="Zele Teste 2">
-    <meta name="apple-mobile-web-app-title" content="Zele Teste 2">
+    <title>Zele teste 3</title>
+    <meta name="application-name" content="Zele teste 3">
+    <meta name="apple-mobile-web-app-title" content="Zele teste 3">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#151b29">
@@ -38,7 +38,7 @@
         
         // Your web app's Firebase configuration
         const firebaseConfig = {
-           apiKey: "AIzaSyBlMfqUkpQQrLHD13Hq3UJ43D4N1U1JviE",
+            apiKey: "AIzaSyBlMfqUkpQQrLHD13Hq3UJ43D4N1U1JviE",
   authDomain: "zele-teste.firebaseapp.com",
   projectId: "zele-teste",
   storageBucket: "zele-teste.firebasestorage.app",
@@ -268,8 +268,8 @@
     <!-- Tela de Loading -->
     <div id="loading-screen" class="fixed inset-0 zele-primary flex items-center justify-center z-50">
         <div class="text-center text-white">
-            <img src="Volunteers logo.png" alt="Zele Teste 2" class="w-32 h-32 mx-auto mb-4 object-contain">
-            <h1 class="text-5xl font-bold mb-4">Zele Teste 2</h1>
+            <img src="Volunteers logo.png" alt="Zele teste 3" class="w-32 h-32 mx-auto mb-4 object-contain">
+            <h1 class="text-5xl font-bold mb-4">Zele teste 3</h1>
             <p class="text-xl mb-8">Sistema de Escalas</p>
             <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-white mx-auto"></div>
         </div>
@@ -278,8 +278,8 @@
     <!-- Tela de Login -->
     <div id="auth-screen" class="fixed inset-0 zele-primary flex items-center justify-center p-4 hidden">
         <div class="card-float rounded-2xl p-8 max-w-md w-full text-center">
-            <img src="Volunteers logo.png" alt="Zele Teste 2" class="w-24 h-24 mx-auto mb-4 object-contain">
-            <h1 class="text-4xl font-bold mb-2" style="color: #151b29;">Zele Teste 2</h1>
+            <img src="Volunteers logo.png" alt="Zele teste 3" class="w-24 h-24 mx-auto mb-4 object-contain">
+            <h1 class="text-4xl font-bold mb-2" style="color: #151b29;">Zele teste 3</h1>
             <p class="text-gray-600 mb-8">Sistema de Escalas</p>
             
             <!-- Login com Google -->
@@ -406,7 +406,7 @@
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <img src="Volunteers logo.png" alt="Logo" class="w-10 h-10 object-contain">
-                        <h1 class="text-2xl font-bold">Zele Teste 2</h1>
+                        <h1 class="text-2xl font-bold">Zele teste 3</h1>
                     </div>
                     <div class="flex items-center gap-4">
                         <div class="text-right hidden sm:block">
@@ -1616,7 +1616,7 @@
 
             <!-- Versão -->
             <div class="mt-8 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">
-                <p>Zele Teste 2 v2.4</p>
+                <p>Zele teste 3 v2.4</p>
                 <p class="mt-1">Servir é a linguagem do céu</p>
             </div>
         </div>
@@ -1740,7 +1740,7 @@
     <div id="ios-install-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
             <h2 class="text-xl font-bold mb-4 text-gray-800">📱 Instalar App no iPhone</h2>
-            <p class="text-sm text-gray-600 mb-4">Para adicionar o Zele Teste 2 à sua tela inicial:</p>
+            <p class="text-sm text-gray-600 mb-4">Para adicionar o Zele teste 3 à sua tela inicial:</p>
             <ol class="text-sm text-gray-700 space-y-3 mb-6">
                 <li class="flex items-start">
                     <span class="font-bold mr-2">1.</span>
@@ -2673,7 +2673,7 @@
         // Aguardar Firebase estar pronto
         function initApp() {
             console.log('═══════════════════════════════════════════');
-            console.log('🚀 Zele Teste 2 v' + CONFIG.SCHEMA_VERSION);
+            console.log('🚀 Zele teste 3 v' + CONFIG.SCHEMA_VERSION);
             console.log('📋 DEBUG MODE:', CONFIG.DEBUG_MODE ? 'ATIVADO ⚠️' : 'DESATIVADO');
             console.log('═══════════════════════════════════════════');
             
@@ -2707,8 +2707,9 @@
                     logger.warn('⚠️ Firebase não totalmente inicializado, usando fallback');
                     // Continuar mesmo assim - a autenticação será feita quando Firebase estiver pronto
                 }
+            }
                 
-                // Renderizar UI primeiro, carregar dados em background
+            // Renderizar UI primeiro, carregar dados em background
             
             // Função de retry para operações Firestore
             async function firestoreRetry(operation, operationName = 'Operação') {
@@ -3085,7 +3086,6 @@
             // Navegação para página de admin
             const menuAdminBtn = document.getElementById('menu-admin-btn');
             const backFromAdminBtn = document.getElementById('back-from-admin');
-            const appContainer = document.getElementById('app-container');
             const adminPage = document.getElementById('admin-page');
 
             if (menuAdminBtn) {
@@ -3448,7 +3448,7 @@
                         if (!deferredPrompt) {
                             console.log('❌ Prompt de instalação não disponível - mostrando instruções manuais');
                             // Instruções manuais para Android/Chrome
-                            showModal('Para instalar no <strong>Android</strong>:<br><br>1. Abra o <strong>Menu</strong> do navegador (⋮)<br>2. Toque em <strong>"Adicionar à tela inicial"</strong> ou <strong>"Instalar app"</strong><br><br>Para <strong>Desktop</strong>:<br>• Chrome: Menu (⋮) → Instalar Zele Teste 2<br>• Edge: Menu (⋯) → Apps → Instalar', false, null, false, null, '📱');
+                            showModal('Para instalar no <strong>Android</strong>:<br><br>1. Abra o <strong>Menu</strong> do navegador (⋮)<br>2. Toque em <strong>"Adicionar à tela inicial"</strong> ou <strong>"Instalar app"</strong><br><br>Para <strong>Desktop</strong>:<br>• Chrome: Menu (⋮) → Instalar Zele teste 3<br>• Edge: Menu (⋯) → Apps → Instalar', false, null, false, null, '📱');
                             return;
                         }
 
@@ -11468,10 +11468,7 @@
             }
         }
 
-        console.log('✅ App inicializado');
-        
-        // Iniciar o app em background enquanto renderiza
-        continueInit();
+            console.log('✅ App inicializado');
         }
         
         // ========================================
