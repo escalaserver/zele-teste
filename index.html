@@ -34,6 +34,8 @@
         import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, query, where, getDocs, deleteDoc, orderBy, addDoc, updateDoc, limit, Timestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
         
+        console.log('🔥 Firebase imports carregados - versão com orderBy, addDoc, updateDoc e Storage');
+        
         // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBlMfqUkpQQrLHD13Hq3UJ43D4N1U1JviE",
@@ -63,6 +65,8 @@
         window.firebaseAuthMethods = { signInWithPopup, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, updateProfile };
         window.firestoreMethods = { doc, setDoc, getDoc, onSnapshot, collection, query, where, getDocs, deleteDoc, orderBy, addDoc, updateDoc, limit, Timestamp };
         window.firebaseStorageMethods = { ref, uploadBytes, getDownloadURL };
+        
+        console.log('✅ Firebase inicializado e exportado para window');
         window.firebaseReady = true;
     </script>
     
@@ -1467,16 +1471,6 @@
                             </div>
                         </button>
 
-                        <button id="menu-manage-roles-btn" class="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition text-left border-b border-gray-100">
-                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                            </svg>
-                            <div>
-                                <p class="font-semibold text-gray-800">Gerenciar Funções</p>
-                                <p class="text-xs text-gray-600">Criar funções por time</p>
-                            </div>
-                        </button>
-
                         <button id="menu-blocked-attempts-btn" class="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition text-left relative border-b border-gray-100">
                             <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
@@ -1509,13 +1503,23 @@
                             </div>
                         </button>
 
-                        <button id="menu-admin-btn" class="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition text-left">
+                        <button id="menu-admin-btn" class="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition text-left border-b border-gray-100">
                             <svg class="w-6 h-6" style="color: #151b29;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                             </svg>
                             <div>
                                 <p class="font-semibold text-gray-800">Datas dos Eventos</p>
                                 <p class="text-xs text-gray-600">Gerenciar datas disponíveis</p>
+                            </div>
+                        </button>
+
+                        <button id="menu-manage-roles-btn" class="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition text-left">
+                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            </svg>
+                            <div>
+                                <p class="font-semibold text-gray-800">Gerenciar Funções</p>
+                                <p class="text-xs text-gray-600">Configurar funções por time</p>
                             </div>
                         </button>
                     </div>
@@ -1714,64 +1718,6 @@
         </div>
     </div>
 
-    <!-- Modal: Gerenciar Funções -->
-    <div id="manage-roles-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl shadow-2xl max-w-3xl w-full p-6 max-h-[85vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold" style="color: #151b29;">💼 Gerenciar Funções</h2>
-                <button id="close-manage-roles-modal" class="text-gray-600 hover:text-gray-800">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-
-            <p class="text-sm text-gray-600 mb-6">Crie funções específicas para cada time (ex: Filmagem, Fotos, Mesa de Som)</p>
-
-            <!-- Seletor de Time -->
-            <div class="mb-6">
-                <label class="block text-sm font-semibold mb-2" style="color: #151b29;">Selecione o Time:</label>
-                <select id="role-team-select" class="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">-- Escolha um time --</option>
-                    <option value="welcome">👋 Welcome</option>
-                    <option value="backstage">🤝 Backstage</option>
-                    <option value="parking">🚗 Parking</option>
-                    <option value="kids">👶 Kids</option>
-                    <option value="comunicacao">📢 Comunicação</option>
-                </select>
-            </div>
-
-            <!-- Adicionar Nova Função -->
-            <div id="add-role-section" class="hidden mb-6 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
-                <h3 class="text-lg font-semibold mb-3" style="color: #151b29;">➕ Adicionar Nova Função</h3>
-                <div class="flex gap-3">
-                    <input type="text" id="new-role-name" placeholder="Nome da função (ex: Filmagem)" 
-                           class="flex-1 border-2 border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <button id="add-role-btn" class="px-6 py-2 text-white font-bold rounded-lg transition hover:opacity-90" style="background-color: #151b29;">
-                        Adicionar
-                    </button>
-                </div>
-            </div>
-
-            <!-- Lista de Funções por Time -->
-            <div id="roles-list-container" class="hidden">
-                <h3 class="text-lg font-semibold mb-3" style="color: #151b29;">📋 Funções Cadastradas</h3>
-                <div id="roles-list" class="space-y-2">
-                    <!-- Funções serão inseridas aqui -->
-                </div>
-            </div>
-
-            <div id="no-team-selected" class="text-center text-gray-500 py-8">
-                👆 Selecione um time acima para gerenciar suas funções
-            </div>
-
-            <!-- Botão Fechar -->
-            <button id="close-roles-modal-btn" class="w-full mt-6 py-3 px-6 text-white font-bold rounded-lg transition hover:opacity-90" style="background-color: #151b29;">
-                Fechar
-            </button>
-        </div>
-    </div>
-
     <!-- Modal de Tentativas Bloqueadas -->
     <div id="blocked-attempts-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[80vh] overflow-y-auto">
@@ -1826,6 +1772,75 @@
         </div>
     </div>
 
+    <!-- Modal: Gerenciar Funções por Time -->
+    <div id="manage-roles-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl relative" style="max-height: 90vh; overflow-y: auto;">
+            <button id="close-manage-roles-modal" class="sticky top-4 right-4 float-right z-10 bg-white rounded-full p-2 shadow-lg text-gray-400 hover:text-gray-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+            
+            <div class="p-6">
+                <h3 class="text-2xl font-bold mb-2" style="color: #151b29;">💼 Gerenciar Funções</h3>
+                <p class="text-sm text-gray-600 mb-6">Configure as funções disponíveis para cada time</p>
+                
+                <!-- Seletor de Time -->
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Selecione o Time:</label>
+                    <select id="roles-team-select" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">-- Escolha um time --</option>
+                        <option value="welcome">🙌 Welcome</option>
+                        <option value="backstage">🎵 Backstage</option>
+                        <option value="parking">🚗 Parking</option>
+                        <option value="kids">👶 Kids</option>
+                        <option value="comunicacao">📱 Comunicação</option>
+                    </select>
+                </div>
+
+                <!-- Adicionar Nova Função -->
+                <div id="add-role-section" class="mb-6 hidden">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Adicionar Nova Função:</label>
+                    <div class="flex gap-2">
+                        <input 
+                            type="text" 
+                            id="new-role-input" 
+                            placeholder="Ex: Recepção, Louvor, Estacionamento..."
+                            class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                        <button id="add-role-btn" class="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                            </svg>
+                            Adicionar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Lista de Funções -->
+                <div id="roles-list-section" class="hidden">
+                    <h4 class="text-lg font-semibold text-gray-800 mb-3">Funções Cadastradas:</h4>
+                    <div id="roles-list" class="space-y-2 mb-4">
+                        <!-- Lista será inserida aqui -->
+                    </div>
+                </div>
+
+                <!-- Mensagem quando nenhum time está selecionado -->
+                <div id="no-team-selected-msg" class="text-center py-8 text-gray-500">
+                    <svg class="w-16 h-16 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                    <p>Selecione um time para gerenciar suas funções</p>
+                </div>
+
+                <!-- Botão Fechar -->
+                <button id="close-roles-modal-btn" class="w-full mt-6 py-3 px-6 text-white font-bold rounded-lg transition hover:opacity-90" style="background-color: #151b29;">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // 🔧 CONFIGURAÇÕES DO SISTEMA
         const CONFIG = {
@@ -1842,16 +1857,17 @@
         
             // Sistema de logging condicional
             const logger = {
-                log: () => {}, // Desativado
-                info: () => {}, // Desativado
+                log: (...args) => CONFIG.DEBUG_MODE && console.log(...args),
+                info: (...args) => CONFIG.DEBUG_MODE && console.info(...args),
                 warn: (...args) => console.warn(...args), // Sempre mostrar warnings
                 error: (...args) => console.error(...args), // Sempre mostrar erros
-                success: () => {} // Desativado
+                success: (...args) => CONFIG.DEBUG_MODE && console.log('✅', ...args)
             };
             
             // Inicializar EmailJS
             if (typeof emailjs !== 'undefined' && CONFIG.EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY') {
                 emailjs.init(CONFIG.EMAILJS_PUBLIC_KEY);
+                console.log('📧 EmailJS inicializado');
             }
 
         // ========================================
@@ -1885,9 +1901,13 @@
                 const firstDayStr = firstDayOfMonth.toISOString().split('T')[0];
                 const lastDayStr = lastDayOfMonth.toISOString().split('T')[0];
                 
+                console.log('📅 Buscando escalas entre:', firstDayStr, 'e', lastDayStr);
+                
                 // Buscar TODAS as escalas do Firestore para calcular corretamente
                 const allEscalasForMonthRef = collection(window.firebaseDb, 'escalas');
                 const allEscalasForMonthSnapshot = await getDocs(allEscalasForMonthRef);
+                
+                console.log('📊 Total de escalas no Firestore:', allEscalasForMonthSnapshot.size);
                 
                 const escalasThisMonth = [];
                 let escalasWithoutDate = 0;
@@ -1912,9 +1932,26 @@
                     }
                 });
                 
+                console.log('📊 Escalas encontradas neste mês:', escalasThisMonth.length);
+                console.log('⚠️ Escalas SEM campo date:', escalasWithoutDate);
+                console.log('📅 Escalas FORA do mês:', escalasOutsideMonth);
+                
+                // Debug: mostrar exemplo das primeiras 3 escalas
+                if (escalasThisMonth.length > 0) {
+                    console.log('📋 Exemplos de escalas do mês:', escalasThisMonth.slice(0, 3).map(e => ({
+                        userId: e.userId,
+                        volunteerName: e.volunteerName,
+                        date: e.date,
+                        team: e.team
+                    })));
+                }
+                
                 // Contar usuários únicos com escalas
                 const uniqueVolunteersWithEscalas = new Set(escalasThisMonth.map(e => e.userId).filter(id => id));
                 const activeVolunteers = uniqueVolunteersWithEscalas.size;
+                
+                console.log('👥 Voluntários únicos escalados:', activeVolunteers);
+                console.log('📋 IDs dos voluntários:', Array.from(uniqueVolunteersWithEscalas));
                 
                 // 4. Contar voluntários com escalas no histórico total (ANY escalas, não apenas este mês)
                 const allEscalasRef = collection(window.firebaseDb, 'escalas');
@@ -1946,6 +1983,14 @@
                 
                 // Calcular estatísticas de onboarding (disponibilidade por time)
                 await calculateOnboardingStats(usersSnapshot);
+                
+                console.log('📊 Estatísticas atualizadas:', {
+                    totalVolunteers,
+                    totalLeaders,
+                    activeVolunteers,
+                    volunteersWithEscalas,
+                    volunteersWithoutEscalas
+                });
                 
             } catch (error) {
                 console.error('❌ Erro ao carregar estatísticas:', error);
@@ -2076,12 +2121,15 @@
                     container.style.display = 'none';
                 }
                 
+                console.log('📊 Estatísticas de onboarding calculadas:', teamStats);
+                
             } catch (error) {
                 console.error('❌ Erro ao calcular estatísticas de onboarding:', error);
             }
         }
 
         async function openTotalVolunteersModal() {
+            console.log('🔵 openTotalVolunteersModal chamada');
             const { collection, getDocs, query, orderBy } = window.firestoreMethods;
             const usersRef = collection(window.firebaseDb, 'users');
             const q = query(usersRef, orderBy('email', 'asc'));
@@ -2143,12 +2191,15 @@
                         modal.classList.add('hidden');
                     }
                 };
+                
+                console.log('✅ Modal aberto');
             } else {
                 console.error('❌ Modal não encontrado');
             }
         }
 
         async function openTotalLeadersModal() {
+            console.log('👑 openTotalLeadersModal chamada');
             const { collection, getDocs, query, orderBy } = window.firestoreMethods;
             const usersRef = collection(window.firebaseDb, 'users');
             const q = query(usersRef, orderBy('email', 'asc'));
@@ -2221,12 +2272,15 @@
                         modal.classList.add('hidden');
                     }
                 };
+                
+                console.log('✅ Modal de líderes aberto');
             } else {
                 console.error('❌ Modal de líderes não encontrado');
             }
         }
 
         async function openVolunteersWithEscalasModal() {
+            console.log('✅ openVolunteersWithEscalasModal chamada');
             const { collection, getDocs } = window.firestoreMethods;
             
             // Buscar usuários primeiro para ter os nomes corretos
@@ -2307,6 +2361,8 @@
                         modal.classList.add('hidden');
                     }
                 };
+                
+                console.log('✅ Modal de voluntários com escalas aberto');
             } else {
                 console.error('❌ Modal não encontrado');
             }
@@ -2408,6 +2464,8 @@
                         modal.classList.add('hidden');
                     }
                 };
+                
+                console.log('✅ Modal de escalados este mês aberto');
             } else {
                 console.error('❌ Modal não encontrado');
             }
@@ -2491,6 +2549,8 @@
                         modal.classList.add('hidden');
                     }
                 };
+                
+                console.log('✅ Modal de voluntários sem escalas aberto');
             } else {
                 console.error('❌ Modal não encontrado');
             }
@@ -2501,6 +2561,12 @@
         // ========================================
         // Aguardar Firebase estar pronto
         function initApp() {
+            console.log('═══════════════════════════════════════════');
+            console.log('🚀 ZELE SERVER v' + CONFIG.SCHEMA_VERSION);
+            console.log('📋 DEBUG MODE:', CONFIG.DEBUG_MODE ? 'ATIVADO ⚠️' : 'DESATIVADO');
+            console.log('═══════════════════════════════════════════');
+            
+            logger.log('🚀 App iniciando... v' + CONFIG.SCHEMA_VERSION);
             
             // Verificar se Firebase foi inicializado
             if (!window.firebaseAuth || !window.firebaseDb) {
@@ -2514,16 +2580,25 @@
                 let lastError;
                 for (let attempt = 1; attempt <= CONFIG.MAX_RETRIES; attempt++) {
                     try {
+                        logger.log(`🔄 ${operationName} - Tentativa ${attempt}/${CONFIG.MAX_RETRIES}`);
                         const result = await operation();
+                        logger.success(`${operationName} - Sucesso`);
                         return result;
                     } catch (error) {
                         lastError = error;
+                        console.error(`🔍 DEBUG - Erro na tentativa ${attempt}:`, {
+                            name: error.name,
+                            message: error.message,
+                            code: error.code,
+                            stack: error.stack
+                        });
                         logger.warn(`⚠️ ${operationName} - Falha na tentativa ${attempt}:`, error.message);
                         if (attempt < CONFIG.MAX_RETRIES) {
                             await new Promise(resolve => setTimeout(resolve, CONFIG.RETRY_DELAY * attempt));
                         }
                     }
                 }
+                console.error(`🔍 DEBUG - Erro final após todas tentativas:`, lastError);
                 logger.error(`❌ ${operationName} - Todas as tentativas falharam`);
                 throw lastError;
             }
@@ -2541,13 +2616,16 @@
                         timestamp: new Date().toISOString(),
                         schemaVersion: CONFIG.SCHEMA_VERSION
                     });
+                    logger.log('💾 Backup criado:', action);
                 } catch (error) {
                     logger.error('❌ Erro ao criar backup:', error);
                     // Não bloquear operação se backup falhar
                 }
             }
-
-
+            
+            logger.success('Firebase Auth:', window.firebaseAuth ? 'OK' : 'Falha');
+            logger.success('Firebase DB:', window.firebaseDb ? 'OK' : 'Falha');
+            logger.success('Firebase Provider:', window.firebaseProvider ? 'OK' : 'Falha');
             
             let currentUser = null;
             let selectedTeam = null;
@@ -2587,6 +2665,7 @@
                     if (upcomingEvents.length > 0) {
                         headerBadge.textContent = upcomingEvents.length;
                         headerBadge.classList.remove('hidden');
+                        console.log(`🔔 ${upcomingEvents.length} evento(s) nas próximas 48h`);
                     } else {
                         headerBadge.classList.add('hidden');
                     }
@@ -2599,6 +2678,7 @@
             async function sendReminderEmail(escalaData) {
                 // Verificar se EmailJS está configurado
                 if (CONFIG.EMAILJS_PUBLIC_KEY === 'YOUR_PUBLIC_KEY') {
+                    console.log('⚠️ EmailJS não configurado. Pule o envio de email.');
                     return;
                 }
                 
@@ -2634,6 +2714,7 @@
                         CONFIG.EMAILJS_TEMPLATE_ID,
                         templateParams
                     );
+                    console.log('📧 Email de lembrete enviado para:', currentUser.email);
                 } catch (error) {
                     console.error('❌ Erro ao enviar email:', error);
                 }
@@ -2683,6 +2764,8 @@
                     img.src = url;
                     preloadedImages[url] = img;
                 });
+                
+                console.log('✅ Imagens dos times pré-carregadas');
             }
             
             // Chamar pré-carregamento assim que o app iniciar
@@ -2724,6 +2807,8 @@
 
             // Modal functions
             function showModal(message, showYesNo = false, onYes = null, isWarning = false, onClose = null, customEmoji = null) {
+                console.log('🔔 showModal chamado:', { showYesNo, hasOnYes: !!onYes, message: message.substring(0, 50) });
+                
                 // Usar innerHTML para suportar formatação HTML
                 elements.modalMessage.innerHTML = message;
                 
@@ -2738,6 +2823,7 @@
                 }
                 
                 if (showYesNo && onYes) {
+                    console.log('🔔 Modal Sim/Não criado');
                     // Modal com Sim/Não
                     elements.modalButtons.innerHTML = `
                         <button id="modal-no-btn" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-6 rounded-lg transition">
@@ -2749,15 +2835,18 @@
                     `;
                     
                     document.getElementById('modal-yes-btn').addEventListener('click', () => {
+                        console.log('🔔 Botão SIM clicado');
                         closeModal();
                         onYes();
                     });
                     
                     document.getElementById('modal-no-btn').addEventListener('click', () => {
+                        console.log('🔔 Botão NÃO clicado');
                         closeModal();
                         if (onClose) onClose();
                     });
                 } else {
+                    console.log('🔔 Modal OK criado');
                     // Modal apenas com OK
                     elements.modalButtons.innerHTML = `
                         <button id="modal-close-btn" class="flex-1 zele-btn text-white font-bold py-3 px-6 rounded-lg">
@@ -2766,6 +2855,7 @@
                     `;
                     
                     document.getElementById('modal-close-btn').addEventListener('click', () => {
+                        console.log('🔔 Botão OK clicado');
                         closeModal();
                         if (onClose) onClose();
                     });
@@ -2845,6 +2935,39 @@
                     appContainer.classList.remove('hidden');
                 });
             }
+
+            // Navegação para Modal de Gerenciar Funções
+            const menuManageRolesBtn = document.getElementById('menu-manage-roles-btn');
+            const manageRolesModal = document.getElementById('manage-roles-modal');
+            const closeManageRolesModal = document.getElementById('close-manage-roles-modal');
+            const closeRolesModalBtn = document.getElementById('close-roles-modal-btn');
+
+            if (menuManageRolesBtn) {
+                menuManageRolesBtn.addEventListener('click', () => {
+                    closeMenu();
+                    manageRolesModal.classList.remove('hidden');
+                    loadTeamRoles(); // Carregar configurações de funções
+                });
+            }
+
+            if (closeManageRolesModal) {
+                closeManageRolesModal.addEventListener('click', () => {
+                    manageRolesModal.classList.add('hidden');
+                });
+            }
+
+            if (closeRolesModalBtn) {
+                closeRolesModalBtn.addEventListener('click', () => {
+                    manageRolesModal.classList.add('hidden');
+                });
+            }
+
+            // Fechar modal ao clicar fora
+            manageRolesModal?.addEventListener('click', (e) => {
+                if (e.target === manageRolesModal) {
+                    manageRolesModal.classList.add('hidden');
+                }
+            });
 
             // Navegação para página de Escalar Voluntários Manualmente
             const menuManualScaleBtn = document.getElementById('menu-manual-scale-btn');
@@ -3072,13 +3195,16 @@
 
             // Capturar evento beforeinstallprompt GLOBALMENTE (antes do login)
             window.addEventListener('beforeinstallprompt', (e) => {
+                console.log('📱 beforeinstallprompt disparado (Android/Windows/Desktop)');
                 e.preventDefault();
                 deferredPrompt = e;
+                console.log('✅ Prompt de instalação capturado e salvo');
                 
                 // Se o botão já existe, mostrar imediatamente
                 const installBtn = document.getElementById('install-app-btn');
                 if (installBtn && !isInStandaloneMode()) {
                     installBtn.style.display = 'block';
+                    console.log('🔄 Botão de instalação ativado após captura do evento');
                 }
             });
 
@@ -3094,6 +3220,7 @@
                 
                 // Não mostrar se já estiver instalado
                 if (isInStandaloneMode()) {
+                    console.log('✅ App já está instalado');
                     installBtn.style.display = 'none';
                     return;
                 }
@@ -3104,6 +3231,7 @@
                 
                 if (isIOS) {
                     // iOS: Mostrar botão com instruções manuais
+                    console.log('📱 iOS detectado - mostrando instruções manuais');
                     newBtn.style.display = 'block';
                     newBtn.addEventListener('click', () => {
                         closeMenu();
@@ -3111,21 +3239,26 @@
                     });
                 } else {
                     // Android/Desktop/Windows
-
+                    console.log('💻 Desktop/Android detectado');
+                    console.log('🔍 deferredPrompt disponível?', !!deferredPrompt);
                     
                     // Sempre mostrar botão (mesmo sem deferredPrompt)
                     newBtn.style.display = 'block';
 
                     newBtn.addEventListener('click', async () => {
+                        console.log('🖱️ Botão de instalação clicado');
                         if (!deferredPrompt) {
+                            console.log('❌ Prompt de instalação não disponível - mostrando instruções manuais');
                             // Instruções manuais para Android/Chrome
                             showModal('Para instalar no <strong>Android</strong>:<br><br>1. Abra o <strong>Menu</strong> do navegador (⋮)<br>2. Toque em <strong>"Adicionar à tela inicial"</strong> ou <strong>"Instalar app"</strong><br><br>Para <strong>Desktop</strong>:<br>• Chrome: Menu (⋮) → Instalar Zele Server<br>• Edge: Menu (⋯) → Apps → Instalar', false, null, false, null, '📱');
                             return;
                         }
 
                         try {
+                            console.log('🚀 Iniciando instalação automática...');
                             deferredPrompt.prompt();
                             const { outcome } = await deferredPrompt.userChoice;
+                            console.log(`👤 Usuário escolheu: ${outcome}`);
                             
                             if (outcome === 'accepted') {
                                 showModal('✅ App instalado com sucesso!');
@@ -3145,6 +3278,7 @@
 
                 // Listener quando o app é instalado
                 window.addEventListener('appinstalled', () => {
+                    console.log('✅ PWA instalado com sucesso');
                     const btn = document.getElementById('install-app-btn');
                     if (btn) btn.style.display = 'none';
                     deferredPrompt = null;
@@ -3188,6 +3322,7 @@
                 if (blockedAttemptsUnsubscribe) {
                     blockedAttemptsUnsubscribe();
                     blockedAttemptsUnsubscribe = null;
+                    console.log('👂 Listener de tentativas bloqueadas cancelado');
                 }
             });
 
@@ -3199,6 +3334,7 @@
                     if (blockedAttemptsUnsubscribe) {
                         blockedAttemptsUnsubscribe();
                         blockedAttemptsUnsubscribe = null;
+                        console.log('👂 Listener de tentativas bloqueadas cancelado');
                     }
                 }
             });
@@ -3259,6 +3395,7 @@
                 
                 try {
                     showLoading();
+                    console.log('📸 Processando foto...');
                     
                     // Converter imagem para Base64
                     const photoBase64 = await new Promise((resolve, reject) => {
@@ -3268,7 +3405,10 @@
                         reader.readAsDataURL(file);
                     });
                     
+                    console.log('✅ Foto convertida para Base64 (' + Math.round(photoBase64.length / 1024) + 'KB)');
+                    
                     // Salvar apenas no Firestore (Firebase Auth tem limite de tamanho)
+                    console.log('💾 Salvando no Firestore...');
                     const { doc, updateDoc } = window.firestoreMethods;
                     await updateDoc(doc(window.firebaseDb, 'users', currentUser.uid), {
                         photoURL: photoBase64,
@@ -3277,6 +3417,8 @@
                     
                     // Atualizar currentUser em memória
                     currentUser.photoURL = photoBase64;
+                    
+                    console.log('✅ Foto de perfil atualizada com sucesso');
                     
                     // Fechar loading e recarregar app após modal ser fechado
                     showModal('✅ Foto de perfil atualizada com sucesso!', false, null, false, () => {
@@ -3326,6 +3468,7 @@
                                 }, 100); // Delay para iOS processar fechamento do modal
                             }
                         );
+                        
                         return;
                     }
                     
@@ -3397,10 +3540,12 @@
             async function loginWithGoogle() {
                 try {
                     showLoading(); // Mostrar loading durante o login
-
-
+                    console.log('🔐 Iniciando login...');
+                    console.log('Auth:', window.firebaseAuth);
+                    console.log('Provider:', window.firebaseProvider);
                     const result = await window.firebaseAuthMethods.signInWithPopup(window.firebaseAuth, window.firebaseProvider);
                     currentUser = result.user;
+                    console.log('✅ Login bem-sucedido:', currentUser.email);
                     // O onAuthStateChanged vai cuidar de mostrar o app
                 } catch (error) {
                     console.error('❌ Erro no login:', error);
@@ -3415,6 +3560,7 @@
             async function logout() {
                 try {
                     await window.firebaseAuthMethods.signOut(window.firebaseAuth);
+                    console.log('👋 Logout realizado');
                     // Recarregar a página para limpar o estado e voltar para tela de login
                     window.location.reload();
                 } catch (error) {
@@ -3460,6 +3606,7 @@
                             teamLeader: existingData.teamLeader || [], // Preservar liderança
                             createdAt: existingData.createdAt || new Date().toISOString()
                         }, { merge: true });
+                        logger.log('✅ Dados do usuário atualizados');
                     } else {
                         // Criar novo documento com role padrão
                         await setDoc(userDocRef, {
@@ -3469,6 +3616,7 @@
                             blocked: false,
                             createdAt: new Date().toISOString()
                         });
+                        logger.log('✅ Novo usuário criado no Firestore');
                     }
                 } catch (error) {
                     console.error('❌ Erro ao salvar usuário:', error);
@@ -3478,6 +3626,7 @@
             // Verificar se usuário é admin ou superadmin
             async function checkAdminStatus(user) {
                 if (!user) {
+                    console.log('⚠️ Nenhum usuário para verificar admin');
                     return false;
                 }
                 
@@ -3487,6 +3636,7 @@
                     const userDoc = await getDoc(doc(window.firebaseDb, 'users', user.uid));
                     
                     if (userDoc.exists() && userDoc.data().blocked === true) {
+                        console.log('🚫 Usuário bloqueado. Fazendo logout...');
                         showModal('Seu acesso está temporariamente bloqueado neste aplicativo. Por favor, fale com o Líder do time que está servindo para maiores informações.', false, null, false, async () => {
                             await window.firebaseAuthMethods.signOut(window.firebaseAuth);
                             window.location.reload();
@@ -3499,20 +3649,26 @@
                 
                 // Salvar/atualizar dados do usuário
                 await saveUserToFirestore(user);
-
+                
+                console.log('🔍 Verificando status de admin para:', user.email);
+                console.log('🔍 UID do usuário:', user.uid);
                 
                 try {
                     const { doc, getDoc, setDoc } = window.firestoreMethods;
                     const userDoc = await getDoc(doc(window.firebaseDb, 'users', user.uid));
                     
+                    console.log('📄 Documento existe?', userDoc.exists());
+                    
                     // Verificar liderança de times e carregar bloqueios
                     if (userDoc.exists()) {
                         const userData = userDoc.data();
-
-
+                        console.log('📄 Dados completos do usuário:', userData);
+                        console.log('📄 Campo teamLeader:', userData.teamLeader);
+                        console.log('📄 Tipo do campo teamLeader:', typeof userData.teamLeader);
                         userTeamLeadership = userData.teamLeader || [];
                         isTeamLeader = userTeamLeadership.length > 0;
-
+                        console.log('🏆 Líder de times:', userTeamLeadership);
+                        console.log('🏆 isTeamLeader:', isTeamLeader);
                         
                         // Mostrar botão de check-in para líderes
                         const checkinBtn = document.getElementById('menu-checkin-btn');
@@ -3522,6 +3678,7 @@
                         
                         // Bloqueios de data do usuário
                         userBlockedDates = userData.blockedDates || {};
+                        console.log('🗓️ Bloqueios carregados:', userBlockedDates);
                         
                         // Atualizar UI após carregar liderança
                         updateUserUI(user);
@@ -3532,6 +3689,7 @@
                     const SUPER_ADMIN_EMAIL = 'leandroalves.facilities@gmail.com';
                     
                     if (user.uid === SUPER_ADMIN_ID || user.email === SUPER_ADMIN_EMAIL) {
+                        console.log('👑👑 SUPER ADMINISTRADOR detectado!');
                         // Garantir que está como superadmin no Firestore
                         if (userDoc.exists()) {
                             const data = userDoc.data();
@@ -3540,6 +3698,7 @@
                                     ...data,
                                     role: 'superadmin'
                                 });
+                                console.log('✅ Role atualizado para superadmin');
                             }
                         }
                         isAdmin = true;
@@ -3562,12 +3721,14 @@
                         if (menuCheckinBtn) menuCheckinBtn.style.display = 'block';
                         updateBlockedAttemptsBadge(); // Atualizar badge
                         updatePendingEscalasBadge(); // Atualizar badge
+                        console.log('✅ Usuário É SUPER ADMINISTRADOR');
                         return true;
                     }
                     
                     if (userDoc.exists()) {
                         const data = userDoc.data();
-
+                        console.log('📄 Dados do documento:', data);
+                        console.log('📄 Valor do campo role:', data.role);
                         
                         if (data.role === 'superadmin') {
                             isAdmin = true;
@@ -3590,6 +3751,7 @@
                             if (menuCheckinBtn) menuCheckinBtn.style.display = 'block';
                             updateBlockedAttemptsBadge(); // Atualizar badge
                             updatePendingEscalasBadge(); // Atualizar badge
+                            console.log('✅ Usuário É SUPER ADMINISTRADOR');
                             return true;
                         } else if (data.role === 'admin') {
                             isAdmin = true;
@@ -3609,10 +3771,13 @@
                             document.getElementById('menu-checkin-btn').style.display = 'block';
                             updateBlockedAttemptsBadge(); // Atualizar badge
                             updatePendingEscalasBadge(); // Atualizar badge
+                            console.log('✅ Usuário É ADMINISTRADOR');
                             return true;
                         } else {
+                            console.log('❌ Usuário NÃO é admin. Role =', data.role);
                         }
                     } else {
+                        console.log('❌ Documento não encontrado em users/' + user.uid);
                     }
                     
                     isAdmin = false;
@@ -3741,8 +3906,12 @@
                         where('date', '==', date),
                         where('time', '==', time),
                         where('team', '==', team)
+                    );
+                    
                     const querySnapshot = await getDocs(q);
                     const count = querySnapshot.size;
+                    
+                    logger.log(`📊 Time ${team} no evento ${date} ${time}: ${count}/${maxVolunteers} voluntários`);
                     
                     return {
                         count: count,
@@ -3808,12 +3977,14 @@
                     const now = new Date();
                     const hoursUntilEvent = (eventDateTime - now) / (1000 * 60 * 60);
                     const hoursUntilEventEnd = (eventEndTime - now) / (1000 * 60 * 60);
-:');
-
-:', eventEndTime);
-
-
-
+                    
+                    console.log('⏰ Verificação 24h (com janela de 2h após início):');
+                    console.log('  Data/Hora evento:', eventDateTime);
+                    console.log('  Data/Hora fim (evento + 2h):', eventEndTime);
+                    console.log('  Data/Hora atual:', now);
+                    console.log('  Horas até evento:', hoursUntilEvent);
+                    console.log('  Horas até fim da janela:', hoursUntilEventEnd);
+                    console.log('  Time selecionado:', team);
                     
                     // Determinar se é pending
                     // - Kids SEMPRE vai para PENDING (mesmo dentro da janela rápida)
@@ -3821,8 +3992,8 @@
                     // - Se evento já começou e está dentro da janela de 2h → CONFIRMADO (entrada rápida) exceto Kids
                     const isDuringQuickEntryWindow = hoursUntilEvent < 0 && hoursUntilEventEnd > 0; // Evento iniciado, dentro de 2h
                     const isPending = team === 'kids' || ((hoursUntilEvent < 24 && hoursUntilEvent > 0) && !isDuringQuickEntryWindow);
-?', isDuringQuickEntryWindow);
-?', isPending);
+                    console.log('  Está na janela de entrada rápida (2h após início)?', isDuringQuickEntryWindow);
+                    console.log('  É pendente (<24h ou Kids)?', isPending);
                     
                     // Verificar limite de voluntários no time para esta data/hora
                     const teamLimit = await checkTeamLimit(date, time, team);
@@ -3877,6 +4048,7 @@
                         if (existingTeam === team) {
                             // Mostrar confirmação antes de salvar
                             if (isPending) {
+                                console.log('⛔ PENDENTE: Salvando como pending (mesmo time, <24h ou Kids)');
                                 // Salvar automaticamente sem botões SIM/NÃO
                                 await saveEscalaToFirestore(escalaId, date, time, team, eventName, true, 'pending');
                                 
@@ -3902,6 +4074,7 @@
                                 }
                                 return;
                             } else {
+                                console.log('✅ Normal: Confirmação padrão (mesmo time, >24h)');
                                 showModal(
                                     `Confirmar escala no time ${teamNames[team]}?`,
                                     true,
@@ -3913,6 +4086,7 @@
                         } else {
                             // Times diferentes - pedir confirmação
                             if (isPending) {
+                                console.log('⛔ PENDENTE: Salvando como pending (mudança de time, <24h ou Kids)');
                                 // Salvar automaticamente sem botões SIM/NÃO
                                 await saveEscalaToFirestore(escalaId, date, time, team, eventName, false, 'pending');
                                 
@@ -3938,6 +4112,7 @@
                                 }
                                 return;
                             } else {
+                                console.log('✅ Normal: Confirmação mudança de time (>24h)');
                                 showModal(
                                     `Você já escolheu servir no time ${teamNames[existingTeam]}. Deseja confirmar a mudança para o time ${teamNames[team]} nesta escala?`,
                                     true,
@@ -3950,6 +4125,7 @@
                     } else {
                         // Nova escala - verificar se é pendente ou aprovada
                         if (isPending) {
+                            console.log('⛔ PENDENTE: Salvando nova escala como pending (<24h ou Kids)');
                             // Escala pendente (menos de 24h ou Kids) - salvar automaticamente
                             await saveEscalaToFirestore(escalaId, date, time, team, eventName, false, 'pending');
                             
@@ -3975,6 +4151,7 @@
                             }
                             return;
                         } else {
+                            console.log('✅ Normal: Nova escala normal (>24h)');
                             // Escala normal - mostrar confirmação
                             showModal(
                                 `Confirmar escala no time ${teamNames[team]}?`,
@@ -3995,10 +4172,11 @@
             // Função auxiliar para salvar no Firestore
             async function saveEscalaToFirestore(escalaId, date, time, team, eventName, skipCalendarPrompt, status = 'approved') {
                 try {
-
-
-
-
+                    console.log('💾 saveEscalaToFirestore chamada:');
+                    console.log('  escalaId:', escalaId);
+                    console.log('  status:', status);
+                    console.log('  team:', team);
+                    console.log('  date/time:', date, time);
                     
                     const { doc, setDoc, Timestamp } = window.firestoreMethods;
                     
@@ -4021,12 +4199,16 @@
                         eventTimestamp: Timestamp.fromDate(eventDateTime)
                     };
                     
+                    console.log('💾 Dados da escala:', escalaData);
+                    
                     // Se for escala negada, adicionar razão
                     if (status === 'denied') {
                         escalaData.deniedReason = 'Escala não aprovada pelo líder';
                     }
                     
                     await setDoc(doc(window.firebaseDb, 'escalas', escalaId), escalaData);
+
+                    console.log('✅ Escala salva com sucesso! Status:', status);
                     
                     // Limpar seleção e resetar imagens
                     selectedTeam = null;
@@ -4098,10 +4280,15 @@
                 if (!currentUser) return;
 
                 try {
+                    // Limpar escalas de eventos passados (DESATIVADO - mantém histórico)
+                    await cleanPastEscalas();
+                    
                     const { collection, query, where, getDocs } = window.firestoreMethods;
                     const q = query(
                         collection(window.firebaseDb, 'escalas'),
                         where('userId', '==', currentUser.uid)
+                    );
+                    
                     const querySnapshot = await getDocs(q);
                     const allEscalas = [];
                     
@@ -4135,11 +4322,6 @@
                     updateCultoDropdown(escalas);
                     updateUpcomingEventsBadge(escalas);
                     checkAndSendReminders(escalas);
-                    
-                    // Configurar listener em tempo real (apenas uma vez)
-                    if (!unsubscribeUserEscalas) {
-                        setupUserEscalasListener();
-                    }
                 } catch (error) {
                     console.error('❌ Erro ao carregar escalas:', error);
                 }
@@ -4161,6 +4343,8 @@
                     const q = query(
                         collection(window.firebaseDb, 'escalas'),
                         where('userId', '==', currentUser.uid)
+                    );
+                    
                     unsubscribeUserEscalas = onSnapshot(q, (snapshot) => {
                         const allEscalas = [];
                         snapshot.forEach((doc) => {
@@ -4190,25 +4374,16 @@
                         renderUserEscalas(escalas);
                         updateCultoDropdown(escalas);
                         updateUpcomingEventsBadge(escalas);
+                        
+                        console.log('🔄 Escalas atualizadas em tempo real:', escalas.length);
                     }, (error) => {
                         console.error('❌ Erro no listener de escalas:', error);
                     });
+                    
+                    console.log('✅ Listener de escalas configurado');
                 } catch (error) {
                     console.error('❌ Erro ao configurar listener:', error);
                 }
-            }
-            
-            // Debounce helper
-            function debounce(func, wait) {
-                let timeout;
-                return function executedFunction(...args) {
-                    const later = () => {
-                        clearTimeout(timeout);
-                        func(...args);
-                    };
-                    clearTimeout(timeout);
-                    timeout = setTimeout(later, wait);
-                };
             }
             
             // Atualizar filtro de Minhas Escalas
@@ -4293,6 +4468,7 @@
             // Limpar escalas de eventos passados - DESATIVADO para manter histórico
             async function cleanPastEscalas() {
                 // FUNÇÃO DESATIVADA: Não deletar escalas passadas para manter dados históricos nos charts
+                console.log('ℹ️ cleanPastEscalas: Função desativada - mantendo dados históricos');
                 return;
                 
                 /* CÓDIGO ORIGINAL (DESATIVADO)
@@ -4317,13 +4493,14 @@
                         if (eventDateTime < now && (status === 'approved' || status === 'denied')) {
                             deletePromises.push(
                                 deleteDoc(doc(window.firebaseDb, 'escalas', docSnapshot.id))
+                            );
                             deletedCount++;
                         }
                     });
                     
                     if (deletePromises.length > 0) {
                         await Promise.all(deletePromises);
- de eventos passados foram removidas`);
+                        console.log(`🧹 ${deletedCount} escala(s) de eventos passados foram removidas`);
                     }
                 } catch (error) {
                     console.error('❌ Erro ao limpar escalas passadas:', error);
@@ -4334,11 +4511,18 @@
             // Carregar datas disponíveis do Firestore
             async function loadAvailableDates() {
                 try {
+                    console.log('🔄 Carregando datas disponíveis...');
                     const { doc, getDoc } = window.firestoreMethods;
                     const datesDoc = await getDoc(doc(window.firebaseDb, 'config', 'availableDates'));
                     
+                    console.log('🔍 DEBUG - Documento existe?', datesDoc.exists());
+                    console.log('🔍 DEBUG - Dados do documento:', datesDoc.data());
+                    
                     if (datesDoc.exists()) {
                         availableDates = datesDoc.data().dates || [];
+                        console.log('📦 Datas encontradas no Firestore:', availableDates.length);
+                        console.log('🔍 DEBUG - TODAS as datas do Firestore:', availableDates.map(d => d.value));
+                        console.log('🔍 DEBUG - Primeira data (exemplo):', availableDates[0]);
                         
                         // Adicionar teamLimits padrão se não existir (retrocompatibilidade)
                         availableDates = availableDates.map(date => {
@@ -4360,22 +4544,30 @@
                         
                         // Filtrar apenas eventos futuros (até 1h após o início)
                         const now = new Date();
+                        console.log('🔍 DEBUG - Data/hora atual:', now.toISOString());
                         const initialCount = availableDates.length;
                         availableDates = availableDates.filter(d => {
                             const [date, time] = d.value.split('|');
                             const eventDateTime = new Date(date + 'T' + time);
                             const eventEndTime = new Date(eventDateTime.getTime() + (2 * 60 * 60 * 1000)); // 2h após início
                             const isVisible = eventEndTime > now; // Visível até 2h após início
+                            console.log(`🔍 DEBUG - Evento: ${d.text} (${d.value}) → ${eventDateTime.toISOString()} → Fim janela: ${eventEndTime.toISOString()} → Visível? ${isVisible}`);
                             return isVisible;
                         });
+                        
+                        console.log(`🧹 Filtrado: ${initialCount} → ${availableDates.length} eventos futuros`);
                     } else {
                         // Documento não existe - lista vazia (admin deve adicionar)
                         availableDates = [];
+                        console.log('📭 Nenhuma data cadastrada. Admin deve adicionar datas.');
                         
                         // Criar documento vazio no Firestore
                         const { setDoc } = window.firestoreMethods;
                         await setDoc(doc(window.firebaseDb, 'config', 'availableDates'), { dates: [] });
+                        console.log('✅ Documento availableDates criado');
                     }
+                    
+                    console.log('✅ Datas disponíveis carregadas:', availableDates.length);
                     
                     // Renderizar lista de datas para admin
                     if (isAdmin) {
@@ -4390,13 +4582,16 @@
             // Atualizar dropdown removendo datas já escaladas
             function updateCultoDropdown(escalas) {
                 const select = elements.cultoSelect;
-
-
-
-`));
+                
+                console.log('🔍 updateCultoDropdown chamado');
+                console.log('🔍 Datas disponíveis:', availableDates.length);
+                console.log('🔍 Escalas do usuário:', escalas.length);
+                console.log('🔍 Escalas detalhes:', escalas.map(e => `${e.date}_${e.time} (${e.team})`));
 
                 // Criar set com data+hora já escaladas (formato: date_time)
                 const escaladasDateTimes = new Set(escalas.map(e => `${e.date}_${e.time}`));
+                console.log('🔍 Datas já escaladas:', Array.from(escaladasDateTimes));
+                
                 // Data/hora atual
                 const now = new Date();
 
@@ -4427,7 +4622,7 @@
                 sortedDates.forEach(option => {
                     const [date, time] = option.value.split('|');
                     const dateTimeKey = `${date}_${time}`;
-}`);
+                    console.log(`🔍 Verificando ${dateTimeKey}: já escalado? ${escaladasDateTimes.has(dateTimeKey)}`);
                     if (!escaladasDateTimes.has(dateTimeKey)) {
                         const optionElement = document.createElement('option');
                         optionElement.value = option.value;
@@ -4443,20 +4638,12 @@
                 } else {
                     select.disabled = false;
                 }
+                
+                console.log('✅ Dropdown atualizado. Total de opções:', select.options.length);
             }
 
-            // Cache para evitar renderizações desnecessárias
-            let lastRenderedEscalasHash = '';
-            
             // Renderizar escalas do usuário
             function renderUserEscalas(escalas) {
-                // Verificar se precisa renderizar (cache simples)
-                const currentHash = JSON.stringify(escalas.map(e => e.id + e.status));
-                if (currentHash === lastRenderedEscalasHash && escalas.length > 0) {
-                    return; // Não renderizar se dados não mudaram
-                }
-                lastRenderedEscalasHash = currentHash;
-                
                 const teamConfig = {
                     welcome: { name: 'Welcome', icon: '👋', color: 'border-[#377db8]', bg: 'bg-blue-50' },
                     backstage: { name: 'Backstage', icon: '🤝', color: 'border-[#0a0e1a]', bg: 'bg-gray-50' },
@@ -4575,6 +4762,7 @@
                             true,
                             () => deleteEscala(escalaId),
                             true
+                        );
                     });
                 });
             }
@@ -4735,6 +4923,7 @@
                         attemptDateFormatted: new Date().toLocaleString('pt-BR'),
                         timestamp: Date.now()
                     });
+                    console.log('📋 Tentativa bloqueada registrada');
                 } catch (error) {
                     console.error('❌ Erro ao registrar tentativa bloqueada:', error);
                 }
@@ -4827,6 +5016,8 @@
                     const q = query(
                         collection(window.firebaseDb, 'escalas'),
                         where('status', '==', 'pending')
+                    );
+                    
                     const querySnapshot = await getDocs(q);
                     const count = querySnapshot.size;
                     
@@ -4850,6 +5041,7 @@
             async function loadBlockedAttempts() {
                 // Superadmin, admin e líderes podem ver tentativas bloqueadas
                 if (!isSuperAdmin && !isAdmin && !isTeamLeader) {
+                    console.log('⚠️ Usuário não tem permissão. Acesso negado.');
                     const listEl = document.getElementById('blocked-attempts-list');
                     if (listEl) {
                         listEl.innerHTML = '<p class="text-red-500 text-center py-8">⚠️ Apenas Administradores e Líderes de Time podem acessar esta área.</p>';
@@ -4873,6 +5065,8 @@
                 }
                 
                 try {
+                    console.log('🔍 Verificando métodos disponíveis:', Object.keys(window.firestoreMethods || {}));
+                    
                     const { collection, query, orderBy, onSnapshot, getDocs } = window.firestoreMethods || {};
                     
                     if (!collection) {
@@ -4885,6 +5079,7 @@
                         q = query(
                             collection(window.firebaseDb, 'blockedAttempts'),
                             orderBy('timestamp', 'desc')
+                        );
                     } else {
                         console.warn('⚠️ orderBy não disponível');
                         q = collection(window.firebaseDb, 'blockedAttempts');
@@ -4892,6 +5087,7 @@
                     
                     // Listener em tempo real
                     if (onSnapshot) {
+                        console.log('👂 Configurando listener em tempo real...');
                         blockedAttemptsUnsubscribe = onSnapshot(q, (querySnapshot) => {
                             const attempts = [];
                             querySnapshot.forEach((doc) => {
@@ -4902,6 +5098,8 @@
                             if (!orderBy) {
                                 attempts.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
                             }
+                            
+                            console.log('📋 Tentativas bloqueadas atualizadas em tempo real:', attempts.length);
                             renderBlockedAttempts(attempts);
                         }, (error) => {
                             console.error('❌ Erro no listener:', error);
@@ -4939,6 +5137,8 @@
                         if (!orderBy) {
                             attempts.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
                         }
+                        
+                        console.log('📋 Tentativas bloqueadas carregadas:', attempts.length);
                         renderBlockedAttempts(attempts);
                     }
                 } catch (error) {
@@ -5050,19 +5250,29 @@
             
             // Deletar tentativa bloqueada
             async function deleteBlockedAttempt(attemptId) {
+                console.log('🗑️ deleteBlockedAttempt chamada. ID:', attemptId);
                 showModal(
                     'Tem certeza que deseja excluir esta tentativa de bloqueio?',
                     true,
                     async () => {
                         try {
+                            console.log('🔵 Confirmação recebida. Iniciando exclusão...');
+                            console.log('🔍 attemptId:', attemptId);
+                            console.log('🔍 firebaseDb existe?', !!window.firebaseDb);
+                            console.log('🔍 firestoreMethods existe?', !!window.firestoreMethods);
+                            
                             const { doc, deleteDoc, getDoc } = window.firestoreMethods;
                             
                             if (!doc || !deleteDoc || !getDoc) {
                                 throw new Error('Métodos Firestore não disponíveis');
                             }
+                            
+                            console.log('🔵 Criando referência do documento...');
                             const docRef = doc(window.firebaseDb, 'blockedAttempts', attemptId);
+                            console.log('🔵 Referência criada:', docRef);
                             
                             // Buscar dados da tentativa antes de deletar (para o log)
+                            console.log('🔵 Buscando dados da tentativa bloqueada...');
                             const attemptDoc = await getDoc(docRef);
                             
                             if (!attemptDoc.exists()) {
@@ -5070,7 +5280,9 @@
                             }
                             
                             const attemptData = attemptDoc.data();
-
+                            console.log('🔵 Dados da tentativa:', attemptData);
+                            
+                            console.log('🔵 Executando deleteDoc...');
                             await deleteDoc(docRef);
                             
                             // Registrar log de auditoria
@@ -5084,6 +5296,8 @@
                                 team: attemptData.team,
                                 reason: attemptData.reason || 'Não especificado'
                             });
+                            
+                            console.log('✅ Tentativa excluída com sucesso!');
                             showModal('✅ Tentativa excluída com sucesso!');
                             // A lista será atualizada automaticamente pelo listener em tempo real
                         } catch (error) {
@@ -5110,6 +5324,7 @@
             // Carregar escalas pendentes (apenas admin)
             async function loadPendingEscalas() {
                 if (!isAdmin && !isSuperAdmin) {
+                    console.log('⚠️ Usuário não é admin. Acesso negado.');
                     return;
                 }
                 
@@ -5132,6 +5347,8 @@
                     const q = query(
                         collection(window.firebaseDb, 'escalas'),
                         where('status', '==', 'pending')
+                    );
+                    
                     const querySnapshot = await getDocs(q);
                     const allPendingEscalas = [];
                     
@@ -5154,6 +5371,8 @@
                         const timeB = new Date(b.requestTimestamp || b.createdAt).getTime();
                         return timeB - timeA; // Mais recentes primeiro
                     });
+                    
+                    console.log('📋 Escalas pendentes carregadas:', pendingEscalas.length);
                     renderPendingEscalas(pendingEscalas);
                     
                 } catch (error) {
@@ -5354,6 +5573,8 @@
                         approvedTeam: selectedTeam,
                         teamChanged: teamChanged
                     });
+                    
+                    console.log('✅ Escala aprovada com sucesso!');
                     showModal(`✅ Escala aprovada! ${teamChanged ? 'Time ajustado para melhor organização.' : ''}`);
                     
                     // Recarregar lista
@@ -5368,9 +5589,10 @@
             // Registrar log de auditoria
             async function logAudit(action, details) {
                 try {
-
-
-
+                    console.log('🔍 DEBUG - Tentando criar log de auditoria...');
+                    console.log('🔍 DEBUG - Action:', action);
+                    console.log('🔍 DEBUG - Details antes de limpar:', details);
+                    console.log('🔍 DEBUG - currentUser:', currentUser);
                     
                     const { collection, addDoc } = window.firestoreMethods;
                     
@@ -5382,6 +5604,8 @@
                         }
                     }
                     
+                    console.log('🔍 DEBUG - Details após limpar:', cleanedDetails);
+                    
                     const logData = {
                         action: action,
                         userId: currentUser.uid,
@@ -5390,8 +5614,11 @@
                         timestamp: new Date().toISOString(),
                         details: cleanedDetails
                     };
+                    
+                    console.log('🔍 DEBUG - Log data a ser salvo:', logData);
                     const docRef = await addDoc(collection(window.firebaseDb, 'audit_logs'), logData);
-
+                    console.log('✅ Log de auditoria registrado com ID:', docRef.id);
+                    console.log('📋 Log de auditoria registrado:', action);
                 } catch (error) {
                     console.error('❌ Erro ao registrar log:', error);
                     console.error('❌ Stack trace:', error.stack);
@@ -5407,19 +5634,25 @@
                 }
                 
                 try {
-
+                    console.log('🔍 DEBUG - Carregando logs de auditoria...');
+                    console.log('🔍 DEBUG - isSuperAdmin:', isSuperAdmin);
                     
                     const { collection, getDocs, query, orderBy: orderByField, limit } = window.firestoreMethods;
                     const logsList = document.getElementById('audit-logs-list');
                     const filterValue = document.getElementById('audit-log-filter').value;
                     const periodValue = document.getElementById('audit-log-period').value;
                     
+                    console.log('🔍 DEBUG - Filtro:', filterValue, 'Período:', periodValue);
+                    
                     logsList.innerHTML = '<div class="text-center py-8"><div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 mx-auto"></div><p class="text-gray-600 mt-4">Carregando logs...</p></div>';
                     
                     const logsRef = collection(window.firebaseDb, 'audit_logs');
                     // Buscar todos os logs ordenados, sem filtro de action (para evitar índice composto)
                     const q = query(logsRef, orderByField('timestamp', 'desc'), limit(200));
+                    
+                    console.log('🔍 DEBUG - Executando query...');
                     const logsSnapshot = await getDocs(q);
+                    console.log('🔍 DEBUG - Logs encontrados:', logsSnapshot.size);
                     
                     if (logsSnapshot.empty) {
                         logsList.innerHTML = '<p class="text-center text-gray-500 py-8">Nenhum log encontrado.</p>';
@@ -5580,6 +5813,8 @@
                                 eventName: escalaData.eventName,
                                 requestedTeam: escalaData.team
                             });
+                            
+                            console.log('✅ Escala negada com sucesso!');
                             showModal('✅ Escala negada. O voluntário será notificado.');
                             
                             // Recarregar lista
@@ -5591,6 +5826,7 @@
                         }
                     },
                     true
+                );
             }
 
             // Verificar se pode deletar escala (impede deleção na véspera e no dia)
@@ -5639,6 +5875,8 @@
                         team: escalaData.team,
                         status: escalaData.status
                     });
+                    
+                    console.log('✅ Escala deletada com sucesso!');
                     showModal('Escala removida com sucesso!');
                     
                     // Recarregar escalas e atualizar dropdown
@@ -5671,7 +5909,9 @@
                 sortedDates.forEach((sortedDate, sortedIndex) => {
                     const originalIndex = availableDates.findIndex(d => 
                         d.value === sortedDate.value && d.text === sortedDate.text
+                    );
                     dateIndexMap.set(sortedIndex, originalIndex);
+                    console.log(`🔍 [DEBUG] sortedIndex: ${sortedIndex} → originalIndex: ${originalIndex} | Data: ${sortedDate.text}`);
                 });
                 
                 const html = sortedDates.map((date, sortedIndex) => {
@@ -5706,6 +5946,7 @@
                     btn.addEventListener('click', (e) => {
                         const index = parseInt(e.currentTarget.dataset.index);
                         const dateText = e.currentTarget.dataset.date;
+                        console.log(`📝 [DEBUG] Editando: ${dateText} com índice: ${index}`);
                         editDate(index);
                     });
                 });
@@ -5716,11 +5957,13 @@
                         const index = parseInt(e.currentTarget.dataset.index);
                         const dateText = e.currentTarget.dataset.date;
                         const date = availableDates[index];
+                        console.log(`🗑️ [DEBUG] Deletando: ${dateText} com índice: ${index} | Confirmado: ${date.text}`);
                         showModal(
                             `Tem certeza que deseja remover a data "<strong>${date.text}</strong>"?<br><br>⚠️ <span class="text-red-600 font-bold">ATENÇÃO: Todas as ${availableDates.length > 1 ? 'escalas' : 'escala'} desta data serão deletadas permanentemente!</span>`,
                             true,
                             () => deleteDate(index),
                             true
+                        );
                     });
                 });
                 
@@ -5802,6 +6045,7 @@
             // Inicializar painel de escala manual
             async function initManualScalePanel() {
                 try {
+                    console.log('🚀 Inicializando painel de escala manual...');
                     resetManualScalePanel();
                     await loadVolunteersForManualScale();
                     
@@ -5840,6 +6084,7 @@
             // Carregar voluntários para escala manual
             async function loadVolunteersForManualScale() {
                 try {
+                    console.log('📋 Carregando voluntários...');
                     
                     const { collection, getDocs } = window.firestoreMethods;
                     const querySnapshot = await getDocs(collection(window.firebaseDb, 'users'));
@@ -5860,6 +6105,7 @@
                     volunteers.sort((a, b) => a.name.localeCompare(b.name));
                     
                     manualScaleState.allVolunteers = volunteers;
+                    console.log('✅ Voluntários carregados:', volunteers.length);
                     
                     displayVolunteersForManualScale(volunteers);
                 } catch (error) {
@@ -5900,6 +6146,8 @@
                 try {
                     const volunteer = manualScaleState.allVolunteers.find(v => v.id === volunteerId);
                     
+                    console.log('👤 Voluntário selecionado:', volunteer.name);
+                    
                     manualScaleState.selectedVolunteer = volunteer;
                     manualScaleState.selectedEvent = null;
                     manualScaleState.selectedTeam = null;
@@ -5921,6 +6169,7 @@
             // Carregar eventos
             async function loadEventsForManualScale() {
                 try {
+                    console.log('📅 Carregando eventos...');
                     
                     const events = [];
                     
@@ -5936,6 +6185,7 @@
                     });
                     
                     manualScaleState.allEvents = events;
+                    console.log('✅ Eventos carregados:', events.length);
                     
                     displayEventsForManualScale(events);
                 } catch (error) {
@@ -5974,6 +6224,8 @@
             function selectEventForManualScale(eventDate, eventTime) {
                 try {
                     const event = manualScaleState.allEvents.find(e => e.value === eventDate && e.time === eventTime);
+                    
+                    console.log('📅 Evento selecionado:', event.text);
                     
                     manualScaleState.selectedEvent = event;
                     manualScaleState.selectedTeam = null;
@@ -6027,6 +6279,7 @@
                         
                         // Habilitar botão de confirmação
                         document.getElementById('manual-scale-confirm-btn').disabled = false;
+                        console.log('✅ Time selecionado:', teamId);
                     });
                 });
             }
@@ -6040,6 +6293,7 @@
                         const query = e.target.value.toLowerCase();
                         const filtered = manualScaleState.allVolunteers.filter(v => 
                             v.name.toLowerCase().includes(query) || v.email.toLowerCase().includes(query)
+                        );
                         displayVolunteersForManualScale(filtered);
                     });
                 }
@@ -6085,9 +6339,11 @@
                         showModal('❌ Selecione voluntário, evento e time');
                         return;
                     }
-
-
-
+                    
+                    console.log('💾 Salvando escala manual...');
+                    console.log('  Voluntário:', selectedVolunteer.name);
+                    console.log('  Evento:', selectedEvent.text);
+                    console.log('  Time:', selectedTeam);
                     
                     const { doc, setDoc, Timestamp } = window.firestoreMethods;
                     
@@ -6117,6 +6373,7 @@
                     
                     // Salvar escala
                     await setDoc(doc(window.firebaseDb, 'escalas', escalaId), escalaData);
+                    console.log('✅ Escala salva com sucesso!');
                     
                     // Log de auditoria
                     await logAudit('MANUAL_SCALE', {
@@ -6137,6 +6394,8 @@
                             // Callback ao fechar o modal - recarregar lista
                             resetManualScalePanel();
                         }
+                    );
+                    
                     // Recarregar dados
                     await loadUserEscalas();
                     await loadAllEscalas();
@@ -6223,6 +6482,7 @@
                                 true,
                                 () => restoreBackup(backupId),
                                 true
+                            );
                         });
                     });
                     
@@ -6235,6 +6495,7 @@
                                 true,
                                 () => deleteBackup(backupId),
                                 true
+                            );
                         });
                     });
                     
@@ -6287,6 +6548,7 @@
             // Restaurar escalas do backup
             async function restoreBackup(backupId) {
                 try {
+                    console.log('🔄 [RESTORE] Iniciando restauração do backup:', backupId);
                     
                     const { doc, getDoc, setDoc, collection } = window.firestoreMethods;
                     const backupDoc = await getDoc(doc(window.firebaseDb, 'escalas_backups', backupId));
@@ -6296,6 +6558,7 @@
                     }
                     
                     const backup = backupDoc.data();
+                    console.log('💾 Backup encontrado com', backup.escalasCount, 'escalas');
                     
                     // Restaurar cada escala
                     let restauradas = 0;
@@ -6308,10 +6571,13 @@
                                 restoredAt: new Date().toISOString()
                             });
                             restauradas++;
+                            console.log(`  ✅ Escala restaurada: ${escala.userName || escala.userEmail}`);
                         } catch (e) {
                             console.error(`  ❌ Erro ao restaurar escala ${escala.id}:`, e);
                         }
                     }
+                    
+                    console.log('✅ [RESTORE] Restauração concluída:', restauradas, '/', backup.escalasCount);
                     
                     // Log de auditoria
                     await logAudit('RESTORE_BACKUP', {
@@ -6336,9 +6602,12 @@
             // Deletar backup permanentemente
             async function deleteBackup(backupId) {
                 try {
+                    console.log('🗑️ Deletando backup:', backupId);
                     
                     const { doc, deleteDoc } = window.firestoreMethods;
                     await deleteDoc(doc(window.firebaseDb, 'escalas_backups', backupId));
+                    
+                    console.log('✅ Backup deletado');
                     showModal('✅ Backup deletado com sucesso');
                     await loadBackups();
                     
@@ -6369,12 +6638,15 @@
 
             // Adicionar nova data (apenas admin)
             async function addNewDate() {
- chamada');
+                console.log('🔵 addNewDate() chamada');
                 
                 // Validar campos com feedback visual
                 if (!validateAdminFields()) {
+                    console.log('❌ Validação falhou');
                     return;
                 }
+                
+                console.log('✅ Validação passou');
                 
                 const dateInput = document.getElementById('admin-new-date').value;
                 const timeInput = document.getElementById('admin-new-time').value;
@@ -6386,6 +6658,8 @@
                     kids: parseInt(document.getElementById('admin-limit-kids').value) || 4,
                     comunicacao: parseInt(document.getElementById('admin-limit-comunicacao').value) || 4
                 };
+                
+                console.log('📝 Dados coletados:', { dateInput, timeInput, eventInput, teamLimits });
                 
                 // Formatar data para exibição (dd/mm)
                 const dateObj = new Date(dateInput + 'T12:00:00');
@@ -6403,9 +6677,12 @@
                 const timeDisplay = timeInput ? `(chegar ${timeInput})` : '(horário a definir)';
                 const text = `${day}/${month} ${weekdayCapitalized}${eventInput ? ' | ' + eventInput : ''} ${timeDisplay}`;
                 
+                console.log('📅 Evento formatado:', { value, text });
+                
                 // Verificar se já existe
                 const exists = availableDates.some(d => d.value === value);
                 if (exists) {
+                    console.log('⚠️ Data já existe');
                     showModal('Esta data já está cadastrada!');
                     return;
                 }
@@ -6416,6 +6693,7 @@
                     true,
                     async () => {
                         try {
+                            console.log('💾 Salvando evento...');
                             
                             // Adicionar à lista com teamLimits e schema version
                             availableDates.push({ 
@@ -6426,10 +6704,15 @@
                                 createdAt: new Date().toISOString(),
                                 createdBy: currentUser?.email || 'unknown'
                             });
+                            
+                            console.log('📦 Array atualizado. Total:', availableDates.length);
+                            console.log('🔍 DEBUG - Array completo:', JSON.stringify(availableDates, null, 2));
+                            
                             // Verificar se está autenticado
-
-
-
+                            console.log('🔍 DEBUG - Usuário atual:', currentUser?.email);
+                            console.log('🔍 DEBUG - É admin?', isAdmin);
+                            console.log('🔍 DEBUG - firebaseDb existe?', !!window.firebaseDb);
+                            console.log('🔍 DEBUG - firestoreMethods existe?', !!window.firestoreMethods);
                             
                             if (!currentUser) {
                                 throw new Error('Usuário não autenticado');
@@ -6440,6 +6723,7 @@
                             }
                             
                             // Salvar no Firestore com retry
+                            console.log('🔍 DEBUG - Iniciando salvamento no Firestore...');
                             await firestoreRetry(async () => {
                                 const { doc, setDoc } = window.firestoreMethods;
                                 
@@ -6452,10 +6736,16 @@
                                     lastUpdated: new Date().toISOString(),
                                     version: CONFIG.SCHEMA_VERSION
                                 };
+                                console.log('🔍 DEBUG - Dados a salvar:', JSON.stringify(dataToSave, null, 2));
+                                
                                 const docRef = doc(window.firebaseDb, 'config', 'availableDates');
+                                console.log('🔍 DEBUG - Referência do documento criada');
                                 
                                 await setDoc(docRef, dataToSave);
+                                console.log('🔍 DEBUG - setDoc completado');
                             }, 'Salvar evento');
+                            
+                            console.log('✅ Salvo no Firestore');
                             
                             // Backup se habilitado
                             if (CONFIG.BACKUP_ENABLED) {
@@ -6473,10 +6763,14 @@
                             document.getElementById('admin-limit-parking').value = '4';
                             document.getElementById('admin-limit-kids').value = '4';
                             
+                            console.log('🔄 Atualizando listas...');
+                            
                             // Atualizar lista
                             renderAdminDatesList();
                             await loadUserEscalas();
                             await loadAllEscalas();
+                            
+                            console.log('✅ Evento adicionado com sucesso!');
                             
                         } catch (error) {
                             console.error('❌ ERRO DETALHADO ao salvar data:', error);
@@ -6491,6 +6785,7 @@
                     false,
                     null,
                     '❓'
+                );
             }
 
             // Sistema de backup automático
@@ -6506,6 +6801,7 @@
                         timestamp: new Date().toISOString(),
                         schemaVersion: CONFIG.SCHEMA_VERSION
                     });
+                    logger.log('💾 Backup criado:', action);
                 } catch (error) {
                     logger.error('❌ Erro ao criar backup:', error);
                     // Não bloquear operação se backup falhar
@@ -6645,7 +6941,10 @@
                             const q = query(
                                 collection(window.firebaseDb, 'escalas'),
                                 where('date', '==', oldDate)
+                            );
+                            
                             const querySnapshot = await getDocs(q);
+                            console.log('📋 Atualizando escalas:', querySnapshot.size);
                             
                             const updatePromises = [];
                             querySnapshot.forEach((docSnapshot) => {
@@ -6671,6 +6970,8 @@
                         true,
                         null,
                         '✏️'
+                    );
+                    
                 } catch (error) {
                     console.error('❌ Erro ao editar evento:', error);
                     showModal(`❌ Erro ao editar evento: ${error.message}`, false, null, true);
@@ -6686,8 +6987,10 @@
                         console.warn('⚠️ Usuário não é super admin. Deleção bloqueada.');
                         return;
                     }
-
-
+                    
+                    console.log('🗑️ [INICIANDO DELEÇÃO] Índice recebido:', index);
+                    console.log('🗑️ Total de datas disponíveis:', availableDates.length);
+                    console.log('🗑️ Array completo:', availableDates);
                     
                     if (index < 0 || index >= availableDates.length) {
                         throw new Error(`Índice inválido: ${index}. Total de datas: ${availableDates.length}`);
@@ -6695,20 +6998,27 @@
                     
                     const dateToDelete = availableDates[index];
                     const dateValue = dateToDelete.value.split('|')[0]; // Extrair apenas a data (YYYY-MM-DD)
-
-:', dateValue);
+                    
+                    console.log('🗑️ Data a deletar:', dateToDelete.text);
+                    console.log('🗑️ Valor da data (YYYY-MM-DD):', dateValue);
+                    console.log('🗑️ Deletando data:', dateValue);
                     
                     // 1. Buscar todas as escalas desta data
                     const { collection, query, where, getDocs, deleteDoc, doc, setDoc, addDoc } = window.firestoreMethods;
                     const q = query(
                         collection(window.firebaseDb, 'escalas'),
                         where('date', '==', dateValue)
+                    );
+                    
                     const querySnapshot = await getDocs(q);
+                    console.log('📋 Escalas encontradas para deletar:', querySnapshot.size);
                     
                     if (querySnapshot.size > 0) {
+                        console.log('⚠️ CUIDADO: Deletando', querySnapshot.size, 'escalas da data', dateValue);
                     }
                     
                     // 2. CRIAR BACKUP antes de deletar
+                    console.log('💾 [BACKUP] Iniciando backup das escalas...');
                     const escalasBackup = [];
                     
                     querySnapshot.forEach((docSnapshot) => {
@@ -6734,6 +7044,7 @@
                                 escalasCount: escalasBackup.length,
                                 escalas: escalasBackup
                             });
+                            console.log('✅ [BACKUP] Backup salvo com sucesso! ID:', backupId);
                             
                             // Log de auditoria
                             await logAudit('DELETE_DATE_WITH_BACKUP', {
@@ -6751,16 +7062,26 @@
                     const deletePromises = [];
                     querySnapshot.forEach((docSnapshot) => {
                         const escalaData = docSnapshot.data();
+                        console.log('  → Deletando escala:', {
+                            id: docSnapshot.id,
+                            volunteer: escalaData.userName || escalaData.userEmail,
+                            date: escalaData.date,
+                            time: escalaData.time,
+                            team: escalaData.team
+                        });
                         deletePromises.push(deleteDoc(doc(window.firebaseDb, 'escalas', docSnapshot.id)));
                     });
                     
                     await Promise.all(deletePromises);
+                    console.log('✅ Escalas deletadas com sucesso');
                     
                     // 4. Remover data da lista
                     availableDates.splice(index, 1);
+                    console.log('✅ Data removida do array local. Novo total:', availableDates.length);
                     
                     // 5. Salvar no Firestore
                     await setDoc(doc(window.firebaseDb, 'config', 'availableDates'), { dates: availableDates });
+                    console.log('✅ Lista de datas atualizada no Firestore');
                     
                     showModal(`✅ Data removida com sucesso!<br><br>${querySnapshot.size} escala(s) foram deletada(s).<br><br>💾 Um backup foi criado e pode ser restaurado se necessário.`);
                     renderAdminDatesList();
@@ -6776,9 +7097,10 @@
 
             // Renderizar visão admin
             function renderAdminView(grouped) {
-
-
-
+                console.log('🔍 renderAdminView - isTeamLeader:', isTeamLeader);
+                console.log('🔍 renderAdminView - userTeamLeadership:', userTeamLeadership);
+                console.log('🔍 renderAdminView - isAdmin:', isAdmin);
+                console.log('🔍 renderAdminView - isSuperAdmin:', isSuperAdmin);
                 
                 // Ordenar chaves por data e hora (ordem crescente)
                 const dates = Object.keys(grouped).sort((a, b) => {
@@ -6810,6 +7132,8 @@
                         // Superadmin pode gerenciar TODOS os times
                         // Admin/líder pode gerenciar SOMENTE os times que lidera
                         const canManageThisTeam = isSuperAdmin || ((isAdmin || isTeamLeader) && userTeamLeadership && userTeamLeadership.includes(teamKey));
+                        
+                        console.log(`🔍 Team: ${teamKey}, isSuperAdmin: ${isSuperAdmin}, isAdmin: ${isAdmin}, isTeamLeader: ${isTeamLeader}, leadership:`, userTeamLeadership, `canManage: ${canManageThisTeam}`);
                         
                         return volunteers.map(v => `
                             <div class="flex items-center justify-between py-2 md:py-1">
@@ -6895,6 +7219,7 @@
                                 true,
                                 () => deleteEscala(escalaId),
                                 true
+                            );
                         } else {
                             showModal('❌ Você só pode remover voluntários dos times que lidera.', false, null, true);
                         }
@@ -6958,6 +7283,7 @@
             // Função principal para carregar Dashboard
             async function loadDashboard() {
                 try {
+                    console.log('📊 Carregando Dashboard...');
                     
                     // Obter período selecionado
                     const period = dashboardPeriodSelect.value;
@@ -6995,7 +7321,8 @@
                             dateTo.setHours(23, 59, 59, 999);
                         }
                     }
-, 'até', dateTo.toLocaleDateString());
+                    
+                    console.log('📅 Período:', dateFrom.toLocaleDateString(), 'até', dateTo.toLocaleDateString());
                     
                     // Converter para formato YYYY-MM-DD usando data local (não UTC)
                     const formatDateLocal = (date) => {
@@ -7007,7 +7334,9 @@
                     
                     const dateFromStr = formatDateLocal(dateFrom);
                     const dateToStr = formatDateLocal(dateTo);
-
+                    
+                    console.log('📅 dateFromStr:', dateFromStr);
+                    console.log('📅 dateToStr:', dateToStr);
                     
                     // Buscar todas as escalas no período
                     const { collection, getDocs } = window.firestoreMethods;
@@ -7015,8 +7344,11 @@
                     
                     // Buscar TODAS as escalas e filtrar no cliente (sem query where)
                     const querySnapshot = await getDocs(escalasRef);
+                    console.log('📊 Total de documentos no Firestore:', querySnapshot.size);
                     
                     const escalas = [];
+                    
+                    console.log('📊 Filtrando escalas entre:', dateFromStr, 'e', dateToStr);
                     
                     querySnapshot.forEach(doc => {
                         const data = doc.data();
@@ -7025,6 +7357,8 @@
                             escalas.push({ id: doc.id, ...data });
                         }
                     });
+                    
+                    console.log('📋 Escalas encontradas no período:', escalas.length);
                     if (escalas.length === 0) {
                         console.warn('⚠️ Nenhuma escala encontrada! Verifique se existem escalas no Firestore para este período.');
                     }
@@ -7045,6 +7379,8 @@
                     
                     // Configurar navegação dos gráficos com scroll
                     setupChartNavigation();
+                    
+                    console.log('✅ Dashboard carregado com sucesso!');
                     
                 } catch (error) {
                     console.error('❌ Erro ao carregar Dashboard:', error);
@@ -7458,6 +7794,8 @@
                         const q = query(
                             collection(window.firebaseDb, 'escalas'),
                             where('date', '==', dateStr)
+                        );
+                        
                         const querySnapshot = await getDocs(q);
                         const teams = { welcome: 0, backstage: 0, parking: 0, kids: 0, comunicacao: 0 };
                         
@@ -7905,11 +8243,17 @@
 
             // Gráfico 6: Ranking de Voluntários - Check-in vs Ausência
             async function generateChart6_CheckinRanking(escalas) {
+                console.log('📊 Chart 6 - Total de escalas recebidas:', escalas.length);
                 
                 // Filtrar escalas com check-in primeiro
                 const escalasWithCheckin = escalas.filter(e => e.checkIn && (e.checkIn.status === 'present' || e.checkIn.status === 'absent'));
-
-));
+                console.log('📊 Chart 6 - Escalas com check-in:', escalasWithCheckin.length);
+                console.log('📊 Chart 6 - Eventos com check-in:', escalasWithCheckin.map(e => ({
+                    userName: e.userName,
+                    date: e.date,
+                    time: e.time,
+                    status: e.checkIn?.status
+                })));
                 
                 // Contar check-ins por voluntário
                 const volunteerCheckins = {};
@@ -7937,11 +8281,14 @@
                 
                 // Filtrar apenas voluntários com check-ins e ordenar por total
                 const totalVolunteersWithCheckin = Object.entries(volunteerCheckins).filter(item => item[1].total > 0).length;
+                console.log('📊 Chart 6 - Voluntários com check-in:', totalVolunteersWithCheckin);
                 
                 const sorted = Object.entries(volunteerCheckins)
                     .filter(item => item[1].total > 0)
                     .sort((a, b) => b[1].total - a[1].total)
                     .slice(0, 10);
+                    
+                console.log('📊 Chart 6 - Top 10:', sorted.map(v => `${v[0]}: ${v[1].present} presentes, ${v[1].absent} ausentes`));
                 
                 const labels = sorted.map(item => item[0]);
                 const presentData = sorted.map(item => item[1].present);
@@ -8037,6 +8384,8 @@
                         }
                     }
                 });
+                
+                console.log('📊 Chart 6 - Ranking de Check-in gerado!');
             }
 
             async function generateChart5_CheckinAttendance(escalas) {
@@ -8044,8 +8393,17 @@
                     // Filtrar apenas escalas com check-in registrado
                     const escalasWithCheckin = escalas.filter(escala => 
                         escala.checkIn && (escala.checkIn.status === 'present' || escala.checkIn.status === 'absent')
-
-));
+                    );
+                    
+                    console.log('📊 Chart 5 - Total de escalas:', escalas.length);
+                    console.log('📊 Chart 5 - Escalas com check-in:', escalasWithCheckin.length);
+                    console.log('📊 Chart 5 - Detalhes:', escalasWithCheckin.map(e => ({
+                        userName: e.userName,
+                        date: e.date,
+                        time: e.time,
+                        team: e.team,
+                        status: e.checkIn?.status
+                    })));
                     
                     // Agregar por time e armazenar detalhes
                     const teamStats = {
@@ -8189,11 +8547,13 @@
 
             // Carregar lista de todos os usuários (apenas superadmin)
             async function loadUsersList() {
-
-
+                console.log('🔍 loadUsersList chamada');
+                console.log('🔍 isSuperAdmin:', isSuperAdmin);
+                console.log('🔍 currentUser:', currentUser?.email, currentUser?.uid);
                 
                 // Verificar se é super admin
                 if (!isSuperAdmin) {
+                    console.log('❌ Usuário não é super admin');
                     document.getElementById('users-list').innerHTML = 
                         '<p class="text-center text-red-500 py-8">⚠️ Acesso negado. Apenas Super Administradores podem gerenciar usuários.</p>';
                     return;
@@ -8210,19 +8570,27 @@
                     return;
                 }
                 
+                console.log('✅ Firebase Auth - Usuário autenticado:', currentAuthUser.email, currentAuthUser.uid);
+                
                 try {
                     const { collection, getDocs, query, orderBy } = window.firestoreMethods;
                     const usersList = document.getElementById('users-list');
-
-
+                    
+                    console.log('📋 Iniciando busca de usuários no Firestore...');
+                    console.log('🔍 Firestore DB:', window.firebaseDb);
+                    console.log('🔍 Firestore projectId:', window.firebaseDb._databaseId?.projectId);
                     
                     // Mostrar loading
                     usersList.innerHTML = '<div class="text-center py-8"><div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 mx-auto"></div><p class="text-gray-600 mt-4">Carregando usuários...</p></div>';
                     
                     // TENTATIVA 1: Buscar com query ordenada
+                    console.log('🔍 Tentativa 1: Buscando com query ordenada...');
                     const usersRef = collection(window.firebaseDb, 'users');
                     const q = query(usersRef, orderBy('email', 'asc'));
+                    
+                    console.log('🔍 Query criada. Executando getDocs...');
                     const usersSnapshot = await getDocs(q);
+                    console.log('✅ getDocs completado. Documentos encontrados:', usersSnapshot.size);
                     
                     if (usersSnapshot.empty) {
                         usersList.innerHTML = '<p class="text-center text-gray-500 py-8">Nenhum usuário encontrado no sistema.</p>';
@@ -8232,6 +8600,7 @@
                     const users = [];
                     usersSnapshot.forEach(doc => {
                         const data = doc.data();
+                        console.log(`📋 Usuário ${data.email}: teamLeader =`, data.teamLeader);
                         users.push({
                             id: doc.id,
                             email: data.email || 'Sem email',
@@ -8440,12 +8809,15 @@
                     console.error('❌ Stack trace:', error.stack);
                     
                     // Tentar ler o próprio documento do usuário para testar permissões
+                    console.log('🔍 Testando leitura do próprio documento do usuário...');
                     try {
                         const { doc, getDoc } = window.firestoreMethods;
                         const userDocRef = doc(window.firebaseDb, 'users', currentUser.uid);
                         const userDocSnap = await getDoc(userDocRef);
                         
                         if (userDocSnap.exists()) {
+                            console.log('✅ Consegui ler MEU próprio documento!');
+                            console.log('📄 Dados do meu documento:', userDocSnap.data());
                         } else {
                             console.error('❌ Meu próprio documento não existe!');
                         }
@@ -8489,6 +8861,7 @@
                             false,
                             null,
                             '👑'
+                        );
                         // Customizar botões do modal
                         document.getElementById('modal-buttons').innerHTML = `
                             <button id="promote-superadmin-btn" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition">
@@ -8539,6 +8912,7 @@
                         () => resolve(true),
                         true,
                         () => resolve(false)
+                    );
                 });
                 
                 if (!confirmation) return;
@@ -8597,6 +8971,7 @@
                         () => resolve(true),
                         true,
                         () => resolve(false)
+                    );
                 });
                 
                 if (!confirmation) return;
@@ -8748,6 +9123,7 @@
                             false,
                             null,
                             true
+                        );
                         return;
                     }
                     
@@ -8819,32 +9195,41 @@
                 document.querySelectorAll('.leader-team-checkbox:checked').forEach(checkbox => {
                     selectedTeams.push(checkbox.dataset.team);
                 });
-
+                
+                console.log('💾 Salvando liderança para usuário:', currentLeaderUserId);
+                console.log('💾 Times selecionados:', selectedTeams);
                 
                 try {
                     const { doc, setDoc, updateDoc, getDoc } = window.firestoreMethods;
                     const userDocRef = doc(window.firebaseDb, 'users', currentLeaderUserId);
                     const userDoc = await getDoc(userDocRef);
+                    
+                    console.log('💾 Documento existe?', userDoc.exists());
+                    
                     if (userDoc.exists()) {
                         // Usar updateDoc para preservar outros campos
                         const updateData = {
                             teamLeader: selectedTeams,
                             updatedAt: new Date().toISOString()
                         };
+                        console.log('💾 Dados a serem atualizados:', updateData);
                         await updateDoc(userDocRef, updateData);
+                        console.log('✅ Dados atualizados com sucesso');
                     } else {
                         // Se não existir, criar com setDoc
                         const newData = {
                             teamLeader: selectedTeams,
                             createdAt: new Date().toISOString()
                         };
+                        console.log('💾 Criando novo documento com:', newData);
                         await setDoc(userDocRef, newData);
+                        console.log('✅ Novo documento criado');
                     }
                     
                     // Verificar se foi salvo corretamente
                     const verifyDoc = await getDoc(userDocRef);
                     if (verifyDoc.exists()) {
-.teamLeader);
+                        console.log('✅ Verificação - teamLeader salvo:', verifyDoc.data().teamLeader);
                     }
                     
                     document.getElementById('team-leader-modal').classList.remove('show');
@@ -9226,15 +9611,21 @@
                         onboardingDate: new Date().toISOString()
                     };
 
-:', dataToSave);
+                    console.log('💾 Salvando onboarding para:', currentUser.uid);
+                    console.log('💾 Dados (sanitizados):', dataToSave);
 
                     await setDoc(userDocRef, dataToSave, { merge: true });
+                    console.log('💾 Dados salvos com setDoc merge:true');
+
                     // Verificar se foi salvo corretamente
                     const verifyDoc = await getDoc(userDocRef);
                     const vData = verifyDoc.data() || {};
+                    console.log('✅ Verificação - onboardingComplete salvo:', vData.onboardingComplete);
                     if (vData.onboardingComplete !== true) {
                         console.warn('⚠️ Campo onboardingComplete não é boolean true. Valor:', vData.onboardingComplete);
                     }
+                    console.log('✅ Documento completo pós-salvo:', vData);
+
                     // Fechar modais
                     const confirmModal = document.getElementById('onboarding-confirm-modal');
                     const mainModal = document.getElementById('onboarding-modal');
@@ -9242,6 +9633,7 @@
                     if (mainModal) mainModal.style.display = 'none';
 
                     showModal('✅ Suas preferências foram salvas com sucesso!<br><br>Agora você pode começar a se escalar nos eventos.');
+                    console.log('✅ Onboarding concluído com sucesso.');
                 } catch (error) {
                     console.error('❌ Erro ao salvar onboarding:', error);
                     showModal('❌ Erro ao salvar suas preferências. Tente novamente.');
@@ -9258,17 +9650,21 @@
                     const { doc, getDoc } = window.firestoreMethods;
                     const ref = doc(window.firebaseDb, 'users', user.uid);
                     const userDoc = await getDoc(ref);
-:', userDoc.exists());
+                    console.log('🔍 checkOnboarding - userDoc.exists():', userDoc.exists());
 
                     let shouldShowOnboarding = false;
                     if (!userDoc.exists()) {
+                        console.log('👋 Novo usuário - mostrar onboarding');
                         shouldShowOnboarding = true;
                     } else {
                         const data = userDoc.data() || {};
                         const completed = data.onboardingComplete === true || data.onboardingComplete === 'true';
+                        console.log('🔍 checkOnboarding - raw value:', data.onboardingComplete, '-> completed:', completed);
                         if (!completed) {
+                            console.log('👋 Usuário sem onboarding completo - mostrar formulário');
                             shouldShowOnboarding = true;
                         } else {
+                            console.log('✅ Onboarding já foi completado');
                         }
                     }
 
@@ -9292,6 +9688,7 @@
                         () => resolve(true),
                         true,
                         () => resolve(false)
+                    );
                 });
                 
                 if (!confirmation) return;
@@ -9303,19 +9700,23 @@
                     const escalasQuery = query(
                         collection(window.firebaseDb, 'escalas'),
                         where('userId', '==', userId)
+                    );
+                    
                     const escalasSnapshot = await getDocs(escalasQuery);
                     const deleteEscalasPromises = [];
                     
                     escalasSnapshot.forEach((docSnapshot) => {
                         deleteEscalasPromises.push(
                             deleteDoc(doc(window.firebaseDb, 'escalas', docSnapshot.id))
+                        );
                     });
                     
                     await Promise.all(deleteEscalasPromises);
- deletada(s)`);
+                    console.log(`🗑️ ${deleteEscalasPromises.length} escala(s) deletada(s)`);
                     
                     // 2. Deletar o documento do usuário no Firestore
                     await deleteDoc(doc(window.firebaseDb, 'users', userId));
+                    console.log('🗑️ Usuário deletado do Firestore');
                     
                     // 3. Marcar usuário para deleção no Auth (Cloud Function fará a deleção real)
                     // Como não podemos deletar diretamente do Auth no client-side, vamos marcar para deleção
@@ -9329,6 +9730,7 @@
                             deletedAt: new Date().toISOString(),
                             status: 'pending'
                         });
+                        console.log('🗑️ Conta marcada para deleção no Authentication');
                     } catch (authError) {
                         console.warn('⚠️ Não foi possível marcar conta para deleção:', authError);
                     }
@@ -9422,6 +9824,7 @@
                     emailLoginModal.classList.remove('show');
                     showLoading(); // Mostrar loading durante o login
                     await window.firebaseAuthMethods.signInWithEmailAndPassword(window.firebaseAuth, email, password);
+                    console.log('✅ Login com email realizado');
                     // O onAuthStateChanged vai cuidar de mostrar o app
                 } catch (error) {
                     console.error('❌ Erro no login:', error);
@@ -9490,6 +9893,8 @@
                     await window.firebaseAuthMethods.updateProfile(userCredential.user, {
                         displayName: `${name} ${lastname}`
                     });
+                    
+                    console.log('✅ Cadastro realizado');
                     // O onAuthStateChanged vai cuidar de mostrar o app e depois o modal de sucesso
                 } catch (error) {
                     console.error('❌ Erro no cadastro:', error);
@@ -9556,6 +9961,7 @@
 
             // Monitorar autenticação
             window.firebaseAuthMethods.onAuthStateChanged(window.firebaseAuth, async (user) => {
+                console.log('🔄 Estado de auth mudou:', user?.email || 'deslogado');
                 currentUser = user;
 
                 if (user) {
@@ -9571,22 +9977,25 @@
                         loadAvailableDates(),
                         loadUserEscalas(),
                         loadAllEscalas()
-                    ]).catch(err => {
+                    ]).then(() => {
+                        console.log('✅ Dados carregados');
+                        setupUserEscalasListener(); // Configurar listener após carregar escalas
+                    }).catch(err => {
                         console.error('❌ Erro ao carregar dados:', err);
                     });
                     
                     // 4. Operações secundárias (não bloqueiam)
                     setupInstallButton();
                     
-                    // 5. Verificar onboarding (delayed para não impactar load)
+                    // 5. Verificar onboarding (pode ser feito depois)
                     setTimeout(async () => {
                         await checkOnboarding(user);
-                    }, 2000);
+                    }, 500);
                     
                     // 6. Verificar check-in de voluntários (para líderes)
                     setTimeout(async () => {
                         await checkForCheckinEvents();
-                    }, 3000);
+                    }, 1500);
                 } else {
                     showLogin();
                 }
@@ -9654,6 +10063,7 @@
                     const { doc, setDoc } = window.firestoreMethods;
                     const userDocRef = doc(window.firebaseDb, 'users', currentUser.uid);
                     await setDoc(userDocRef, { blockedDates: userBlockedDates }, { merge: true });
+                    console.log('✅ Bloqueios salvos:', userBlockedDates);
                 } catch (err) {
                     console.error('❌ Erro ao salvar bloqueios:', err);
                     showModal('Erro ao salvar bloqueios. Tente novamente.');
@@ -9714,377 +10124,13 @@
                 await addBlockedDate(date, period);
             });
 
-            // ===== GERENCIAR FUNÇÕES POR TIME =====
-            let teamRoles = {}; // Estrutura: { welcome: ['Placa', 'Acompanhamento'], backstage: [...], ... }
-
-            // Carregar funções do Firestore
-            async function loadTeamRoles() {
-                try {
-                    const { doc, getDoc } = window.firestoreMethods;
-                    const rolesDoc = await getDoc(doc(window.firebaseDb, 'config', 'teamRoles'));
-                    
-                    if (rolesDoc.exists()) {
-                        teamRoles = rolesDoc.data().roles || {};
-                    } else {
-                        teamRoles = {};
-                    }
-                } catch (error) {
-                    console.error('❌ Erro ao carregar funções:', error);
-                    teamRoles = {};
-                }
-            }
-
-            // Salvar funções no Firestore
-            async function saveTeamRoles() {
-                try {
-                    const { doc, setDoc } = window.firestoreMethods;
-                    await setDoc(doc(window.firebaseDb, 'config', 'teamRoles'), { roles: teamRoles });
-                } catch (error) {
-                    console.error('❌ Erro ao salvar funções:', error);
-                    showModal('Erro ao salvar funções. Tente novamente.');
-                }
-            }
-
-            // Abrir modal de gerenciamento de funções
-            function openManageRolesModal() {
-                document.getElementById('manage-roles-modal').classList.remove('hidden');
-                document.getElementById('role-team-select').value = '';
-                document.getElementById('add-role-section').classList.add('hidden');
-                document.getElementById('roles-list-container').classList.add('hidden');
-                document.getElementById('no-team-selected').classList.remove('hidden');
-            }
-
-            // Fechar modal de gerenciamento de funções
-            function closeManageRolesModal() {
-                document.getElementById('manage-roles-modal').classList.add('hidden');
-            }
-
-            // Renderizar lista de funções do time selecionado
-            function renderTeamRolesList(team) {
-                const rolesList = document.getElementById('roles-list');
-                const roles = teamRoles[team] || [];
-                
-                const teamNames = {
-                    welcome: 'Welcome',
-                    backstage: 'Backstage',
-                    parking: 'Parking',
-                    kids: 'Kids',
-                    comunicacao: 'Comunicação'
-                };
-
-                if (roles.length === 0) {
-                    rolesList.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhuma função cadastrada ainda</p>';
-                } else {
-                    rolesList.innerHTML = roles.map((role, index) => `
-                        <div class="role-item flex items-center justify-between p-3 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-300 transition" data-team="${team}" data-index="${index}">
-                            <div class="flex items-center gap-2 flex-1">
-                                <span class="text-lg">💼</span>
-                                <span class="role-name font-semibold text-gray-800">${role}</span>
-                                <input type="text" class="role-edit-input hidden flex-1 border-2 border-blue-500 rounded px-2 py-1 text-sm focus:outline-none" value="${role}">
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="edit-role-btn text-blue-600 hover:text-blue-800 transition" 
-                                        data-team="${team}" 
-                                        data-index="${index}"
-                                        title="Editar função">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                    </svg>
-                                </button>
-                                <button class="save-role-btn hidden text-green-600 hover:text-green-800 transition" 
-                                        data-team="${team}" 
-                                        data-index="${index}"
-                                        title="Salvar">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                </button>
-                                <button class="cancel-edit-btn hidden text-gray-600 hover:text-gray-800 transition" 
-                                        data-team="${team}" 
-                                        data-index="${index}"
-                                        title="Cancelar">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                    </svg>
-                                </button>
-                                <button class="delete-role-btn text-red-600 hover:text-red-800 transition" 
-                                        data-team="${team}" 
-                                        data-index="${index}"
-                                        title="Deletar função">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    `).join('');
-
-                    // Adicionar listeners aos botões de editar
-                    document.querySelectorAll('.edit-role-btn').forEach(btn => {
-                        btn.addEventListener('click', (e) => {
-                            const team = e.currentTarget.dataset.team;
-                            const index = parseInt(e.currentTarget.dataset.index);
-                            enterEditMode(team, index);
-                        });
-                    });
-
-                    // Adicionar listeners aos botões de salvar
-                    document.querySelectorAll('.save-role-btn').forEach(btn => {
-                        btn.addEventListener('click', async (e) => {
-                            const team = e.currentTarget.dataset.team;
-                            const index = parseInt(e.currentTarget.dataset.index);
-                            await saveEditedRole(team, index);
-                        });
-                    });
-
-                    // Adicionar listeners aos botões de cancelar
-                    document.querySelectorAll('.cancel-edit-btn').forEach(btn => {
-                        btn.addEventListener('click', (e) => {
-                            const team = e.currentTarget.dataset.team;
-                            const index = parseInt(e.currentTarget.dataset.index);
-                            cancelEditMode(team, index);
-                        });
-                    });
-
-                    // Adicionar listeners aos botões de deletar
-                    document.querySelectorAll('.delete-role-btn').forEach(btn => {
-                        btn.addEventListener('click', async (e) => {
-                            const team = e.currentTarget.dataset.team;
-                            const index = parseInt(e.currentTarget.dataset.index);
-                            await deleteTeamRole(team, index);
-                        });
-                    });
-                }
-            }
-
-            // Adicionar nova função ao time
-            async function addTeamRole(team, roleName) {
-                if (!roleName || !roleName.trim()) {
-                    showModal('Digite o nome da função.');
-                    return;
-                }
-
-                const trimmedRole = roleName.trim();
-                
-                if (!teamRoles[team]) {
-                    teamRoles[team] = [];
-                }
-
-                // Verificar se já existe
-                if (teamRoles[team].includes(trimmedRole)) {
-                    showModal('Esta função já existe para este time.');
-                    return;
-                }
-
-                teamRoles[team].push(trimmedRole);
-                await saveTeamRoles();
-                renderTeamRolesList(team);
-                document.getElementById('new-role-name').value = '';
-                showModal('✅ Função adicionada com sucesso!');
-            }
-
-            // Entrar em modo de edição
-            function enterEditMode(team, index) {
-                const roleItem = document.querySelector(`.role-item[data-team="${team}"][data-index="${index}"]`);
-                if (!roleItem) return;
-
-                const roleName = roleItem.querySelector('.role-name');
-                const editInput = roleItem.querySelector('.role-edit-input');
-                const editBtn = roleItem.querySelector('.edit-role-btn');
-                const saveBtn = roleItem.querySelector('.save-role-btn');
-                const cancelBtn = roleItem.querySelector('.cancel-edit-btn');
-                const deleteBtn = roleItem.querySelector('.delete-role-btn');
-
-                // Mostrar input e esconder texto
-                roleName.classList.add('hidden');
-                editInput.classList.remove('hidden');
-                editInput.focus();
-                editInput.select();
-
-                // Trocar botões
-                editBtn.classList.add('hidden');
-                deleteBtn.classList.add('hidden');
-                saveBtn.classList.remove('hidden');
-                cancelBtn.classList.remove('hidden');
-
-                // Adicionar listener para Enter e Escape
-                editInput.onkeydown = async (e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        await saveEditedRole(team, index);
-                    } else if (e.key === 'Escape') {
-                        e.preventDefault();
-                        cancelEditMode(team, index);
-                    }
-                };
-            }
-
-            // Cancelar modo de edição
-            function cancelEditMode(team, index) {
-                const roleItem = document.querySelector(`.role-item[data-team="${team}"][data-index="${index}"]`);
-                if (!roleItem) return;
-
-                const roleName = roleItem.querySelector('.role-name');
-                const editInput = roleItem.querySelector('.role-edit-input');
-                const editBtn = roleItem.querySelector('.edit-role-btn');
-                const saveBtn = roleItem.querySelector('.save-role-btn');
-                const cancelBtn = roleItem.querySelector('.cancel-edit-btn');
-                const deleteBtn = roleItem.querySelector('.delete-role-btn');
-
-                // Restaurar valor original
-                editInput.value = roleName.textContent;
-
-                // Mostrar texto e esconder input
-                roleName.classList.remove('hidden');
-                editInput.classList.add('hidden');
-
-                // Trocar botões
-                editBtn.classList.remove('hidden');
-                deleteBtn.classList.remove('hidden');
-                saveBtn.classList.add('hidden');
-                cancelBtn.classList.add('hidden');
-            }
-
-            // Salvar função editada
-            async function saveEditedRole(team, index) {
-                const roleItem = document.querySelector(`.role-item[data-team="${team}"][data-index="${index}"]`);
-                if (!roleItem) return;
-
-                const editInput = roleItem.querySelector('.role-edit-input');
-                const newName = editInput.value.trim();
-                const oldName = teamRoles[team][index];
-
-                if (!newName) {
-                    showModal('Digite o nome da função.');
-                    return;
-                }
-
-                if (newName === oldName) {
-                    cancelEditMode(team, index);
-                    return;
-                }
-
-                // Verificar se já existe outra função com este nome
-                if (teamRoles[team].includes(newName) && newName !== oldName) {
-                    showModal('Já existe uma função com este nome neste time.');
-                    return;
-                }
-
-                const teamNames = {
-                    welcome: 'Welcome',
-                    backstage: 'Backstage',
-                    parking: 'Parking',
-                    kids: 'Kids',
-                    comunicacao: 'Comunicação'
-                };
-
-                // Atualizar no array
-                teamRoles[team][index] = newName;
-                await saveTeamRoles();
-
-                // Registrar no log de auditoria
-                await logAudit('edit_role', {
-                    team: team,
-                    teamName: teamNames[team],
-                    oldRole: oldName,
-                    newRole: newName,
-                    user: currentUser.displayName || currentUser.email
-                });
-
-                renderTeamRolesList(team);
-                showModal('✅ Função editada com sucesso!');
-            }
-
-            // Deletar função do time
-            async function deleteTeamRole(team, index) {
-                const roleName = teamRoles[team][index];
-                
-                const teamNames = {
-                    welcome: 'Welcome',
-                    backstage: 'Backstage',
-                    parking: 'Parking',
-                    kids: 'Kids',
-                    comunicacao: 'Comunicação'
-                };
-                
-                showModal(
-                    `Tem certeza que deseja deletar a função "<strong>${roleName}</strong>"?`,
-                    true,
-                    async () => {
-                        teamRoles[team].splice(index, 1);
-                        await saveTeamRoles();
-
-                        // Registrar no log de auditoria
-                        await logAudit('delete_role', {
-                            team: team,
-                            teamName: teamNames[team],
-                            role: roleName,
-                            user: currentUser.displayName || currentUser.email
-                        });
-
-                        renderTeamRolesList(team);
-                        showModal('✅ Função deletada com sucesso!');
-                    }
-            }
-
-            // Event listeners do modal de funções
-            document.getElementById('menu-manage-roles-btn')?.addEventListener('click', async () => {
-                closeMenu();
-                await loadTeamRoles();
-                openManageRolesModal();
-            });
-
-            document.getElementById('close-manage-roles-modal')?.addEventListener('click', closeManageRolesModal);
-            document.getElementById('close-roles-modal-btn')?.addEventListener('click', closeManageRolesModal);
-
-            document.getElementById('role-team-select')?.addEventListener('change', (e) => {
-                const selectedTeam = e.target.value;
-                
-                if (selectedTeam) {
-                    document.getElementById('add-role-section').classList.remove('hidden');
-                    document.getElementById('roles-list-container').classList.remove('hidden');
-                    document.getElementById('no-team-selected').classList.add('hidden');
-                    renderTeamRolesList(selectedTeam);
-                } else {
-                    document.getElementById('add-role-section').classList.add('hidden');
-                    document.getElementById('roles-list-container').classList.add('hidden');
-                    document.getElementById('no-team-selected').classList.remove('hidden');
-                }
-            });
-
-            document.getElementById('add-role-btn')?.addEventListener('click', async () => {
-                const team = document.getElementById('role-team-select').value;
-                const roleName = document.getElementById('new-role-name').value;
-                
-                if (!team) {
-                    showModal('Selecione um time primeiro.');
-                    return;
-                }
-                
-                await addTeamRole(team, roleName);
-            });
-
-            // Permitir Enter para adicionar função
-            document.getElementById('new-role-name')?.addEventListener('keypress', async (e) => {
-                if (e.key === 'Enter') {
-                    const team = document.getElementById('role-team-select').value;
-                    const roleName = document.getElementById('new-role-name').value;
-                    
-                    if (!team) {
-                        showModal('Selecione um time primeiro.');
-                        return;
-                    }
-                    
-                    await addTeamRole(team, roleName);
-                }
-            });
-
             // ===== CHECK-IN DE VOLUNTÁRIOS =====
             let currentCheckinEvents = []; // Agora é um array
 
             async function checkForCheckinEvents() {
                 // Só executar para líderes de time
                 if (!isTeamLeader || !userTeamLeadership || userTeamLeadership.length === 0) {
+                    console.log('🔍 Check-in: Usuário não é líder de time');
                     return;
                 }
 
@@ -10093,6 +10139,9 @@
                     const now = new Date();
                     const twoHoursBefore = new Date(now.getTime() - (2 * 60 * 60 * 1000));
                     const fourHoursAfter = new Date(now.getTime() + (4 * 60 * 60 * 1000));
+
+                    console.log('🔍 Check-in: Buscando eventos entre', twoHoursBefore, 'e', fourHoursAfter);
+
                     // Buscar escalas dos times que lidera
                     const escalasRef = collection(window.firebaseDb, 'escalas');
                     const q = query(escalasRef, where('team', 'in', userTeamLeadership));
@@ -10111,6 +10160,9 @@
                             eventsInWindow.push({ ...escala, eventDateTime });
                         }
                     });
+
+                    console.log('🔍 Check-in: Eventos encontrados na janela:', eventsInWindow.length);
+
                     if (eventsInWindow.length > 0) {
                         // Agrupar por evento (date + time)
                         const groupedByEvent = {};
@@ -10138,6 +10190,8 @@
                         
                         // Armazenar todos os eventos (não apenas um)
                         currentCheckinEvents = sortedEvents.map(entry => entry[1]);
+                        
+                        console.log('🎯 Check-in: Eventos selecionados:', currentCheckinEvents.map(e => `${e.date}_${e.time}`).join(', '));
                         
                         openCheckinModal();
                     }
@@ -10273,6 +10327,8 @@
                             checkedAt: new Date().toISOString()
                         }
                     });
+
+                    console.log(`✅ Check-in registrado: ${escalaId} = ${status}`);
                     
                     // Atualizar visualmente os botões
                     const presentBtn = document.querySelector(`.checkin-present-btn[data-escala-id="${escalaId}"]`);
@@ -10326,6 +10382,7 @@
             // Função para abrir modal de seleção de evento
             async function openEventSelectorModal() {
                 if (!isTeamLeader || !userTeamLeadership || userTeamLeadership.length === 0) {
+                    console.log('🔍 Check-in: Usuário não é líder de time');
                     return;
                 }
 
@@ -10333,6 +10390,9 @@
                     const { collection, query, where, getDocs } = window.firestoreMethods;
                     const now = new Date();
                     const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+
+                    console.log('🔍 Check-in: Buscando eventos dos últimos 30 dias');
+
                     // Buscar escalas dos times que lidera
                     const escalasRef = collection(window.firebaseDb, 'escalas');
                     const q = query(escalasRef, where('team', 'in', userTeamLeadership));
@@ -10348,7 +10408,8 @@
                             eventsInLast30Days.push({ ...escala, eventDateTime });
                         }
                     });
-:', eventsInLast30Days.length);
+
+                    console.log('🔍 Check-in: Eventos encontrados (últimos 30 dias):', eventsInLast30Days.length);
 
                     if (eventsInLast30Days.length === 0) {
                         showModal('📭 Não há eventos nos últimos 30 dias.', false, null, false, null, '📭');
@@ -10505,6 +10566,8 @@
                     showModal('❌ Erro ao buscar eventos. Tente novamente.');
                 }
             });
+
+            console.log('✅ App inicializado');
         }
         
         // ========================================
@@ -10516,9 +10579,8 @@
                 const swPath = '/zele/service-worker.js';
                 
                 navigator.serviceWorker.register(swPath)
-                    .then(reg =>
-)
-                    .catch(err =>
+                    .then(reg => console.log('✅ Service Worker registrado:', swPath))
+                    .catch(err => console.log('⚠️ Service Worker não disponível:', err.message));
             });
         }
         
