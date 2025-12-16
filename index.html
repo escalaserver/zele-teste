@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zele Teste</title>
-    <meta name="application-name" content="Zele Teste">
-    <meta name="apple-mobile-web-app-title" content="Zele Teste">
+    <title>Zele Teste 1</title>
+    <meta name="application-name" content="Zele Teste 1">
+    <meta name="apple-mobile-web-app-title" content="Zele Teste 1">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#151b29">
@@ -70,9 +70,20 @@
         window.firebaseReady = true;
     </script>
     
-    <!-- Tailwind CDN: Para produção, considere instalar via npm e usar build process -->
-    <!-- Veja: https://tailwindcss.com/docs/installation -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CDN: Carregado de forma assíncrona para não bloquear a app -->
+    <script async src="https://cdn.tailwindcss.com"></script>
+    <!-- Fallback: CSS básico enquanto Tailwind carrega -->
+    <link rel="preload" as="script" href="https://cdn.tailwindcss.com">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: system-ui, -apple-system, sans-serif; 
+            background-color: #cdc8c0; 
+            visibility: visible !important;
+        }
+        /* Mostrar app mesmo se Tailwind não carregar */
+        #app-container { display: block !important; }
+    </style>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: system-ui, -apple-system, sans-serif; background-color: #cdc8c0; }
@@ -189,6 +200,25 @@
             animation: blink-border 0.2s ease-in-out 4;
             -webkit-animation: blink-border 0.2s ease-in-out 4;
         }
+        /* Indicador de carregamento rápido */
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #151b29;
+            animation: pulse 1.5s infinite;
+        }
+        #app-container {
+            min-height: 100vh;
+            display: block;
+            visibility: visible;
+        }
         @keyframes pulse-team {
             0%, 100% { border: 1px solid #e5e5e5; }
             50% { border: 10px solid #cdc8c0; }
@@ -238,8 +268,8 @@
     <!-- Tela de Loading -->
     <div id="loading-screen" class="fixed inset-0 zele-primary flex items-center justify-center z-50">
         <div class="text-center text-white">
-            <img src="Volunteers logo.png" alt="Zele Teste" class="w-32 h-32 mx-auto mb-4 object-contain">
-            <h1 class="text-5xl font-bold mb-4">Zele Teste</h1>
+            <img src="Volunteers logo.png" alt="Zele Teste 1" class="w-32 h-32 mx-auto mb-4 object-contain">
+            <h1 class="text-5xl font-bold mb-4">Zele Teste 1</h1>
             <p class="text-xl mb-8">Sistema de Escalas</p>
             <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-white mx-auto"></div>
         </div>
@@ -248,8 +278,8 @@
     <!-- Tela de Login -->
     <div id="auth-screen" class="fixed inset-0 zele-primary flex items-center justify-center p-4 hidden">
         <div class="card-float rounded-2xl p-8 max-w-md w-full text-center">
-            <img src="Volunteers logo.png" alt="Zele Teste" class="w-24 h-24 mx-auto mb-4 object-contain">
-            <h1 class="text-4xl font-bold mb-2" style="color: #151b29;">Zele Teste</h1>
+            <img src="Volunteers logo.png" alt="Zele Teste 1" class="w-24 h-24 mx-auto mb-4 object-contain">
+            <h1 class="text-4xl font-bold mb-2" style="color: #151b29;">Zele Teste 1</h1>
             <p class="text-gray-600 mb-8">Sistema de Escalas</p>
             
             <!-- Login com Google -->
@@ -376,7 +406,7 @@
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <img src="Volunteers logo.png" alt="Logo" class="w-10 h-10 object-contain">
-                        <h1 class="text-2xl font-bold">Zele Teste</h1>
+                        <h1 class="text-2xl font-bold">Zele Teste 1</h1>
                     </div>
                     <div class="flex items-center gap-4">
                         <div class="text-right hidden sm:block">
@@ -1586,7 +1616,7 @@
 
             <!-- Versão -->
             <div class="mt-8 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">
-                <p>Zele Teste v2.4</p>
+                <p>Zele Teste 1 v2.4</p>
                 <p class="mt-1">Servir é a linguagem do céu</p>
             </div>
         </div>
@@ -1710,7 +1740,7 @@
     <div id="ios-install-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
             <h2 class="text-xl font-bold mb-4 text-gray-800">📱 Instalar App no iPhone</h2>
-            <p class="text-sm text-gray-600 mb-4">Para adicionar o Zele Teste à sua tela inicial:</p>
+            <p class="text-sm text-gray-600 mb-4">Para adicionar o Zele Teste 1 à sua tela inicial:</p>
             <ol class="text-sm text-gray-700 space-y-3 mb-6">
                 <li class="flex items-start">
                     <span class="font-bold mr-2">1.</span>
@@ -2643,18 +2673,42 @@
         // Aguardar Firebase estar pronto
         function initApp() {
             console.log('═══════════════════════════════════════════');
-            console.log('🚀 Zele Teste v' + CONFIG.SCHEMA_VERSION);
+            console.log('🚀 Zele Teste 1 v' + CONFIG.SCHEMA_VERSION);
             console.log('📋 DEBUG MODE:', CONFIG.DEBUG_MODE ? 'ATIVADO ⚠️' : 'DESATIVADO');
             console.log('═══════════════════════════════════════════');
             
+            // Garantir que app seja renderizado rapidamente mesmo se não estiver pronto
+            const appContainer = document.getElementById('app-container');
+            if (appContainer) {
+                appContainer.style.visibility = 'visible';
+                appContainer.style.display = 'block';
+            }
+            
             logger.log('🚀 App iniciando... v' + CONFIG.SCHEMA_VERSION);
             
-            // Verificar se Firebase foi inicializado
-            if (!window.firebaseAuth || !window.firebaseDb) {
-                logger.error('❌ Firebase não inicializado, tentando novamente...');
-                setTimeout(initApp, 100);
-                return;
-            }
+            // Verificar se Firebase foi inicializado com timeout
+            let firebaseCheckCount = 0;
+            const firebaseCheckInterval = setInterval(() => {
+                firebaseCheckCount++;
+                if (window.firebaseAuth && window.firebaseDb) {
+                    clearInterval(firebaseCheckInterval);
+                    console.log('✅ Firebase pronto após', firebaseCheckCount * 100, 'ms');
+                    continueInit();
+                } else if (firebaseCheckCount > 50) {
+                    // Timeout: Firebase levou muito tempo
+                    clearInterval(firebaseCheckInterval);
+                    logger.error('⚠️ Timeout aguardando Firebase, continuando mesmo assim...');
+                    continueInit();
+                }
+            }, 100);
+            
+            function continueInit() {
+                if (!window.firebaseAuth || !window.firebaseDb) {
+                    logger.warn('⚠️ Firebase não totalmente inicializado, usando fallback');
+                    // Continuar mesmo assim - a autenticação será feita quando Firebase estiver pronto
+                }
+                
+                // Renderizar UI primeiro, carregar dados em background
             
             // Função de retry para operações Firestore
             async function firestoreRetry(operation, operationName = 'Operação') {
@@ -3394,7 +3448,7 @@
                         if (!deferredPrompt) {
                             console.log('❌ Prompt de instalação não disponível - mostrando instruções manuais');
                             // Instruções manuais para Android/Chrome
-                            showModal('Para instalar no <strong>Android</strong>:<br><br>1. Abra o <strong>Menu</strong> do navegador (⋮)<br>2. Toque em <strong>"Adicionar à tela inicial"</strong> ou <strong>"Instalar app"</strong><br><br>Para <strong>Desktop</strong>:<br>• Chrome: Menu (⋮) → Instalar Zele Teste<br>• Edge: Menu (⋯) → Apps → Instalar', false, null, false, null, '📱');
+                            showModal('Para instalar no <strong>Android</strong>:<br><br>1. Abra o <strong>Menu</strong> do navegador (⋮)<br>2. Toque em <strong>"Adicionar à tela inicial"</strong> ou <strong>"Instalar app"</strong><br><br>Para <strong>Desktop</strong>:<br>• Chrome: Menu (⋮) → Instalar Zele Teste 1<br>• Edge: Menu (⋯) → Apps → Instalar', false, null, false, null, '📱');
                             return;
                         }
 
@@ -10958,15 +11012,12 @@
                 }
             });
 
-            console.log('✅ App inicializado');
-        }
+            // ========================================
+            // PRÓXIMOS CULTOS DO LÍDER
+            // ========================================
+            let currentEditingVolunteer = null;
 
-        // ========================================
-        // PRÓXIMOS CULTOS DO LÍDER
-        // ========================================
-        let currentEditingVolunteer = null;
-
-        async function showLeaderUpcomingServices() {
+            async function showLeaderUpcomingServices() {
             try {
                 const leaderTeams = currentUser.teamLeader || [];
                 if (leaderTeams.length === 0) {
@@ -11415,20 +11466,35 @@
                 console.error('❌ Erro ao excluir voluntário:', error);
                 showModal('❌ Erro ao excluir voluntário. Tente novamente.');
             }
+            }
+
+            console.log('✅ App inicializado');
+            
+            // Iniciar o app em background enquanto renderiza
+            continueInit();
         }
         
         // ========================================
-        // SERVICE WORKER (PWA) - HABILITADO
+        // SERVICE WORKER (PWA) - NÃO-BLOQUEANTE
         // ========================================
         if ('serviceWorker' in navigator) {
+            // Registrar de forma não-bloqueante com timeout
             window.addEventListener('load', () => {
-                // GitHub Pages na raiz do repositório
                 const swPath = '/zele/service-worker.js';
+                const swTimeout = setTimeout(() => {
+                    console.warn('⚠️ Service Worker levou muito tempo para registrar');
+                }, 10000); // 10 segundos de timeout
                 
                 navigator.serviceWorker.register(swPath)
-                    .then(reg => console.log('✅ Service Worker registrado:', swPath))
-                    .catch(err => console.log('⚠️ Service Worker não disponível:', err.message));
-            });
+                    .then(reg => {
+                        clearTimeout(swTimeout);
+                        console.log('✅ Service Worker registrado:', swPath);
+                    })
+                    .catch(err => {
+                        clearTimeout(swTimeout);
+                        console.log('⚠️ Service Worker não disponível:', err.message);
+                    });
+            }, { once: true });
         }
         
         // Iniciar quando DOM estiver pronto
