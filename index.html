@@ -1790,11 +1790,11 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Selecione o Time:</label>
                     <select id="roles-team-select" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <option value="">-- Escolha um time --</option>
-                        <option value="welcome">🙌 Welcome</option>
-                        <option value="backstage">🎵 Backstage</option>
+                        <option value="welcome">� Welcome</option>
+                        <option value="backstage">🤝 Backstage</option>
                         <option value="parking">🚗 Parking</option>
                         <option value="kids">👶 Kids</option>
-                        <option value="comunicacao">📱 Comunicação</option>
+                        <option value="comunicacao">📢 Comunicação</option>
                     </select>
                 </div>
 
@@ -2683,11 +2683,11 @@
                 }
                 
                 const teamNames = {
-                    welcome: 'Welcome',
-                    backstage: 'Backstage',
-                    parking: 'Parking',
-                    kids: 'Kids',
-                    comunicacao: 'Comunicação'
+                    welcome: '👋 Welcome',
+                    backstage: '🤝 Backstage',
+                    parking: '🚗 Parking',
+                    kids: '👶 Kids',
+                    comunicacao: '📢 Comunicação'
                 };
                 
                 const eventDate = new Date(escalaData.date + 'T' + escalaData.time);
@@ -2943,10 +2943,19 @@
             const closeRolesModalBtn = document.getElementById('close-roles-modal-btn');
 
             if (menuManageRolesBtn) {
-                menuManageRolesBtn.addEventListener('click', () => {
+                menuManageRolesBtn.addEventListener('click', async () => {
                     closeMenu();
                     manageRolesModal.classList.remove('hidden');
-                    loadTeamRoles(); // Carregar configurações de funções
+                    
+                    // Resetar estado do modal
+                    document.getElementById('roles-team-select').value = '';
+                    document.getElementById('add-role-section').classList.add('hidden');
+                    document.getElementById('roles-list-section').classList.add('hidden');
+                    document.getElementById('no-team-selected-msg').classList.remove('hidden');
+                    document.getElementById('new-role-input').value = '';
+                    
+                    // Carregar configurações de funções
+                    await loadTeamRoles();
                 });
             }
 
@@ -3944,11 +3953,11 @@
                 const [date, time, eventName] = cultoData.split('|');
 
                 const teamNames = {
-                    welcome: 'Welcome',
-                    backstage: 'Backstage',
-                    parking: 'Parking',
-                    kids: 'Kids',
-                    comunicacao: 'Comunicação'
+                    welcome: '👋 Welcome',
+                    backstage: '🤝 Backstage',
+                    parking: '🚗 Parking',
+                    kids: '👶 Kids',
+                    comunicacao: '📢 Comunicação'
                 };
 
                 try {
@@ -4243,11 +4252,11 @@
             // Exportar para Google Calendar
             function exportToGoogleCalendar(date, time, team, eventName) {
                 const teamNames = {
-                    welcome: 'Welcome',
-                    backstage: 'Backstage',
-                    parking: 'Parking',
-                    kids: 'Kids',
-                    comunicacao: 'Comunicação'
+                    welcome: '👋 Welcome',
+                    backstage: '🤝 Backstage',
+                    parking: '🚗 Parking',
+                    kids: '👶 Kids',
+                    comunicacao: '📢 Comunicação'
                 };
 
                 const startDateTime = `${date}T${time}:00`;
@@ -4419,11 +4428,11 @@
                 const upcomingEvents = updateUpcomingEventsBadge(allUserEscalas);
                 
                 const teamNames = {
-                    welcome: 'Welcome',
-                    backstage: 'Backstage',
-                    parking: 'Parking',
-                    kids: 'Kids',
-                    comunicacao: 'Comunicação'
+                    welcome: '👋 Welcome',
+                    backstage: '🤝 Backstage',
+                    parking: '🚗 Parking',
+                    kids: '👶 Kids',
+                    comunicacao: '📢 Comunicação'
                 };
                 
                 if (upcomingEvents.length === 0) {
@@ -4934,11 +4943,11 @@
                 const upcomingEvents = updateUpcomingEventsBadge(allUserEscalas);
                 
                 const teamNames = {
-                    welcome: 'Welcome',
-                    backstage: 'Backstage',
-                    parking: 'Parking',
-                    kids: 'Kids',
-                    comunicacao: 'Comunicação'
+                    welcome: '👋 Welcome',
+                    backstage: '🤝 Backstage',
+                    parking: '🚗 Parking',
+                    kids: '👶 Kids',
+                    comunicacao: '📢 Comunicação'
                 };
                 
                 if (upcomingEvents.length === 0) {
@@ -5192,11 +5201,11 @@
                 }
                 
                 const teamNames = {
-                    welcome: 'Welcome',
-                    backstage: 'Backstage',
-                    parking: 'Parking',
-                    kids: 'Kids',
-                    comunicacao: 'Comunicação'
+                    welcome: '👋 Welcome',
+                    backstage: '🤝 Backstage',
+                    parking: '🚗 Parking',
+                    kids: '👶 Kids',
+                    comunicacao: '📢 Comunicação'
                 };
                 
                 const html = attempts.map(attempt => {
@@ -5549,11 +5558,11 @@
                     // Se mudou de time, adicionar aviso
                     if (teamChanged) {
                         const teamNames = {
-                            welcome: 'Welcome',
-                            backstage: 'Backstage',
-                            parking: 'Parking',
-                            kids: 'Kids',
-                            comunicacao: 'Comunicação'
+                            welcome: '👋 Welcome',
+                            backstage: '🤝 Backstage',
+                            parking: '🚗 Parking',
+                            kids: '👶 Kids',
+                            comunicacao: '📢 Comunicação'
                         };
                         updateData.teamChangeNotice = `Foi necessário mudar sua escolha do time ${teamNames[requestedTeam]} para ${teamNames[selectedTeam]} para uma melhor organização dos times.`;
                     }
@@ -5704,10 +5713,11 @@
                     };
                     
                     const teamNames = {
-                        welcome: 'Welcome',
-                        backstage: 'Backstage',
-                        parking: 'Parking',
-                        kids: 'Kids'
+                        welcome: '👋 Welcome',
+                        backstage: '🤝 Backstage',
+                        parking: '🚗 Parking',
+                        kids: '👶 Kids',
+                        comunicacao: '📢 Comunicação'
                     };
                     
                     logsList.innerHTML = logs.map(log => {
@@ -8543,6 +8553,223 @@
                 }
             }
 
+            // ===== GERENCIAMENTO DE FUNÇÕES POR TIME =====
+
+            let teamRolesData = {};
+            const TEAM_COLORS = {
+                welcome: { bg: 'bg-blue-50', border: 'border-[#377db8]', text: 'text-blue-700', icon: '👋' },
+                backstage: { bg: 'bg-gray-50', border: 'border-[#0a0e1a]', text: 'text-gray-700', icon: '🤝' },
+                parking: { bg: 'bg-red-50', border: 'border-red-500', text: 'text-red-700', icon: '🚗' },
+                kids: { bg: 'bg-yellow-50', border: 'border-yellow-500', text: 'text-yellow-700', icon: '👶' },
+                comunicacao: { bg: 'bg-purple-50', border: 'border-purple-500', text: 'text-purple-700', icon: '📢' }
+            };
+
+            // Carregar configurações de funções do Firestore
+            async function loadTeamRoles() {
+                try {
+                    const { doc, getDoc } = window.firestoreMethods;
+                    const configRef = doc(window.firebaseDb, 'config', 'teamRoles');
+                    const configSnap = await getDoc(configRef);
+                    
+                    if (configSnap.exists()) {
+                        teamRolesData = configSnap.data().roles || {};
+                    } else {
+                        // Estrutura inicial vazia
+                        teamRolesData = {
+                            welcome: [],
+                            backstage: [],
+                            parking: [],
+                            kids: [],
+                            comunicacao: []
+                        };
+                    }
+                    
+                    console.log('✅ Funções carregadas:', teamRolesData);
+                } catch (error) {
+                    console.error('❌ Erro ao carregar funções:', error);
+                    showModal('❌ Erro ao carregar funções. Tente novamente.');
+                }
+            }
+
+            // Salvar configurações de funções no Firestore
+            async function saveTeamRoles() {
+                try {
+                    const { doc, setDoc } = window.firestoreMethods;
+                    const configRef = doc(window.firebaseDb, 'config', 'teamRoles');
+                    
+                    await setDoc(configRef, {
+                        roles: teamRolesData,
+                        updatedAt: new Date().toISOString(),
+                        updatedBy: currentUser.email
+                    });
+                    
+                    console.log('✅ Funções salvas com sucesso');
+                } catch (error) {
+                    console.error('❌ Erro ao salvar funções:', error);
+                    showModal('❌ Erro ao salvar funções. Tente novamente.');
+                }
+            }
+
+            // Renderizar lista de funções do time selecionado
+            function renderRolesList(team) {
+                console.log('🎨 renderRolesList chamada para o time:', team);
+                const rolesList = document.getElementById('roles-list');
+                
+                if (!rolesList) {
+                    console.error('❌ Elemento roles-list não encontrado!');
+                    return;
+                }
+                
+                const roles = teamRolesData[team] || [];
+                const colors = TEAM_COLORS[team];
+                
+                console.log('📋 Funções do time:', roles);
+                console.log('🎨 Cores do time:', colors);
+                
+                if (roles.length === 0) {
+                    rolesList.innerHTML = `
+                        <div class="text-center py-6 text-gray-500">
+                            <p>Nenhuma função cadastrada ainda.</p>
+                            <p class="text-sm mt-1">Use o campo acima para adicionar.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                rolesList.innerHTML = roles.map(role => `
+                    <div class="flex items-center justify-between p-3 ${colors.bg} border-l-4 ${colors.border} rounded">
+                        <div class="flex items-center gap-2">
+                            <span class="text-2xl">${colors.icon}</span>
+                            <span class="font-medium ${colors.text}">${role}</span>
+                        </div>
+                        <button 
+                            onclick="deleteRole('${team}', '${role.replace(/'/g, "\\'")}')" 
+                            class="text-red-600 hover:text-red-800 transition p-2"
+                            title="Excluir função"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                        </button>
+                    </div>
+                `).join('');
+                
+                console.log('✅ Lista renderizada com sucesso');
+            }
+
+            // Adicionar nova função
+            async function addRole(team) {
+                const input = document.getElementById('new-role-input');
+                const roleName = input.value.trim();
+                
+                if (!roleName) {
+                    showModal('⚠️ Por favor, digite o nome da função.');
+                    return;
+                }
+                
+                // Verificar se já existe
+                if (teamRolesData[team].includes(roleName)) {
+                    showModal('⚠️ Esta função já existe neste time.');
+                    return;
+                }
+                
+                // Adicionar ao array
+                teamRolesData[team].push(roleName);
+                
+                // Salvar no Firestore
+                await saveTeamRoles();
+                
+                // Atualizar UI
+                renderRolesList(team);
+                input.value = '';
+                
+                showModal(`✅ Função "${roleName}" adicionada com sucesso!`);
+            }
+
+            // Deletar função
+            window.deleteRole = async function(team, roleName) {
+                showModal(
+                    `Tem certeza que deseja excluir a função "${roleName}"?`,
+                    true,
+                    async () => {
+                        try {
+                            // Remover do array
+                            teamRolesData[team] = teamRolesData[team].filter(r => r !== roleName);
+                            
+                            // Salvar no Firestore
+                            await saveTeamRoles();
+                            
+                            // Atualizar UI
+                            renderRolesList(team);
+                            
+                            showModal(`✅ Função "${roleName}" excluída com sucesso!`);
+                        } catch (error) {
+                            console.error('❌ Erro ao excluir função:', error);
+                            showModal('❌ Erro ao excluir função. Tente novamente.');
+                        }
+                    }
+                );
+            };
+
+            // Event listeners para o modal de funções
+            const rolesTeamSelect = document.getElementById('roles-team-select');
+            const addRoleBtn = document.getElementById('add-role-btn');
+            const newRoleInput = document.getElementById('new-role-input');
+            const addRoleSection = document.getElementById('add-role-section');
+            const rolesListSection = document.getElementById('roles-list-section');
+            const noTeamSelectedMsg = document.getElementById('no-team-selected-msg');
+
+            if (rolesTeamSelect) {
+                rolesTeamSelect.addEventListener('change', (e) => {
+                    const team = e.target.value;
+                    console.log('🔄 Time selecionado:', team);
+                    
+                    if (team) {
+                        console.log('✅ Mostrando seções de gerenciamento');
+                        // Mostrar seções relevantes
+                        addRoleSection.classList.remove('hidden');
+                        rolesListSection.classList.remove('hidden');
+                        noTeamSelectedMsg.classList.add('hidden');
+                        
+                        console.log('📋 Renderizando funções do time:', team);
+                        // Renderizar funções do time
+                        renderRolesList(team);
+                        
+                        // Limpar input
+                        if (newRoleInput) newRoleInput.value = '';
+                    } else {
+                        console.log('❌ Ocultando seções de gerenciamento');
+                        // Ocultar seções
+                        addRoleSection.classList.add('hidden');
+                        rolesListSection.classList.add('hidden');
+                        noTeamSelectedMsg.classList.remove('hidden');
+                    }
+                });
+            } else {
+                console.error('❌ rolesTeamSelect não encontrado!');
+            }
+
+            if (addRoleBtn) {
+                addRoleBtn.addEventListener('click', () => {
+                    const team = rolesTeamSelect.value;
+                    if (team) {
+                        addRole(team);
+                    }
+                });
+            }
+
+            // Permitir adicionar com Enter
+            if (newRoleInput) {
+                newRoleInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        const team = rolesTeamSelect.value;
+                        if (team) {
+                            addRole(team);
+                        }
+                    }
+                });
+            }
+
             // ===== GERENCIAMENTO DE ADMINISTRADORES =====
 
             // Carregar lista de todos os usuários (apenas superadmin)
@@ -9024,11 +9251,11 @@
                 currentTransferData = { escalaId, currentTeam, date, time };
                 
                 const teamNames = {
-                    welcome: 'Welcome',
-                    backstage: 'Backstage',
-                    parking: 'Parking',
-                    kids: 'Kids',
-                    comunicacao: 'Comunicação'
+                    welcome: '👋 Welcome',
+                    backstage: '🤝 Backstage',
+                    parking: '🚗 Parking',
+                    kids: '👶 Kids',
+                    comunicacao: '📢 Comunicação'
                 };
                 
                 const teamColors = {
@@ -9112,11 +9339,11 @@
                     
                     if (teamLimit.isFull) {
                         const teamNames = {
-                            welcome: 'Welcome',
-                            backstage: 'Backstage',
-                            parking: 'Parking',
-                            kids: 'Kids',
-                            comunicacao: 'Comunicação'
+                            welcome: '👋 Welcome',
+                            backstage: '🤝 Backstage',
+                            parking: '🚗 Parking',
+                            kids: '👶 Kids',
+                            comunicacao: '📢 Comunicação'
                         };
                         showModal(
                             `❌ O time ${teamNames[selectedTeam]} já está completo (${teamLimit.count}/${teamLimit.maxVolunteers} voluntários).<br><br>Não é possível transferir.`,
@@ -9128,11 +9355,11 @@
                     }
                     
                     const teamNames = {
-                        welcome: 'Welcome',
-                        backstage: 'Backstage',
-                        parking: 'Parking',
-                        kids: 'Kids',
-                        comunicacao: 'Comunicação'
+                        welcome: '👋 Welcome',
+                        backstage: '🤝 Backstage',
+                        parking: '🚗 Parking',
+                        kids: '👶 Kids',
+                        comunicacao: '📢 Comunicação'
                     };
                     
                     // Atualizar time do voluntário com aviso de mudança
@@ -9236,11 +9463,11 @@
                     currentLeaderUserId = null;
                     
                     const teamNames = {
-                        welcome: 'Welcome',
-                        backstage: 'Backstage',
-                        parking: 'Parking',
-                        kids: 'Kids',
-                        comunicacao: 'Comunicação'
+                        welcome: '👋 Welcome',
+                        backstage: '🤝 Backstage',
+                        parking: '🚗 Parking',
+                        kids: '👶 Kids',
+                        comunicacao: '📢 Comunicação'
                     };
                     
                     if (selectedTeams.length > 0) {
