@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zele Teste</title>
-    <meta name="application-name" content="Zele Teste">
-    <meta name="apple-mobile-web-app-title" content="Zele Teste">
+    <title>Zele teste 3</title>
+    <meta name="application-name" content="Zele teste 3">
+    <meta name="apple-mobile-web-app-title" content="Zele teste 3">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#151b29">
@@ -70,9 +70,20 @@
         window.firebaseReady = true;
     </script>
     
-    <!-- Tailwind CDN: Para produção, considere instalar via npm e usar build process -->
-    <!-- Veja: https://tailwindcss.com/docs/installation -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CDN: Carregado de forma assíncrona para não bloquear a app -->
+    <script async src="https://cdn.tailwindcss.com"></script>
+    <!-- Fallback: CSS básico enquanto Tailwind carrega -->
+    <link rel="preload" as="script" href="https://cdn.tailwindcss.com">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: system-ui, -apple-system, sans-serif; 
+            background-color: #cdc8c0; 
+            visibility: visible !important;
+        }
+        /* Mostrar app mesmo se Tailwind não carregar */
+        #app-container { display: block !important; }
+    </style>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: system-ui, -apple-system, sans-serif; background-color: #cdc8c0; }
@@ -189,6 +200,25 @@
             animation: blink-border 0.2s ease-in-out 4;
             -webkit-animation: blink-border 0.2s ease-in-out 4;
         }
+        /* Indicador de carregamento rápido */
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #151b29;
+            animation: pulse 1.5s infinite;
+        }
+        #app-container {
+            min-height: 100vh;
+            display: block;
+            visibility: visible;
+        }
         @keyframes pulse-team {
             0%, 100% { border: 1px solid #e5e5e5; }
             50% { border: 10px solid #cdc8c0; }
@@ -238,8 +268,8 @@
     <!-- Tela de Loading -->
     <div id="loading-screen" class="fixed inset-0 zele-primary flex items-center justify-center z-50">
         <div class="text-center text-white">
-            <img src="Volunteers logo.png" alt="Zele Teste" class="w-32 h-32 mx-auto mb-4 object-contain">
-            <h1 class="text-5xl font-bold mb-4">Zele Teste</h1>
+            <img src="Volunteers logo.png" alt="Zele teste 3" class="w-32 h-32 mx-auto mb-4 object-contain">
+            <h1 class="text-5xl font-bold mb-4">Zele teste 3</h1>
             <p class="text-xl mb-8">Sistema de Escalas</p>
             <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-white mx-auto"></div>
         </div>
@@ -248,8 +278,8 @@
     <!-- Tela de Login -->
     <div id="auth-screen" class="fixed inset-0 zele-primary flex items-center justify-center p-4 hidden">
         <div class="card-float rounded-2xl p-8 max-w-md w-full text-center">
-            <img src="Volunteers logo.png" alt="Zele Teste" class="w-24 h-24 mx-auto mb-4 object-contain">
-            <h1 class="text-4xl font-bold mb-2" style="color: #151b29;">Zele Teste</h1>
+            <img src="Volunteers logo.png" alt="Zele teste 3" class="w-24 h-24 mx-auto mb-4 object-contain">
+            <h1 class="text-4xl font-bold mb-2" style="color: #151b29;">Zele teste 3</h1>
             <p class="text-gray-600 mb-8">Sistema de Escalas</p>
             
             <!-- Login com Google -->
@@ -376,7 +406,7 @@
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <img src="Volunteers logo.png" alt="Logo" class="w-10 h-10 object-contain">
-                        <h1 class="text-2xl font-bold">Zele Teste</h1>
+                        <h1 class="text-2xl font-bold">Zele teste 3</h1>
                     </div>
                     <div class="flex items-center gap-4">
                         <div class="text-right hidden sm:block">
@@ -645,6 +675,9 @@
                         <option value="DENY_PENDING">❌ Negações</option>
                         <option value="DELETE_ESCALA">🗑️ Exclusões de Escalas</option>
                         <option value="DELETE_BLOCKED_ATTEMPT">🔓 Remoções de Bloqueios</option>
+                        <option value="LEADER_UPDATE_FUNCTION">💼 Ações do Líder - Função</option>
+                        <option value="LEADER_CHANGE_TEAM">🔄 Ações do Líder - Mudar Time</option>
+                        <option value="LEADER_DELETE_VOLUNTEER">🗑️ Ações do Líder - Excluir</option>
                     </select>
                     
                     <select id="audit-log-period" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
@@ -1451,6 +1484,16 @@
                         </svg>
                     </button>
                     <div id="leadership-menu-items" class="hidden bg-white">
+                        <button id="menu-upcoming-services-btn" class="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition text-left border-b border-gray-100">
+                            <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            <div>
+                                <p class="font-semibold text-gray-800">📅 Próximos Cultos</p>
+                                <p class="text-xs text-gray-600">Ver e gerenciar escalas do seu time</p>
+                            </div>
+                        </button>
+
                         <button id="menu-dashboard-btn" class="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition text-left border-b border-gray-100">
                             <svg class="w-6 h-6" style="color: #151b29;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
@@ -1573,7 +1616,7 @@
 
             <!-- Versão -->
             <div class="mt-8 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">
-                <p>Zele Teste v2.4</p>
+                <p>Zele teste 3 v2.4</p>
                 <p class="mt-1">Servir é a linguagem do céu</p>
             </div>
         </div>
@@ -1697,7 +1740,7 @@
     <div id="ios-install-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
             <h2 class="text-xl font-bold mb-4 text-gray-800">📱 Instalar App no iPhone</h2>
-            <p class="text-sm text-gray-600 mb-4">Para adicionar o Zele Teste à sua tela inicial:</p>
+            <p class="text-sm text-gray-600 mb-4">Para adicionar o Zele teste 3 à sua tela inicial:</p>
             <ol class="text-sm text-gray-700 space-y-3 mb-6">
                 <li class="flex items-start">
                     <span class="font-bold mr-2">1.</span>
@@ -1768,6 +1811,74 @@
             <p class="text-sm text-gray-600 mb-4">Selecione o time para aprovar a escala:</p>
             <div class="space-y-3" id="approve-team-options">
                 <!-- Opções de times serão inseridas aqui -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Próximos Cultos do Líder -->
+    <div id="leader-upcoming-services-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50" style="display: none;">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div class="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white p-6 flex items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold">📅 Próximos Cultos - Seu Time</h2>
+                    <p class="text-indigo-100 text-sm mt-1">Gerencie as escalas dos seus voluntários</p>
+                </div>
+                <button id="close-leader-services-modal" class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto flex-1">
+                <div id="leader-services-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Editar Voluntário -->
+    <div id="edit-volunteer-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50" style="display: none;">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-md">
+            <div class="bg-gradient-to-r from-purple-600 to-purple-800 text-white p-4 flex items-center justify-between">
+                <h2 class="text-xl font-bold">✏️ Editar Voluntário</h2>
+                <button id="close-edit-volunteer-modal" class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="p-6">
+                <div class="mb-4">
+                    <p class="text-sm text-gray-600 mb-2">Voluntário:</p>
+                    <p id="edit-volunteer-name" class="font-semibold text-lg text-gray-800"></p>
+                </div>
+                
+                <div class="space-y-3">
+                    <button id="edit-volunteer-function-btn" class="w-full flex items-center gap-3 p-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 rounded-lg transition">
+                        <span class="text-2xl">💼</span>
+                        <div class="text-left">
+                            <p class="font-semibold text-gray-800">Incluir/Editar Função</p>
+                            <p class="text-xs text-gray-600">Atribuir função específica</p>
+                        </div>
+                    </button>
+                    
+                    <button id="edit-volunteer-team-btn" class="w-full flex items-center gap-3 p-3 bg-yellow-50 hover:bg-yellow-100 border-2 border-yellow-200 rounded-lg transition">
+                        <span class="text-2xl">🔄</span>
+                        <div class="text-left">
+                            <p class="font-semibold text-gray-800">Mudar de Time</p>
+                            <p class="text-xs text-gray-600">Transferir para outro time</p>
+                        </div>
+                    </button>
+                    
+                    <button id="edit-volunteer-delete-btn" class="w-full flex items-center gap-3 p-3 bg-red-50 hover:bg-red-100 border-2 border-red-200 rounded-lg transition">
+                        <span class="text-2xl">🗑️</span>
+                        <div class="text-left">
+                            <p class="font-semibold text-gray-800">Excluir da Escala</p>
+                            <p class="text-xs text-gray-600">Remover deste evento</p>
+                        </div>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -2562,18 +2673,43 @@
         // Aguardar Firebase estar pronto
         function initApp() {
             console.log('═══════════════════════════════════════════');
-            console.log('🚀 Zele Teste v' + CONFIG.SCHEMA_VERSION);
+            console.log('🚀 Zele teste 3 v' + CONFIG.SCHEMA_VERSION);
             console.log('📋 DEBUG MODE:', CONFIG.DEBUG_MODE ? 'ATIVADO ⚠️' : 'DESATIVADO');
             console.log('═══════════════════════════════════════════');
             
+            // Garantir que app seja renderizado rapidamente mesmo se não estiver pronto
+            const appContainer = document.getElementById('app-container');
+            if (appContainer) {
+                appContainer.style.visibility = 'visible';
+                appContainer.style.display = 'block';
+            }
+            
             logger.log('🚀 App iniciando... v' + CONFIG.SCHEMA_VERSION);
             
-            // Verificar se Firebase foi inicializado
-            if (!window.firebaseAuth || !window.firebaseDb) {
-                logger.error('❌ Firebase não inicializado, tentando novamente...');
-                setTimeout(initApp, 100);
-                return;
+            // Verificar se Firebase foi inicializado com timeout
+            let firebaseCheckCount = 0;
+            const firebaseCheckInterval = setInterval(() => {
+                firebaseCheckCount++;
+                if (window.firebaseAuth && window.firebaseDb) {
+                    clearInterval(firebaseCheckInterval);
+                    console.log('✅ Firebase pronto após', firebaseCheckCount * 100, 'ms');
+                    continueInit();
+                } else if (firebaseCheckCount > 50) {
+                    // Timeout: Firebase levou muito tempo
+                    clearInterval(firebaseCheckInterval);
+                    logger.error('⚠️ Timeout aguardando Firebase, continuando mesmo assim...');
+                    continueInit();
+                }
+            }, 100);
+            
+            function continueInit() {
+                if (!window.firebaseAuth || !window.firebaseDb) {
+                    logger.warn('⚠️ Firebase não totalmente inicializado, usando fallback');
+                    // Continuar mesmo assim - a autenticação será feita quando Firebase estiver pronto
+                }
             }
+                
+            // Renderizar UI primeiro, carregar dados em background
             
             // Função de retry para operações Firestore
             async function firestoreRetry(operation, operationName = 'Operação') {
@@ -2874,6 +3010,51 @@
                 }
             });
 
+            // Modal com input personalizado
+            function showModalWithInput(title, htmlContent, confirmButtonText = 'Confirmar', defaultValue = '') {
+                return new Promise((resolve) => {
+                    const modalHtml = `
+                        ${htmlContent}
+                        <div class="mt-4">
+                            <input type="text" id="custom-input" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500" 
+                                   placeholder="Digite aqui..." value="${defaultValue}">
+                        </div>
+                    `;
+
+                    elements.modalMessage.innerHTML = `<h3 class="text-lg font-bold mb-4">${title}</h3>${modalHtml}`;
+                    
+                    const emojiDiv = elements.successModal.querySelector('.mb-4');
+                    emojiDiv.textContent = '📝';
+
+                    elements.modalButtons.innerHTML = `
+                        <button id="modal-cancel-btn" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-6 rounded-lg transition">
+                            Cancelar
+                        </button>
+                        <button id="modal-confirm-btn" class="flex-1 zele-btn text-white font-bold py-3 px-6 rounded-lg">
+                            ${confirmButtonText}
+                        </button>
+                    `;
+
+                    const inputEl = document.getElementById('custom-input');
+                    
+                    document.getElementById('modal-confirm-btn').addEventListener('click', () => {
+                        const value = inputEl?.value || '';
+                        closeModal();
+                        resolve(value);
+                    });
+
+                    document.getElementById('modal-cancel-btn').addEventListener('click', () => {
+                        closeModal();
+                        resolve(null);
+                    });
+
+                    elements.successModal.classList.add('show');
+                    
+                    // Focar no input após um pequeno delay
+                    setTimeout(() => inputEl?.focus(), 100);
+                });
+            }
+
             // Menu functions
             function openMenu() {
                 elements.menuOverlay.classList.add('show');
@@ -2893,10 +3074,18 @@
                 logout();
             });
 
+            // Navegação para página de próximos cultos do líder
+            const menuUpcomingServicesBtn = document.getElementById('menu-upcoming-services-btn');
+            if (menuUpcomingServicesBtn) {
+                menuUpcomingServicesBtn.addEventListener('click', () => {
+                    closeMenu();
+                    showLeaderUpcomingServices();
+                });
+            }
+
             // Navegação para página de admin
             const menuAdminBtn = document.getElementById('menu-admin-btn');
             const backFromAdminBtn = document.getElementById('back-from-admin');
-            const appContainer = document.getElementById('app-container');
             const adminPage = document.getElementById('admin-page');
 
             if (menuAdminBtn) {
@@ -3259,7 +3448,7 @@
                         if (!deferredPrompt) {
                             console.log('❌ Prompt de instalação não disponível - mostrando instruções manuais');
                             // Instruções manuais para Android/Chrome
-                            showModal('Para instalar no <strong>Android</strong>:<br><br>1. Abra o <strong>Menu</strong> do navegador (⋮)<br>2. Toque em <strong>"Adicionar à tela inicial"</strong> ou <strong>"Instalar app"</strong><br><br>Para <strong>Desktop</strong>:<br>• Chrome: Menu (⋮) → Instalar Zele Teste<br>• Edge: Menu (⋯) → Apps → Instalar', false, null, false, null, '📱');
+                            showModal('Para instalar no <strong>Android</strong>:<br><br>1. Abra o <strong>Menu</strong> do navegador (⋮)<br>2. Toque em <strong>"Adicionar à tela inicial"</strong> ou <strong>"Instalar app"</strong><br><br>Para <strong>Desktop</strong>:<br>• Chrome: Menu (⋮) → Instalar Zele teste 3<br>• Edge: Menu (⋯) → Apps → Instalar', false, null, false, null, '📱');
                             return;
                         }
 
@@ -4722,7 +4911,9 @@
                                         <h3 class="font-bold text-lg ${cardStyles.textStyle}">${cardStyles.teamDisplay}${eventNameDisplay}</h3>
                                         <p class="text-sm text-gray-600">📅 ${dateStr}</p>
                                         <p class="text-sm text-gray-600">🕐 ${timeStr}</p>
+                                        ${escala.role ? `<p class="text-sm text-indigo-700 font-semibold mt-1">💼 Função: ${escala.role}</p>` : ''}
                                         ${escala.teamChangeNotice ? `<p class="text-sm text-red-600 font-semibold mt-1">⚠️ ${escala.teamChangeNotice}</p>` : ''}
+                                        ${escala.leaderModification ? `<p class="text-sm text-red-600 font-semibold mt-1 bg-red-50 p-2 rounded border border-red-200">⚠️ ${escala.leaderModification}</p>` : ''}
                                     </div>
                                 </div>
                                 ${canDelete ? `
@@ -5702,14 +5893,20 @@
                         'APPROVE_PENDING': '✅',
                         'DENY_PENDING': '❌',
                         'DELETE_ESCALA': '🗑️',
-                        'DELETE_BLOCKED_ATTEMPT': '🔓'
+                        'DELETE_BLOCKED_ATTEMPT': '🔓',
+                        'LEADER_UPDATE_FUNCTION': '💼',
+                        'LEADER_CHANGE_TEAM': '🔄',
+                        'LEADER_DELETE_VOLUNTEER': '🗑️'
                     };
                     
                     const actionLabels = {
                         'APPROVE_PENDING': 'Aprovação',
                         'DENY_PENDING': 'Negação',
                         'DELETE_ESCALA': 'Exclusão',
-                        'DELETE_BLOCKED_ATTEMPT': 'Remoção de Bloqueio'
+                        'DELETE_BLOCKED_ATTEMPT': 'Remoção de Bloqueio',
+                        'LEADER_UPDATE_FUNCTION': 'Líder - Atualizar Função',
+                        'LEADER_CHANGE_TEAM': 'Líder - Mudar Time',
+                        'LEADER_DELETE_VOLUNTEER': 'Líder - Excluir Voluntário'
                     };
                     
                     const teamNames = {
@@ -5762,6 +5959,27 @@
                                 <p class="text-sm"><strong>Evento:</strong> ${log.details.eventName || 'Sem nome'} - ${new Date(log.details.date).toLocaleDateString('pt-BR')} às ${log.details.time}</p>
                                 <p class="text-sm"><strong>Time:</strong> ${teamNames[log.details.team]}</p>
                                 <p class="text-sm"><strong>Motivo do bloqueio:</strong> ${log.details.reason}</p>
+                            `;
+                        } else if (log.action === 'LEADER_UPDATE_FUNCTION') {
+                            detailsHtml = `
+                                <p class="text-sm"><strong>Voluntário:</strong> ${log.details.volunteerName}</p>
+                                <p class="text-sm"><strong>Nova Função:</strong> ${log.details.newRole}</p>
+                                <p class="text-sm"><strong>Evento:</strong> ${new Date(log.details.eventDate).toLocaleDateString('pt-BR')} às ${log.details.eventTime}</p>
+                                <p class="text-sm"><strong>Líder:</strong> ${log.details.leaderName}</p>
+                            `;
+                        } else if (log.action === 'LEADER_CHANGE_TEAM') {
+                            detailsHtml = `
+                                <p class="text-sm"><strong>Voluntário:</strong> ${log.details.volunteerName}</p>
+                                <p class="text-sm"><strong>Mudança:</strong> <span class="text-orange-600 font-semibold">${teamNames[log.details.oldTeam]} → ${teamNames[log.details.newTeam]}</span></p>
+                                <p class="text-sm"><strong>Evento:</strong> ${new Date(log.details.eventDate).toLocaleDateString('pt-BR')} às ${log.details.eventTime}</p>
+                                <p class="text-sm"><strong>Líder:</strong> ${log.details.leaderName}</p>
+                            `;
+                        } else if (log.action === 'LEADER_DELETE_VOLUNTEER') {
+                            detailsHtml = `
+                                <p class="text-sm"><strong>Voluntário:</strong> ${log.details.volunteerName} (${log.details.volunteerEmail})</p>
+                                <p class="text-sm"><strong>Time:</strong> ${teamNames[log.details.team]}</p>
+                                <p class="text-sm"><strong>Evento:</strong> ${new Date(log.details.eventDate).toLocaleDateString('pt-BR')} às ${log.details.eventTime}</p>
+                                <p class="text-sm"><strong>Líder:</strong> ${log.details.leaderName}</p>
                             `;
                         }
                         
@@ -10794,21 +11012,486 @@
                 }
             });
 
+            // ========================================
+            // PRÓXIMOS CULTOS DO LÍDER
+            // ========================================
+            let currentEditingVolunteer = null;
+
+            async function showLeaderUpcomingServices() {
+            try {
+                const leaderTeams = currentUser.teamLeader || [];
+                if (leaderTeams.length === 0) {
+                    showModal('❌ Você não é líder de nenhum time.');
+                    return;
+                }
+
+                const modal = document.getElementById('leader-upcoming-services-modal');
+                const listContainer = document.getElementById('leader-services-list');
+                
+                listContainer.innerHTML = '<div class="text-center py-8"><p class="text-gray-600">⏳ Carregando próximos cultos...</p></div>';
+                
+                modal.style.display = 'flex';
+                setTimeout(() => modal.classList.remove('hidden'), 10);
+
+                // Buscar próximos eventos (próximos 30 dias)
+                const today = new Date();
+                const thirtyDaysFromNow = new Date(today);
+                thirtyDaysFromNow.setDate(today.getDate() + 30);
+
+                const { collection, query, where, getDocs } = window.firestoreMethods;
+                const q = query(
+                    collection(window.firebaseDb, 'escalas'),
+                    where('date', '>=', today.toISOString().split('T')[0])
+                );
+
+                const snapshot = await getDocs(q);
+                const escalas = [];
+                
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const escalaTeam = data.team?.toLowerCase();
+                    
+                    // Filtrar apenas escalas dos times que o líder gerencia
+                    if (leaderTeams.includes(escalaTeam)) {
+                        escalas.push({
+                            id: doc.id,
+                            ...data
+                        });
+                    }
+                });
+
+                // Agrupar por evento (data + hora)
+                const groupedEvents = {};
+                escalas.forEach(escala => {
+                    const key = `${escala.date}_${escala.time}`;
+                    if (!groupedEvents[key]) {
+                        groupedEvents[key] = {
+                            date: escala.date,
+                            time: escala.time,
+                            eventName: escala.eventName || '',
+                            teams: {}
+                        };
+                    }
+                    const team = escala.team.toLowerCase();
+                    if (!groupedEvents[key].teams[team]) {
+                        groupedEvents[key].teams[team] = [];
+                    }
+                    groupedEvents[key].teams[team].push(escala);
+                });
+
+                // Ordenar eventos por data
+                const sortedEvents = Object.values(groupedEvents).sort((a, b) => {
+                    const dateA = new Date(a.date + 'T' + a.time);
+                    const dateB = new Date(b.date + 'T' + b.time);
+                    return dateA - dateB;
+                });
+
+                if (sortedEvents.length === 0) {
+                    listContainer.innerHTML = '<div class="text-center py-8"><p class="text-gray-600">✅ Não há próximos cultos agendados.</p></div>';
+                    return;
+                }
+
+                // Renderizar eventos
+                renderLeaderServicesList(sortedEvents, leaderTeams);
+                
+            } catch (error) {
+                console.error('❌ Erro ao carregar próximos cultos:', error);
+                showModal('❌ Erro ao carregar escalas. Tente novamente.');
+            }
+        }
+
+        function renderLeaderServicesList(events, leaderTeams) {
+            const listContainer = document.getElementById('leader-services-list');
+            
+            const teamConfig = {
+                welcome: { name: 'Welcome', icon: '👋', color: 'bg-blue-50 border-blue-300' },
+                backstage: { name: 'Backstage', icon: '🤝', color: 'bg-gray-50 border-gray-300' },
+                parking: { name: 'Parking', icon: '🚗', color: 'bg-red-50 border-red-300' },
+                kids: { name: 'Kids', icon: '👶', color: 'bg-yellow-50 border-yellow-300' },
+                comunicacao: { name: 'Comunicação', icon: '📢', color: 'bg-purple-50 border-purple-300' }
+            };
+
+            let html = '';
+            
+            events.forEach((event, eventIndex) => {
+                const dateObj = new Date(event.date + 'T' + event.time);
+                const dateStr = dateObj.toLocaleDateString('pt-BR', { 
+                    weekday: 'long', 
+                    day: '2-digit', 
+                    month: '2-digit', 
+                    year: 'numeric' 
+                });
+                const eventNameDisplay = event.eventName ? ` - ${event.eventName}` : '';
+                
+                html += `
+                    <div class="mb-6 pb-6 border-b border-gray-200 last:border-b-0">
+                        <div class="bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded-lg mb-4">
+                            <div class="font-bold text-lg text-gray-800">📅 ${dateStr}${eventNameDisplay}</div>
+                            <div class="text-sm text-gray-600">🕐 ${event.time}</div>
+                        </div>
+                `;
+
+                // Listar apenas times que o líder gerencia
+                Object.entries(event.teams).forEach(([teamKey, volunteers]) => {
+                    if (!leaderTeams.includes(teamKey)) return;
+                    
+                    const config = teamConfig[teamKey];
+                    html += `
+                        <div class="border-2 rounded-lg p-4 mb-3 ${config.color}">
+                            <h4 class="font-bold mb-3 flex items-center gap-2 text-lg">
+                                <span>${config.icon}</span>
+                                <span>${config.name}</span>
+                                <span class="text-xs text-gray-500 font-normal">(${volunteers.length})</span>
+                            </h4>
+                            <div class="space-y-2">
+                                ${volunteers.map(v => {
+                                    const photoUrl = v.userPhoto || 'Zele logo.png';
+                                    const leaderNote = v.leaderModification ? `<div class="text-xs text-red-600 font-semibold mt-1">⚠️ ${v.leaderModification}</div>` : '';
+                                    const functionDisplay = v.role ? `<span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded">${v.role}</span>` : '';
+                                    
+                                    return `
+                                        <div class="flex items-center justify-between bg-white p-3 rounded-lg border ${v.leaderModification ? 'border-red-300' : 'border-gray-200'}">
+                                            <div class="flex items-center gap-3 flex-1">
+                                                <img src="${photoUrl}" alt="${v.userName}" class="w-10 h-10 rounded-full object-cover" onerror="this.src='Zele logo.png'">
+                                                <div class="flex-1">
+                                                    <p class="font-semibold text-sm">${v.userName}</p>
+                                                    <p class="text-xs text-gray-500">${v.userEmail}</p>
+                                                    ${functionDisplay}
+                                                    ${leaderNote}
+                                                </div>
+                                            </div>
+                                            <button class="edit-volunteer-btn flex items-center gap-1 px-3 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm font-semibold transition"
+                                                    data-escala-id="${v.id}"
+                                                    data-volunteer-name="${v.userName}"
+                                                    data-volunteer-email="${v.userEmail}"
+                                                    data-volunteer-team="${teamKey}"
+                                                    data-event-date="${event.date}"
+                                                    data-event-time="${event.time}"
+                                                    data-volunteer-role="${v.role || ''}">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                </svg>
+                                                Editar
+                                            </button>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += '</div>';
+            });
+
+            listContainer.innerHTML = html;
+
+            // Adicionar event listeners aos botões de editar
+            document.querySelectorAll('.edit-volunteer-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    openEditVolunteerModal({
+                        escalaId: btn.dataset.escalaId,
+                        volunteerName: btn.dataset.volunteerName,
+                        volunteerEmail: btn.dataset.volunteerEmail,
+                        team: btn.dataset.volunteerTeam,
+                        eventDate: btn.dataset.eventDate,
+                        eventTime: btn.dataset.eventTime,
+                        role: btn.dataset.volunteerRole
+                    });
+                });
+            });
+        }
+
+        // Event listeners dos modais
+        document.getElementById('close-leader-services-modal')?.addEventListener('click', () => {
+            const modal = document.getElementById('leader-upcoming-services-modal');
+            modal.classList.add('hidden');
+            setTimeout(() => modal.style.display = 'none', 300);
+        });
+
+        document.getElementById('leader-upcoming-services-modal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'leader-upcoming-services-modal') {
+                const modal = document.getElementById('leader-upcoming-services-modal');
+                modal.classList.add('hidden');
+                setTimeout(() => modal.style.display = 'none', 300);
+            }
+        });
+
+        function openEditVolunteerModal(data) {
+            currentEditingVolunteer = data;
+            
+            document.getElementById('edit-volunteer-name').textContent = data.volunteerName;
+            
+            const modal = document.getElementById('edit-volunteer-modal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.remove('hidden'), 10);
+        }
+
+        document.getElementById('close-edit-volunteer-modal')?.addEventListener('click', () => {
+            const modal = document.getElementById('edit-volunteer-modal');
+            modal.classList.add('hidden');
+            setTimeout(() => modal.style.display = 'none', 300);
+            currentEditingVolunteer = null;
+        });
+
+        document.getElementById('edit-volunteer-modal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'edit-volunteer-modal') {
+                const modal = document.getElementById('edit-volunteer-modal');
+                modal.classList.add('hidden');
+                setTimeout(() => modal.style.display = 'none', 300);
+                currentEditingVolunteer = null;
+            }
+        });
+
+        // Ações do modal de edição
+        document.getElementById('edit-volunteer-function-btn')?.addEventListener('click', async () => {
+            if (!currentEditingVolunteer) return;
+
+            // Carregar funções do time
+            await loadTeamRoles();
+            const teamRoles = teamRolesData[currentEditingVolunteer.team] || [];
+            
+            let optionsHtml = '<option value="">Nenhuma função específica</option>';
+            teamRoles.forEach(role => {
+                const selected = role === currentEditingVolunteer.role ? 'selected' : '';
+                optionsHtml += `<option value="${role}" ${selected}>${role}</option>`;
+            });
+
+            const roleInput = await showModalWithInput(
+                '💼 Incluir/Editar Função',
+                `<div class="mb-3">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Selecione uma função:</label>
+                    <select id="role-select" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                        ${optionsHtml}
+                    </select>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Ou digite uma nova função personalizada:</p>`,
+                'Salvar Função',
+                currentEditingVolunteer.role || ''
+            );
+
+            if (roleInput !== null) {
+                const selectedRole = document.getElementById('role-select')?.value || roleInput;
+                await updateVolunteerFunction(currentEditingVolunteer.escalaId, selectedRole);
+            }
+        });
+
+        document.getElementById('edit-volunteer-team-btn')?.addEventListener('click', async () => {
+            if (!currentEditingVolunteer) return;
+
+            const teamNames = {
+                welcome: '👋 Welcome',
+                backstage: '🤝 Backstage',
+                parking: '🚗 Parking',
+                kids: '👶 Kids',
+                comunicacao: '📢 Comunicação'
+            };
+
+            let optionsHtml = '';
+            Object.entries(teamNames).forEach(([key, name]) => {
+                if (key !== currentEditingVolunteer.team) {
+                    optionsHtml += `<option value="${key}">${name}</option>`;
+                }
+            });
+
+            const modalHtml = `
+                <div class="mb-3">
+                    <p class="text-sm text-gray-600 mb-3">Time atual: <strong>${teamNames[currentEditingVolunteer.team]}</strong></p>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Transferir para:</label>
+                    <select id="team-select" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                        ${optionsHtml}
+                    </select>
+                </div>
+            `;
+
+            showModal(modalHtml, true, async () => {
+                const newTeam = document.getElementById('team-select')?.value;
+                if (newTeam) {
+                    await changeVolunteerTeam(currentEditingVolunteer.escalaId, newTeam);
+                }
+            }, false, 'Confirmar Mudança', '🔄');
+        });
+
+        document.getElementById('edit-volunteer-delete-btn')?.addEventListener('click', async () => {
+            if (!currentEditingVolunteer) return;
+
+            showModal(
+                `⚠️ Tem certeza que deseja <strong>excluir ${currentEditingVolunteer.volunteerName}</strong> desta escala?<br><br>Esta ação não pode ser desfeita.`,
+                true,
+                async () => await deleteVolunteerFromSchedule(currentEditingVolunteer.escalaId),
+                false,
+                'Sim, Excluir',
+                '🗑️'
+            );
+        });
+
+        async function updateVolunteerFunction(escalaId, newRole) {
+            try {
+                const { doc, updateDoc } = window.firestoreMethods;
+                const escalaRef = doc(window.firebaseDb, 'escalas', escalaId);
+
+                const modification = newRole 
+                    ? `Função atribuída pelo líder: ${newRole}`
+                    : 'Função removida pelo líder';
+
+                await updateDoc(escalaRef, {
+                    role: newRole || null,
+                    leaderModification: modification,
+                    leaderModificationDate: new Date().toISOString(),
+                    leaderModificationBy: currentUser.uid
+                });
+
+                // Se a função é personalizada (não está no dropdown), adicionar ao cadastro de funções
+                if (newRole) {
+                    const teamRoles = teamRolesData[currentEditingVolunteer.team] || [];
+                    
+                    // Verificar se a função já existe (case-insensitive)
+                    const existingFunction = teamRoles.find(role => 
+                        role.toLowerCase().trim() === newRole.toLowerCase().trim()
+                    );
+                    
+                    if (existingFunction) {
+                        // Função já existe - avisar o líder
+                        console.log('⚠️ Função já existe no cadastro:', existingFunction);
+                        showModal(`⚠️ A função "<strong>${existingFunction}</strong>" já existe no cadastro do time.<br><br>Será utilizada a versão já cadastrada.`, false, null, false, null, '📝');
+                    } else {
+                        // Função é nova - adicionar ao cadastro
+                        // Normalizar: primeira letra maiúscula, restante minúsculo
+                        const normalizedRole = newRole.trim().charAt(0).toUpperCase() + newRole.trim().slice(1).toLowerCase();
+                        teamRolesData[currentEditingVolunteer.team] = [...teamRoles, normalizedRole];
+                        await saveTeamRoles();
+                        console.log('✅ Função personalizada salva ao cadastro:', normalizedRole);
+                        showModal(`✅ Função "<strong>${normalizedRole}</strong>" adicionada ao cadastro do time!`, false, null, false, null, '📝');
+                    }
+                }
+
+                // Log de auditoria
+                await logAudit('LEADER_UPDATE_FUNCTION', {
+                    escalaId: escalaId,
+                    volunteerName: currentEditingVolunteer.volunteerName,
+                    newRole: newRole || 'Nenhuma',
+                    leaderName: currentUser.displayName || currentUser.email,
+                    leaderId: currentUser.uid,
+                    eventDate: currentEditingVolunteer.eventDate,
+                    eventTime: currentEditingVolunteer.eventTime
+                });
+
+                showModal('✅ Função atualizada com sucesso!');
+                
+                // Fechar modal de edição e recarregar lista
+                document.getElementById('edit-volunteer-modal').classList.add('hidden');
+                setTimeout(() => document.getElementById('edit-volunteer-modal').style.display = 'none', 300);
+                await showLeaderUpcomingServices();
+
+            } catch (error) {
+                console.error('❌ Erro ao atualizar função:', error);
+                showModal('❌ Erro ao atualizar função. Tente novamente.');
+            }
+        }
+
+        async function changeVolunteerTeam(escalaId, newTeam) {
+            try {
+                const { doc, updateDoc } = window.firestoreMethods;
+                const escalaRef = doc(window.firebaseDb, 'escalas', escalaId);
+
+                const teamNames = {
+                    welcome: '👋 Welcome',
+                    backstage: '🤝 Backstage',
+                    parking: '🚗 Parking',
+                    kids: '👶 Kids',
+                    comunicacao: '📢 Comunicação'
+                };
+
+                const modification = `Transferido do time ${teamNames[currentEditingVolunteer.team]} para ${teamNames[newTeam]} pelo líder`;
+
+                await updateDoc(escalaRef, {
+                    team: newTeam,
+                    leaderModification: modification,
+                    leaderModificationDate: new Date().toISOString(),
+                    leaderModificationBy: currentUser.uid
+                });
+
+                // Log de auditoria
+                await logAudit('LEADER_CHANGE_TEAM', {
+                    escalaId: escalaId,
+                    volunteerName: currentEditingVolunteer.volunteerName,
+                    oldTeam: currentEditingVolunteer.team,
+                    newTeam: newTeam,
+                    leaderName: currentUser.displayName || currentUser.email,
+                    leaderId: currentUser.uid,
+                    eventDate: currentEditingVolunteer.eventDate,
+                    eventTime: currentEditingVolunteer.eventTime
+                });
+
+                showModal('✅ Voluntário transferido com sucesso!');
+                
+                // Fechar modal de edição e recarregar lista
+                document.getElementById('edit-volunteer-modal').classList.add('hidden');
+                setTimeout(() => document.getElementById('edit-volunteer-modal').style.display = 'none', 300);
+                await showLeaderUpcomingServices();
+
+            } catch (error) {
+                console.error('❌ Erro ao mudar time:', error);
+                showModal('❌ Erro ao mudar time. Tente novamente.');
+            }
+        }
+
+        async function deleteVolunteerFromSchedule(escalaId) {
+            try {
+                const { doc, deleteDoc } = window.firestoreMethods;
+                const escalaRef = doc(window.firebaseDb, 'escalas', escalaId);
+
+                // Log de auditoria antes de deletar
+                await logAudit('LEADER_DELETE_VOLUNTEER', {
+                    escalaId: escalaId,
+                    volunteerName: currentEditingVolunteer.volunteerName,
+                    volunteerEmail: currentEditingVolunteer.volunteerEmail,
+                    team: currentEditingVolunteer.team,
+                    leaderName: currentUser.displayName || currentUser.email,
+                    leaderId: currentUser.uid,
+                    eventDate: currentEditingVolunteer.eventDate,
+                    eventTime: currentEditingVolunteer.eventTime
+                });
+
+                await deleteDoc(escalaRef);
+
+                showModal('✅ Voluntário removido da escala com sucesso!');
+                
+                // Fechar modal de edição e recarregar lista
+                document.getElementById('edit-volunteer-modal').classList.add('hidden');
+                setTimeout(() => document.getElementById('edit-volunteer-modal').style.display = 'none', 300);
+                await showLeaderUpcomingServices();
+
+            } catch (error) {
+                console.error('❌ Erro ao excluir voluntário:', error);
+                showModal('❌ Erro ao excluir voluntário. Tente novamente.');
+            }
+        }
+
             console.log('✅ App inicializado');
         }
         
         // ========================================
-        // SERVICE WORKER (PWA) - HABILITADO
+        // SERVICE WORKER (PWA) - NÃO-BLOQUEANTE
         // ========================================
         if ('serviceWorker' in navigator) {
+            // Registrar de forma não-bloqueante com timeout
             window.addEventListener('load', () => {
-                // GitHub Pages na raiz do repositório
                 const swPath = '/zele/service-worker.js';
+                const swTimeout = setTimeout(() => {
+                    console.warn('⚠️ Service Worker levou muito tempo para registrar');
+                }, 10000); // 10 segundos de timeout
                 
                 navigator.serviceWorker.register(swPath)
-                    .then(reg => console.log('✅ Service Worker registrado:', swPath))
-                    .catch(err => console.log('⚠️ Service Worker não disponível:', err.message));
-            });
+                    .then(reg => {
+                        clearTimeout(swTimeout);
+                        console.log('✅ Service Worker registrado:', swPath);
+                    })
+                    .catch(err => {
+                        clearTimeout(swTimeout);
+                        console.log('⚠️ Service Worker não disponível:', err.message);
+                    });
+            }, { once: true });
         }
         
         // Iniciar quando DOM estiver pronto
