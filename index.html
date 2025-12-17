@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zele Serve</title>
-    <meta name="application-name" content="Zele Serve">
-    <meta name="apple-mobile-web-app-title" content="Zele Serve">
+    <title>Zele Teste</title>
+    <meta name="application-name" content="Zele Teste">
+    <meta name="apple-mobile-web-app-title" content="Zele Teste">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#151b29">
@@ -238,8 +238,8 @@
     <!-- Tela de Loading -->
     <div id="loading-screen" class="fixed inset-0 zele-primary flex items-center justify-center z-50">
         <div class="text-center text-white">
-            <img src="Volunteers logo.png" alt="Zele Serve" class="w-32 h-32 mx-auto mb-4 object-contain">
-            <h1 class="text-5xl font-bold mb-4">Zele Serve</h1>
+            <img src="Volunteers logo.png" alt="Zele Teste" class="w-32 h-32 mx-auto mb-4 object-contain">
+            <h1 class="text-5xl font-bold mb-4">Zele Teste</h1>
             <p class="text-xl mb-8">Sistema de Escalas</p>
             <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-white mx-auto"></div>
         </div>
@@ -248,8 +248,8 @@
     <!-- Tela de Login -->
     <div id="auth-screen" class="fixed inset-0 zele-primary flex items-center justify-center p-4 hidden">
         <div class="card-float rounded-2xl p-8 max-w-md w-full text-center">
-            <img src="Volunteers logo.png" alt="Zele Serve" class="w-24 h-24 mx-auto mb-4 object-contain">
-            <h1 class="text-4xl font-bold mb-2" style="color: #151b29;">Zele Serve</h1>
+            <img src="Volunteers logo.png" alt="Zele Teste" class="w-24 h-24 mx-auto mb-4 object-contain">
+            <h1 class="text-4xl font-bold mb-2" style="color: #151b29;">Zele Teste</h1>
             <p class="text-gray-600 mb-8">Sistema de Escalas</p>
             
             <!-- Login com Google -->
@@ -376,7 +376,7 @@
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <img src="Volunteers logo.png" alt="Logo" class="w-10 h-10 object-contain">
-                        <h1 class="text-2xl font-bold">Zele Serve</h1>
+                        <h1 class="text-2xl font-bold">Zele Teste</h1>
                     </div>
                     <div class="flex items-center gap-4">
                         <div class="text-right hidden sm:block">
@@ -1586,7 +1586,7 @@
 
             <!-- Versão -->
             <div class="mt-8 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">
-                <p>Zele Serve v2.4</p>
+                <p>Zele Teste v2.4</p>
                 <p class="mt-1">Servir é a linguagem do céu</p>
             </div>
         </div>
@@ -1710,7 +1710,7 @@
     <div id="ios-install-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
             <h2 class="text-xl font-bold mb-4 text-gray-800">📱 Instalar App no iPhone</h2>
-            <p class="text-sm text-gray-600 mb-4">Para adicionar o Zele Serve à sua tela inicial:</p>
+            <p class="text-sm text-gray-600 mb-4">Para adicionar o Zele Teste à sua tela inicial:</p>
             <ol class="text-sm text-gray-700 space-y-3 mb-6">
                 <li class="flex items-start">
                     <span class="font-bold mr-2">1.</span>
@@ -1788,10 +1788,9 @@
     <!-- Modal: Próximos Cultos do Líder -->
     <div id="leader-upcoming-services-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50" style="display: none;">
         <div class="bg-white rounded-lg shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
-            <div class="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white p-6 flex items-center justify-between">
+            <div class="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white p-4 flex items-center justify-between">
                 <div>
-                    <h2 class="text-2xl font-bold">Próximos Cultos - Seu Time</h2>
-                    <p class="text-indigo-100 text-sm mt-1">Gerencie as escalas dos seus voluntários</p>
+                    <h2 class="text-lg font-semibold">Próximos Cultos</h2>
                 </div>
                 <button id="close-leader-services-modal" class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2643,7 +2642,7 @@
         // Aguardar Firebase estar pronto
         function initApp() {
             console.log('═══════════════════════════════════════════');
-            console.log('🚀 Zele Serve v' + CONFIG.SCHEMA_VERSION);
+            console.log('🚀 Zele Teste v' + CONFIG.SCHEMA_VERSION);
             console.log('📋 DEBUG MODE:', CONFIG.DEBUG_MODE ? 'ATIVADO ⚠️' : 'DESATIVADO');
             console.log('═══════════════════════════════════════════');
             
@@ -3394,7 +3393,7 @@
                         if (!deferredPrompt) {
                             console.log('❌ Prompt de instalação não disponível - mostrando instruções manuais');
                             // Instruções manuais para Android/Chrome
-                            showModal('Para instalar no <strong>Android</strong>:<br><br>1. Abra o <strong>Menu</strong> do navegador (⋮)<br>2. Toque em <strong>"Adicionar à tela inicial"</strong> ou <strong>"Instalar app"</strong><br><br>Para <strong>Desktop</strong>:<br>• Chrome: Menu (⋮) → Instalar Zele Serve<br>• Edge: Menu (⋯) → Apps → Instalar', false, null, false, null, '📱');
+                            showModal('Para instalar no <strong>Android</strong>:<br><br>1. Abra o <strong>Menu</strong> do navegador (⋮)<br>2. Toque em <strong>"Adicionar à tela inicial"</strong> ou <strong>"Instalar app"</strong><br><br>Para <strong>Desktop</strong>:<br>• Chrome: Menu (⋮) → Instalar Zele Teste<br>• Edge: Menu (⋯) → Apps → Instalar', false, null, false, null, '📱');
                             return;
                         }
 
@@ -11061,19 +11060,17 @@
             
             events.forEach((event, eventIndex) => {
                 const dateObj = new Date(event.date + 'T' + event.time);
-                const dateStr = dateObj.toLocaleDateString('pt-BR', { 
-                    weekday: 'long', 
-                    day: '2-digit', 
-                    month: '2-digit', 
-                    year: 'numeric' 
-                });
-                const eventNameDisplay = event.eventName ? ` - ${event.eventName}` : '';
+                const dayShort = dateObj.toLocaleDateString('pt-BR', { weekday: 'short' }).toUpperCase().slice(0, 3);
+                const day = dateObj.getDate().toString().padStart(2, '0');
+                const year = dateObj.getFullYear().toString().slice(-2);
+                const eventNameDisplay = event.eventName ? event.eventName : '';
+                const timeStr = event.time === '00:00' ? '' : `${event.time}`;
                 
                 html += `
-                    <div class="mb-6 pb-6 border-b border-gray-200 last:border-b-0">
-                        <div class="bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded-lg mb-4">
-                            <div class="font-bold text-lg text-gray-800">📅 ${dateStr}${eventNameDisplay}</div>
-                            <div class="text-sm text-gray-600">🕐 ${event.time}</div>
+                    <div class="mb-4 pb-4 border-b border-gray-200 last:border-b-0">
+                        <div class="bg-indigo-50 border-l-4 border-indigo-500 p-3 rounded-lg mb-3">
+                            <div class="font-semibold text-base text-gray-800">${day} - ${dayShort} - ${eventNameDisplay}</div>
+                            ${timeStr ? `<div class="text-xs text-gray-600 mt-1">🕐 ${timeStr}</div>` : ''}
                         </div>
                 `;
 
@@ -11083,30 +11080,25 @@
                     
                     const config = teamConfig[teamKey];
                     html += `
-                        <div class="border-2 rounded-lg p-4 mb-3 ${config.color}">
-                            <h4 class="font-bold mb-3 flex items-center gap-2 text-lg">
+                        <div class="border-2 rounded-lg p-2 mb-2 ${config.color}">
+                            <h4 class="font-semibold mb-2 flex items-center gap-1 text-sm">
                                 <span>${config.icon}</span>
                                 <span>${config.name}</span>
                                 <span class="text-xs text-gray-500 font-normal">(${volunteers.length})</span>
                             </h4>
-                            <div class="space-y-2">
+                            <div class="space-y-1">
                                 ${volunteers.map(v => {
                                     const photoUrl = v.userPhoto || 'Zele logo.png';
-                                    const leaderNote = v.leaderModification ? `<div class="text-xs text-red-600 font-semibold mt-1">⚠️ ${v.leaderModification}</div>` : '';
-                                    const functionDisplay = v.role ? `<span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded">${v.role}</span>` : '';
+                                    const functionDisplay = v.role ? `<p class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded inline-block">${v.role}</p>` : '';
                                     
                                     return `
-                                        <div class="flex items-center justify-between bg-white p-3 rounded-lg border ${v.leaderModification ? 'border-red-300' : 'border-gray-200'}">
-                                            <div class="flex items-center gap-3 flex-1">
-                                                <img src="${photoUrl}" alt="${v.userName}" class="w-10 h-10 rounded-full object-cover" onerror="this.src='Zele logo.png'">
-                                                <div class="flex-1">
-                                                    <p class="font-semibold text-sm">${v.userName}</p>
-                                                    <p class="text-xs text-gray-500">${v.userEmail}</p>
-                                                    ${functionDisplay}
-                                                    ${leaderNote}
-                                                </div>
+                                        <div class="flex items-center gap-2 bg-white p-2 rounded-lg border border-gray-200">
+                                            <img src="${photoUrl}" alt="${v.userName}" class="w-8 h-8 rounded-full object-cover" onerror="this.src='Zele logo.png'">
+                                            <div class="flex-1 min-w-0">
+                                                <p class="font-semibold text-xs truncate">${v.userName}</p>
+                                                ${functionDisplay}
                                             </div>
-                                            <button class="edit-volunteer-btn flex items-center gap-1 px-3 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm font-semibold transition"
+                                            <button class="edit-volunteer-btn flex-shrink-0 text-purple-600 hover:text-purple-800 transition"
                                                     data-escala-id="${v.id}"
                                                     data-volunteer-name="${v.userName}"
                                                     data-volunteer-email="${v.userEmail}"
@@ -11114,14 +11106,14 @@
                                                     data-event-date="${event.date}"
                                                     data-event-time="${event.time}"
                                                     data-volunteer-role="${v.role || ''}">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                                </svg>
-                                                Editar
+                                                ✏️
                                             </button>
                                         </div>
                                     `;
                                 }).join('')}
+                            </div>
+                        </div>
+                    `;
                             </div>
                         </div>
                     `;
@@ -11276,13 +11268,8 @@
                 const { doc, updateDoc } = window.firestoreMethods;
                 const escalaRef = doc(window.firebaseDb, 'escalas', escalaId);
 
-                const modification = newRole 
-                    ? `Função atribuída pelo líder: ${newRole}`
-                    : 'Função removida pelo líder';
-
                 await updateDoc(escalaRef, {
                     role: newRole || null,
-                    leaderModification: modification,
                     leaderModificationDate: new Date().toISOString(),
                     leaderModificationBy: currentUser.uid
                 });
