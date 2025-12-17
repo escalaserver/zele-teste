@@ -11060,16 +11060,17 @@
             
             events.forEach((event, eventIndex) => {
                 const dateObj = new Date(event.date + 'T' + event.time);
-                const dayShort = dateObj.toLocaleDateString('pt-BR', { weekday: 'short' }).toUpperCase().slice(0, 3);
                 const day = dateObj.getDate().toString().padStart(2, '0');
+                const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
                 const year = dateObj.getFullYear().toString().slice(-2);
+                const dayShort = dateObj.toLocaleDateString('pt-BR', { weekday: 'short' }).toUpperCase().slice(0, 3);
                 const eventNameDisplay = event.eventName ? event.eventName : '';
                 const timeStr = event.time === '00:00' ? '' : `${event.time}`;
                 
                 html += `
                     <div class="mb-4 pb-4 border-b border-gray-200 last:border-b-0">
                         <div class="bg-indigo-50 border-l-4 border-indigo-500 p-3 rounded-lg mb-3">
-                            <div class="font-semibold text-base text-gray-800">${day} - ${dayShort} - ${eventNameDisplay}</div>
+                            <div class="font-semibold text-base text-gray-800">${day}/${month}/${year} - ${dayShort} - ${eventNameDisplay}</div>
                             ${timeStr ? `<div class="text-xs text-gray-600 mt-1">🕐 ${timeStr}</div>` : ''}
                         </div>
                 `;
