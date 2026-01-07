@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zele Teste</title>
-    <meta name="application-name" content="Zele Teste">
-    <meta name="apple-mobile-web-app-title" content="Zele Teste">
+    <title>Zele Serve</title>
+    <meta name="application-name" content="Zele Serve">
+    <meta name="apple-mobile-web-app-title" content="Zele Serve">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#151b29">
@@ -38,12 +38,12 @@
         
         // Your web app's Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyBlMfqUkpQQrLHD13Hq3UJ43D4N1U1JviE",
-  authDomain: "zele-teste.firebaseapp.com",
-  projectId: "zele-teste",
-  storageBucket: "zele-teste.firebasestorage.app",
-  messagingSenderId: "758471959826",
-  appId: "1:758471959826:web:374288feffb10f31fc7fcb"
+            apiKey: "AIzaSyBGMYUmA0hJs1v2IlU-fdFDucYFp6LZaCg",
+            authDomain: "z-ele-church-escalas.firebaseapp.com",
+            projectId: "z-ele-church-escalas",
+            storageBucket: "z-ele-church-escalas.firebasestorage.app",
+            messagingSenderId: "473523773124",
+            appId: "1:473523773124:web:9c57a51236a5a8fabc3391"
         };
         
         // Initialize Firebase
@@ -238,8 +238,8 @@
     <!-- Tela de Loading -->
     <div id="loading-screen" class="fixed inset-0 zele-primary flex items-center justify-center z-50">
         <div class="text-center text-white">
-            <img src="Volunteers logo.png" alt="Zele Teste" class="w-32 h-32 mx-auto mb-4 object-contain">
-            <h1 class="text-5xl font-bold mb-4">Zele Teste</h1>
+            <img src="Volunteers logo.png" alt="Zele Serve" class="w-32 h-32 mx-auto mb-4 object-contain">
+            <h1 class="text-5xl font-bold mb-4">Zele Serve</h1>
             <p class="text-xl mb-8">Sistema de Escalas</p>
             <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-white mx-auto"></div>
         </div>
@@ -248,8 +248,8 @@
     <!-- Tela de Login -->
     <div id="auth-screen" class="fixed inset-0 zele-primary flex items-center justify-center p-4 hidden">
         <div class="card-float rounded-2xl p-8 max-w-md w-full text-center">
-            <img src="Volunteers logo.png" alt="Zele Teste" class="w-24 h-24 mx-auto mb-4 object-contain">
-            <h1 class="text-4xl font-bold mb-2" style="color: #151b29;">Zele Teste</h1>
+            <img src="Volunteers logo.png" alt="Zele Serve" class="w-24 h-24 mx-auto mb-4 object-contain">
+            <h1 class="text-4xl font-bold mb-2" style="color: #151b29;">Zele Serve</h1>
             <p class="text-gray-600 mb-8">Sistema de Escalas</p>
             
             <!-- Login com Google -->
@@ -376,7 +376,7 @@
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <img src="Volunteers logo.png" alt="Logo" class="w-10 h-10 object-contain">
-                        <h1 class="text-2xl font-bold">Zele Teste</h1>
+                        <h1 class="text-2xl font-bold">Zele Serve</h1>
                     </div>
                     <div class="flex items-center gap-4">
                         <div class="text-right hidden sm:block">
@@ -1526,13 +1526,23 @@
                             </div>
                         </button>
 
-                        <button id="menu-manage-roles-btn" class="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition text-left">
+                        <button id="menu-manage-roles-btn" class="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition text-left border-b border-gray-100">
                             <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                             </svg>
                             <div>
                                 <p class="font-semibold text-gray-800">Gerenciar Funções</p>
                                 <p class="text-xs text-gray-600">Configurar funções por time</p>
+                            </div>
+                        </button>
+
+                        <button id="menu-ai-analysis-btn" class="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition text-left">
+                            <svg class="w-6 h-6" style="color: #10a37f;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5.36 4.364l-.707.707M9 12a3 3 0 11 6 0 3 3 0 01-6 0z"/>
+                            </svg>
+                            <div>
+                                <p class="font-semibold text-gray-800">Análise com IA 🤖</p>
+                                <p class="text-xs text-gray-600">Faça perguntas sobre os dados</p>
                             </div>
                         </button>
                     </div>
@@ -1586,7 +1596,7 @@
 
             <!-- Versão -->
             <div class="mt-8 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">
-                <p>Zele Teste v2.4</p>
+                <p>Zele Serve v2.4</p>
                 <p class="mt-1">Servir é a linguagem do céu</p>
             </div>
         </div>
@@ -1710,7 +1720,7 @@
     <div id="ios-install-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
             <h2 class="text-xl font-bold mb-4 text-gray-800">📱 Instalar App no iPhone</h2>
-            <p class="text-sm text-gray-600 mb-4">Para adicionar o Zele Teste à sua tela inicial:</p>
+            <p class="text-sm text-gray-600 mb-4">Para adicionar o Zele Serve à sua tela inicial:</p>
             <ol class="text-sm text-gray-700 space-y-3 mb-6">
                 <li class="flex items-start">
                     <span class="font-bold mr-2">1.</span>
@@ -1915,6 +1925,83 @@
 
                 <!-- Botão Fechar -->
                 <button id="close-roles-modal-btn" class="w-full mt-6 py-3 px-6 text-white font-bold rounded-lg transition hover:opacity-90" style="background-color: #151b29;">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Análise com IA 🤖 -->
+    <div id="ai-analysis-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl relative" style="max-height: 90vh; overflow-y: auto;">
+            <button id="close-ai-modal" class="sticky top-4 right-4 float-right z-10 bg-white rounded-full p-2 shadow-lg text-gray-400 hover:text-gray-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+            
+            <div class="p-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="text-3xl">🤖</span>
+                    <div>
+                        <h3 class="text-2xl font-bold" style="color: #151b29;">Análise com IA</h3>
+                        <p class="text-sm text-gray-600">Faça perguntas sobre voluntários e escalas</p>
+                    </div>
+                </div>
+
+                <!-- Aviso de Configuração -->
+                <div id="ai-config-warning" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4 rounded">
+                    <p class="text-sm text-yellow-800 mb-2"><strong>⚠️ Configuração Necessária</strong></p>
+                    <p class="text-xs text-yellow-700 mb-3">Para usar a análise com IA, você precisa adicionar sua chave da API Claude (Anthropic).</p>
+                    <input 
+                        type="password" 
+                        id="ai-api-key-input" 
+                        placeholder="Cole sua chave da API aqui (sk-ant-...)"
+                        class="w-full p-3 border border-yellow-300 rounded-lg text-sm focus:ring-2 focus:ring-yellow-500 mb-2"
+                    />
+                    <p class="text-xs text-gray-600 mb-3">
+                        Obtenha sua chave gratuitamente em <a href="https://console.anthropic.com/" target="_blank" class="text-blue-600 hover:underline">console.anthropic.com</a>
+                    </p>
+                    <button id="save-ai-api-key-btn" class="w-full py-2 px-4 bg-yellow-600 text-white rounded-lg text-sm font-semibold hover:bg-yellow-700 transition">
+                        Salvar Chave
+                    </button>
+                </div>
+
+                <!-- Área de Chat (oculta até configurar chave) -->
+                <div id="ai-chat-area" class="hidden">
+                    <div id="ai-messages" class="bg-gray-50 rounded-lg p-4 mb-4 space-y-3 min-h-[300px] max-h-[400px] overflow-y-auto border border-gray-200">
+                        <div class="flex gap-3">
+                            <span class="text-2xl flex-shrink-0">🤖</span>
+                            <div class="bg-white p-3 rounded-lg rounded-tl-none">
+                                <p class="text-sm text-gray-800">Olá! Sou a IA do Zele Serve. Posso ajudar com perguntas sobre voluntários e escalas. Tente perguntar:</p>
+                                <ul class="text-xs text-gray-600 mt-2 space-y-1">
+                                    <li>• "Quais voluntários têm preferência no Welcome mas nunca se escalaram?"</li>
+                                    <li>• "Quem não foi escalado nos últimos 30 dias?"</li>
+                                    <li>• "Quem é o voluntário mais ativo no Kids?"</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <input 
+                            type="text" 
+                            id="ai-question-input" 
+                            placeholder="Faça uma pergunta sobre os voluntários e escalas..."
+                            class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        />
+                        <button id="ai-send-btn" class="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-semibold hover:shadow-lg transition">
+                            Enviar
+                        </button>
+                    </div>
+
+                    <p class="text-xs text-gray-500 mt-3">
+                        💡 A IA analisa dados reais do sistema para responder suas perguntas de forma precisa.
+                    </p>
+                </div>
+
+                <!-- Botão Fechar -->
+                <button id="close-ai-modal-btn" class="w-full mt-6 py-3 px-6 text-white font-bold rounded-lg transition hover:opacity-90" style="background-color: #151b29;">
                     Fechar
                 </button>
             </div>
@@ -2642,7 +2729,7 @@
         // Aguardar Firebase estar pronto
         function initApp() {
             console.log('═══════════════════════════════════════════');
-            console.log('🚀 Zele Teste v' + CONFIG.SCHEMA_VERSION);
+            console.log('🚀 Zele Serve v' + CONFIG.SCHEMA_VERSION);
             console.log('📋 DEBUG MODE:', CONFIG.DEBUG_MODE ? 'ATIVADO ⚠️' : 'DESATIVADO');
             console.log('═══════════════════════════════════════════');
             
@@ -3393,7 +3480,7 @@
                         if (!deferredPrompt) {
                             console.log('❌ Prompt de instalação não disponível - mostrando instruções manuais');
                             // Instruções manuais para Android/Chrome
-                            showModal('Para instalar no <strong>Android</strong>:<br><br>1. Abra o <strong>Menu</strong> do navegador (⋮)<br>2. Toque em <strong>"Adicionar à tela inicial"</strong> ou <strong>"Instalar app"</strong><br><br>Para <strong>Desktop</strong>:<br>• Chrome: Menu (⋮) → Instalar Zele Teste<br>• Edge: Menu (⋯) → Apps → Instalar', false, null, false, null, '📱');
+                            showModal('Para instalar no <strong>Android</strong>:<br><br>1. Abra o <strong>Menu</strong> do navegador (⋮)<br>2. Toque em <strong>"Adicionar à tela inicial"</strong> ou <strong>"Instalar app"</strong><br><br>Para <strong>Desktop</strong>:<br>• Chrome: Menu (⋮) → Instalar Zele Serve<br>• Edge: Menu (⋯) → Apps → Instalar', false, null, false, null, '📱');
                             return;
                         }
 
@@ -7308,7 +7395,14 @@
                         
                         console.log(`🔍 Team: ${teamKey}, isSuperAdmin: ${isSuperAdmin}, isAdmin: ${isAdmin}, isTeamLeader: ${isTeamLeader}, leadership:`, userTeamLeadership, `canManage: ${canManageThisTeam}`);
                         
-                        return volunteers.map(v => `
+                        // Ordenar voluntários por função (role) alfabeticamente
+                        const sortedVolunteers = volunteers.sort((a, b) => {
+                            const roleA = (a.role || '').toLowerCase();
+                            const roleB = (b.role || '').toLowerCase();
+                            return roleA.localeCompare(roleB, 'pt-BR');
+                        });
+                        
+                        return sortedVolunteers.map(v => `
                             <div class="flex items-center justify-between py-2 md:py-1">
                                 <span class="text-base md:text-sm font-medium">• ${v.userName}</span>
                                 ${canManageThisTeam ? `
@@ -8199,10 +8293,17 @@
                     
                     const config = teamConfig[teamKey];
                     
+                    // Ordenar voluntários por função (role) alfabeticamente
+                    const sortedVolunteers = volunteers.sort((a, b) => {
+                        const roleA = (a.role || '').toLowerCase();
+                        const roleB = (b.role || '').toLowerCase();
+                        return roleA.localeCompare(roleB, 'pt-BR');
+                    });
+                    
                     const teamDiv = document.createElement('div');
                     teamDiv.className = `border-2 rounded-lg p-3 ${config.color}`;
                     
-                    const volunteersHtml = volunteers.map(v => `
+                    const volunteersHtml = sortedVolunteers.map(v => `
                         <div class="flex items-center gap-2 py-1">
                             <img src="${v.photo || 'Zele logo.png'}" alt="${v.name}" class="w-8 h-8 rounded-full object-cover flex-shrink-0">
                             <div class="flex-1 min-w-0">
@@ -10624,6 +10725,14 @@
 
                     Object.entries(event.teams).forEach(([teamKey, volunteers]) => {
                         const teamInfo = teamNames[teamKey] || { name: teamKey, icon: '👥', color: 'bg-gray-50' };
+                        
+                        // Ordenar voluntários por função (role) alfabeticamente
+                        const sortedVolunteers = volunteers.sort((a, b) => {
+                            const roleA = (a.role || '').toLowerCase();
+                            const roleB = (b.role || '').toLowerCase();
+                            return roleA.localeCompare(roleB, 'pt-BR');
+                        });
+                        
                         eventsHtml += `
                             <div class="border-l-4 ${teamInfo.color} border rounded p-3 mb-3">
                                 <h4 class="font-semibold mb-2 flex items-center gap-2">
@@ -10632,7 +10741,7 @@
                                     <span class="text-xs text-gray-500">(${volunteers.length})</span>
                                 </h4>
                                 <div class="space-y-2">
-                                    ${volunteers.map(v => {
+                                    ${sortedVolunteers.map(v => {
                                         const checkInStatus = v.checkIn?.status || 'pending';
                                         const photoUrl = v.userPhoto || 'Zele logo.png';
                                         return `
@@ -11079,6 +11188,14 @@
                     if (!leaderTeams.includes(teamKey)) return;
                     
                     const config = teamConfig[teamKey];
+                    
+                    // Ordenar voluntários por função (role) alfabeticamente
+                    const sortedVolunteers = volunteers.sort((a, b) => {
+                        const roleA = (a.role || '').toLowerCase();
+                        const roleB = (b.role || '').toLowerCase();
+                        return roleA.localeCompare(roleB, 'pt-BR');
+                    });
+                    
                     html += `
                         <div class="border-2 rounded-lg p-2 mb-2 ${config.color}">
                             <h4 class="font-semibold mb-2 flex items-center gap-1 text-sm">
@@ -11087,7 +11204,7 @@
                                 <span class="text-xs text-gray-500 font-normal">(${volunteers.length})</span>
                             </h4>
                             <div class="space-y-1">
-                                ${volunteers.map(v => {
+                                ${sortedVolunteers.map(v => {
                                     const photoUrl = v.userPhoto || 'Zele logo.png';
                                     const functionDisplay = v.role ? `<p class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded inline-block">${v.role}</p>` : '';
                                     
@@ -11402,6 +11519,252 @@
         } // FIM de initApp()
         
         // ========================================
+        // 🤖 ANÁLISE COM IA (CLAUDE)
+        // ========================================
+        let aiApiKey = localStorage.getItem('ai_api_key') || '';
+        const aiModal = document.getElementById('ai-analysis-modal');
+        const aiConfigWarning = document.getElementById('ai-config-warning');
+        const aiChatArea = document.getElementById('ai-chat-area');
+        const aiMessages = document.getElementById('ai-messages');
+
+        // Mostrar/ocultar area de chat baseado na configuração
+        function updateAIStatus() {
+            if (aiApiKey && aiApiKey.trim()) {
+                aiConfigWarning.classList.add('hidden');
+                aiChatArea.classList.remove('hidden');
+            } else {
+                aiConfigWarning.classList.remove('hidden');
+                aiChatArea.classList.add('hidden');
+            }
+        }
+
+        // Abrir modal de IA
+        document.getElementById('menu-ai-analysis-btn')?.addEventListener('click', () => {
+            updateAIStatus();
+            aiModal.classList.remove('hidden');
+            aiModal.style.display = 'flex';
+        });
+
+        // Fechar modal de IA
+        document.getElementById('close-ai-modal')?.addEventListener('click', () => {
+            aiModal.classList.add('hidden');
+            aiModal.style.display = 'none';
+        });
+
+        document.getElementById('close-ai-modal-btn')?.addEventListener('click', () => {
+            aiModal.classList.add('hidden');
+            aiModal.style.display = 'none';
+        });
+
+        aiModal?.addEventListener('click', (e) => {
+            if (e.target === aiModal) {
+                aiModal.classList.add('hidden');
+                aiModal.style.display = 'none';
+            }
+        });
+
+        // Salvar chave da API
+        document.getElementById('save-ai-api-key-btn')?.addEventListener('click', () => {
+            const input = document.getElementById('ai-api-key-input');
+            const key = input.value.trim();
+            
+            if (!key) {
+                showModal('⚠️ Insira sua chave da API Claude');
+                return;
+            }
+
+            localStorage.setItem('ai_api_key', key);
+            aiApiKey = key;
+            updateAIStatus();
+            
+            // Limpar input
+            input.value = '';
+            showModal('✅ Chave da API salva com sucesso!');
+        });
+
+        // Função para obter contexto dos dados
+        async function getAnalysisContext() {
+            try {
+                const { collection, getDocs, query, where } = window.firestoreMethods;
+                
+                // Buscar todos os usuários (voluntários)
+                const usersRef = collection(window.firebaseDb, 'users');
+                const usersSnapshot = await getDocs(usersRef);
+                const volunteers = [];
+                
+                usersSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    volunteers.push({
+                        id: doc.id,
+                        name: data.name || data.displayName || 'Sem nome',
+                        email: data.email || '',
+                        preferences: data.preferences || [],
+                        blockedDates: data.blockedDates || []
+                    });
+                });
+
+                // Buscar todas as escalas
+                const escalasRef = collection(window.firebaseDb, 'escalas');
+                const escalasSnapshot = await getDocs(escalasRef);
+                const escalas = [];
+                
+                escalasSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    escalas.push({
+                        id: doc.id,
+                        volunteer: data.userName || data.volunteerName || '',
+                        team: data.team || '',
+                        date: data.date || '',
+                        role: data.role || '',
+                        status: data.status || 'approved'
+                    });
+                });
+
+                return {
+                    volunteers,
+                    escalas,
+                    totalVolunteers: volunteers.length,
+                    totalEscalas: escalas.length
+                };
+            } catch (error) {
+                console.error('Erro ao buscar contexto:', error);
+                return { volunteers: [], escalas: [], totalVolunteers: 0, totalEscalas: 0 };
+            }
+        }
+
+        // Função para enviar mensagem à IA
+        async function sendAIQuestion(question) {
+            if (!aiApiKey || !aiApiKey.trim()) {
+                showModal('⚠️ Configure sua chave da API primeiro');
+                return;
+            }
+
+            // Adicionar mensagem do usuário
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.className = 'flex gap-3 justify-end';
+            userMessageDiv.innerHTML = `<div class="bg-blue-500 text-white p-3 rounded-lg rounded-tr-none max-w-xs">
+                <p class="text-sm">${escapeHtml(question)}</p>
+            </div>`;
+            aiMessages.appendChild(userMessageDiv);
+            aiMessages.scrollTop = aiMessages.scrollHeight;
+
+            // Mostrar loading
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'flex gap-3';
+            loadingDiv.innerHTML = `<span class="text-2xl">🤖</span><div class="bg-gray-200 p-3 rounded-lg"><p class="text-sm text-gray-600">Analisando...</p></div>`;
+            aiMessages.appendChild(loadingDiv);
+            aiMessages.scrollTop = aiMessages.scrollHeight;
+
+            try {
+                // Obter contexto dos dados
+                const context = await getAnalysisContext();
+                
+                // Preparar contexto para a IA
+                const volunteersJson = JSON.stringify(context.volunteers, null, 2);
+                const escalasJson = JSON.stringify(context.escalas, null, 2);
+                
+                const systemPrompt = `Você é um assistente de análise de dados para um sistema de escalas de voluntários chamado Zele Serve.
+
+CONTEXTO DOS DADOS:
+- Total de voluntários: ${context.totalVolunteers}
+- Total de escalas: ${context.totalEscalas}
+
+DADOS DOS VOLUNTÁRIOS:
+${volunteersJson}
+
+DADOS DAS ESCALAS:
+${escalasJson}
+
+INSTRUÇÕES:
+- Responda em português (Brasil)
+- Seja conciso e direto
+- Baseie suas respostas apenas nos dados fornecidos
+- Se não conseguir responder, explique por que
+- Use formatação clara com listas quando apropriado`;
+
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'x-api-key': aiApiKey,
+                        'anthropic-version': '2023-06-01',
+                        'content-type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-3-5-sonnet-20241022',
+                        max_tokens: 1024,
+                        system: systemPrompt,
+                        messages: [
+                            {
+                                role: 'user',
+                                content: question
+                            }
+                        ]
+                    })
+                });
+
+                loadingDiv.remove();
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error?.message || 'Erro ao processar requisição');
+                }
+
+                const data = await response.json();
+                const aiResponse = data.content[0].text;
+
+                // Adicionar resposta da IA
+                const aiResponseDiv = document.createElement('div');
+                aiResponseDiv.className = 'flex gap-3';
+                aiResponseDiv.innerHTML = `<span class="text-2xl">🤖</span><div class="bg-white p-3 rounded-lg rounded-tl-none border border-gray-200">
+                    <p class="text-sm text-gray-800 whitespace-pre-wrap">${escapeHtml(aiResponse)}</p>
+                </div>`;
+                aiMessages.appendChild(aiResponseDiv);
+                aiMessages.scrollTop = aiMessages.scrollHeight;
+
+            } catch (error) {
+                console.error('Erro ao chamar IA:', error);
+                loadingDiv.remove();
+                
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'flex gap-3';
+                errorDiv.innerHTML = `<span class="text-2xl">🤖</span><div class="bg-red-100 p-3 rounded-lg">
+                    <p class="text-sm text-red-800">❌ Erro: ${error.message}</p>
+                </div>`;
+                aiMessages.appendChild(errorDiv);
+                aiMessages.scrollTop = aiMessages.scrollHeight;
+            }
+        }
+
+        // Função para escapar HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Event listener para enviar pergunta
+        document.getElementById('ai-send-btn')?.addEventListener('click', () => {
+            const input = document.getElementById('ai-question-input');
+            const question = input.value.trim();
+            
+            if (!question) return;
+            
+            sendAIQuestion(question);
+            input.value = '';
+            input.focus();
+        });
+
+        // Enviar com Enter
+        document.getElementById('ai-question-input')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('ai-send-btn').click();
+            }
+        });
+
+        // Inicializar status de IA ao carregar
+        updateAIStatus();
+
+        // ========================================
         // SERVICE WORKER (PWA) - HABILITADO
         // ========================================
         if ('serviceWorker' in navigator) {
@@ -11414,6 +11777,7 @@
                     .catch(err => console.log('⚠️ Service Worker não disponível:', err.message));
             });
         }
+        
         
         // Iniciar quando DOM estiver pronto
         if (document.readyState === 'loading') {
