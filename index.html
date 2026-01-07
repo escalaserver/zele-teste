@@ -11530,7 +11530,12 @@
 
         // Abrir modal de IA
         document.getElementById('menu-ai-analysis-btn')?.addEventListener('click', () => {
-            closeMenu();
+            // Fechar menu manualmente
+            const menuOverlay = document.querySelector('.menu-overlay');
+            const menuDrawer = document.querySelector('.menu-drawer');
+            if (menuOverlay) menuOverlay.classList.remove('show');
+            if (menuDrawer) menuDrawer.classList.remove('show');
+            
             updateAIStatus();
             aiModal.classList.remove('hidden');
             aiModal.style.display = 'flex';
