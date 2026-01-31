@@ -1319,6 +1319,7 @@
                         </button>
                         <div class="period-options hidden mt-2 flex gap-2 justify-center" data-day="sunday">
                             <button class="period-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-100 transition" data-period="morning">☀️ Manhã</button>
+                            <button class="period-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-100 transition" data-period="night">🌙 Noite</button>
                         </div>
                     </div>
                 </div>
@@ -4101,13 +4102,20 @@
             }
 
             // Verificar limite de voluntários no time (máximo 4 por time por evento)
-            async function checkTeamLimit(date, time, team) {
+            async function checkTeamLimit(date, time, team, eventValue = null, excludeUserId = null) {
                 try {
                     // Buscar o evento específico
-                    const eventKey = availableDates.find(d => {
-                        const [eventDate, eventTime] = d.value.split('|');
-                        return eventDate === date && eventTime === time;
-                    });
+                    let eventKey;
+                    if (eventValue) {
+                        // Se temos eventValue, usar ele para buscar o evento exato
+                        eventKey = availableDates.find(d => d.value === eventValue);
+                    } else {
+                        // Fallback: buscar por date e time (retrocompatibilidade)
+                        eventKey = availableDates.find(d => {
+                            const [eventDate, eventTime] = d.value.split('|');
+                            return eventDate === date && eventTime === time;
+                        });
+                    }
                     
                     // Obter limite específico do time (novo formato) ou padrão 4
                     let maxVolunteers = 4;
@@ -4119,17 +4127,37 @@
                     }
                     
                     const { collection, query, where, getDocs } = window.firestoreMethods;
-                    const q = query(
-                        collection(window.firebaseDb, 'escalas'),
-                        where('date', '==', date),
-                        where('time', '==', time),
-                        where('team', '==', team)
-                    );
+                    
+                    // Buscar escalas - se temos eventValue, filtrar por ele também
+                    let q;
+                    if (eventValue) {
+                        q = query(
+                            collection(window.firebaseDb, 'escalas'),
+                            where('eventValue', '==', eventValue),
+                            where('team', '==', team),
+                            where('status', 'in', ['approved', 'pending'])
+                        );
+                    } else {
+                        // Fallback: usar date e time (retrocompatibilidade)
+                        q = query(
+                            collection(window.firebaseDb, 'escalas'),
+                            where('date', '==', date),
+                            where('time', '==', time),
+                            where('team', '==', team)
+                        );
+                    }
                     
                     const querySnapshot = await getDocs(q);
-                    const count = querySnapshot.size;
                     
-                    logger.log(`📊 Time ${team} no evento ${date} ${time}: ${count}/${maxVolunteers} voluntários`);
+                    // Filtrar manualmente para excluir o próprio usuário (ao mudar de time)
+                    let count = 0;
+                    querySnapshot.forEach((doc) => {
+                        if (!excludeUserId || doc.data().userId !== excludeUserId) {
+                            count++;
+                        }
+                    });
+                    
+                    logger.log(`📊 Time ${team} no evento ${eventValue || date + ' ' + time}: ${count}/${maxVolunteers} voluntários${excludeUserId ? ' (excluindo usuário atual)' : ''}`);
                     
                     return {
                         count: count,
@@ -4158,8 +4186,12 @@
                     return;
                 }
 
-                // Parsear os dados do culto (formato: "2024-11-20|19:00|Quinta")
-                const [date, time, eventName] = cultoData.split('|');
+                // Parsear os dados do culto (formato: "2024-11-20|19:00|Quinta - Nome Evento")
+                // Extrair as 3 primeiras partes, mantendo o eventName completo
+                const parts = cultoData.split('|');
+                const date = parts[0];
+                const time = parts[1];
+                const eventName = parts.slice(2).join('|'); // Juntar de volta caso tenha mais pipes no nome
 
                 const teamNames = {
                     welcome: '👋 Welcome',
@@ -4213,11 +4245,9 @@
                     console.log('  Está na janela de entrada rápida (2h após início)?', isDuringQuickEntryWindow);
                     console.log('  É pendente (<24h ou Kids)?', isPending);
                     
-                    // Verificar limite de voluntários no time para esta data/hora
-                    const teamLimit = await checkTeamLimit(date, time, team);
-                    
-                    // Verificar se já existe escala deste usuário para esta data e horário
-                    const escalaId = `${currentUser.uid}_${date}_${time}`;
+                    // Verificar se já existe escala deste usuário para este evento específico
+                    // Usar cultoData completo para garantir unicidade entre eventos no mesmo dia/horário
+                    const escalaId = `${currentUser.uid}_${cultoData.replace(/[^a-zA-Z0-9]/g, '_')}`;
                     const { doc, getDoc, setDoc } = window.firestoreMethods;
                     
                     // Buscar escala existente
@@ -4226,7 +4256,27 @@
                     
                     // Se usuário já está escalado neste evento
                     const userAlreadyInEvent = docSnap.exists();
-                    const isChangingTeam = userAlreadyInEvent && docSnap.data().team !== team;
+                    const existingData = userAlreadyInEvent ? docSnap.data() : null;
+                    const existingStatus = existingData?.status || null;
+                    const isChangingTeam = userAlreadyInEvent && existingData.team !== team;
+                    
+                    console.log('🔍 Verificação de escala existente:');
+                    console.log('  Usuário já está no evento?', userAlreadyInEvent);
+                    console.log('  Status existente:', existingStatus);
+                    console.log('  Time existente:', existingData?.team);
+                    console.log('  Novo time:', team);
+                    console.log('  Está mudando de time?', isChangingTeam);
+                    
+                    // Verificar limite de voluntários no time para este evento específico
+                    // Se está mudando de time, excluir a contagem do próprio usuário
+                    const teamLimit = await checkTeamLimit(date, time, team, cultoData, isChangingTeam ? currentUser.uid : null);
+                    
+                    console.log('🔍 Verificação de escala existente:');
+                    console.log('  Usuário já está no evento?', userAlreadyInEvent);
+                    console.log('  Status existente:', existingStatus);
+                    console.log('  Time existente:', existingData?.team);
+                    console.log('  Novo time:', team);
+                    console.log('  Está mudando de time?', isChangingTeam);
                     
                     // Se time está cheio E usuário não está mudando de time (nova entrada)
                     if (teamLimit.isFull && !isChangingTeam) {
@@ -4237,7 +4287,7 @@
                         const eventDisplay = eventName ? ` - ${eventName}` : '';
                         
                         // Criar escala como pendente para aprovação do líder
-                        await saveEscalaToFirestore(escalaId, date, time, team, eventName, false, 'pending');
+                        await saveEscalaToFirestore(escalaId, date, time, team, eventName, cultoData, false, 'pending');
                         
                         // Criar elemento de mensagem com HTML
                         const message = document.createElement('div');
@@ -4268,7 +4318,7 @@
                             if (isPending) {
                                 console.log('⛔ PENDENTE: Salvando como pending (mesmo time, <24h ou Kids)');
                                 // Salvar automaticamente sem botões SIM/NÃO
-                                await saveEscalaToFirestore(escalaId, date, time, team, eventName, true, 'pending');
+                                await saveEscalaToFirestore(escalaId, date, time, team, eventName, cultoData, true, 'pending');
                                 
                                 // Mensagem específica para Kids
                                 if (team === 'kids') {
@@ -4297,7 +4347,7 @@
                                     `Confirmar escala no time ${teamNames[team]}?`,
                                     true,
                                     async () => {
-                                        await saveEscalaToFirestore(escalaId, date, time, team, eventName, true, 'approved');
+                                        await saveEscalaToFirestore(escalaId, date, time, team, eventName, cultoData, true, 'approved');
                                     }
                                 );
                             }
@@ -4306,7 +4356,7 @@
                             if (isPending) {
                                 console.log('⛔ PENDENTE: Salvando como pending (mudança de time, <24h ou Kids)');
                                 // Salvar automaticamente sem botões SIM/NÃO
-                                await saveEscalaToFirestore(escalaId, date, time, team, eventName, false, 'pending');
+                                await saveEscalaToFirestore(escalaId, date, time, team, eventName, cultoData, false, 'pending');
                                 
                                 // Mensagem específica para Kids
                                 if (team === 'kids') {
@@ -4335,7 +4385,7 @@
                                     `Você já escolheu servir no time ${teamNames[existingTeam]}. Deseja confirmar a mudança para o time ${teamNames[team]} nesta escala?`,
                                     true,
                                     async () => {
-                                        await saveEscalaToFirestore(escalaId, date, time, team, eventName, false, 'approved');
+                                        await saveEscalaToFirestore(escalaId, date, time, team, eventName, cultoData, false, 'approved');
                                     }
                                 );
                             }
@@ -4345,7 +4395,7 @@
                         if (isPending) {
                             console.log('⛔ PENDENTE: Salvando nova escala como pending (<24h ou Kids)');
                             // Escala pendente (menos de 24h ou Kids) - salvar automaticamente
-                            await saveEscalaToFirestore(escalaId, date, time, team, eventName, false, 'pending');
+                            await saveEscalaToFirestore(escalaId, date, time, team, eventName, cultoData, false, 'pending');
                             
                             // Mensagem específica para Kids
                             if (team === 'kids') {
@@ -4375,7 +4425,7 @@
                                 `Confirmar escala no time ${teamNames[team]}?`,
                                 true,
                                 async () => {
-                                    await saveEscalaToFirestore(escalaId, date, time, team, eventName, false, 'approved');
+                                    await saveEscalaToFirestore(escalaId, date, time, team, eventName, cultoData, false, 'approved');
                                 }
                             );
                         }
@@ -4388,15 +4438,41 @@
             }
 
             // Função auxiliar para salvar no Firestore
-            async function saveEscalaToFirestore(escalaId, date, time, team, eventName, skipCalendarPrompt, status = 'approved') {
+            async function saveEscalaToFirestore(escalaId, date, time, team, eventName, eventValue, skipCalendarPrompt, status = 'approved') {
                 try {
                     console.log('💾 saveEscalaToFirestore chamada:');
                     console.log('  escalaId:', escalaId);
                     console.log('  status:', status);
                     console.log('  team:', team);
                     console.log('  date/time:', date, time);
+                    console.log('  eventValue:', eventValue);
                     
-                    const { doc, setDoc, Timestamp } = window.firestoreMethods;
+                    // IMPORTANTE: Verificar se já existe outra escala deste usuário neste evento
+                    const { doc, setDoc, Timestamp, collection, query, where, getDocs, deleteDoc } = window.firestoreMethods;
+                    
+                    // Buscar escalas duplicadas (mesmo userId e eventValue, mas IDs diferentes)
+                    const duplicateCheckQuery = query(
+                        collection(window.firebaseDb, 'escalas'),
+                        where('userId', '==', currentUser.uid),
+                        where('eventValue', '==', eventValue)
+                    );
+                    
+                    const duplicateSnapshot = await getDocs(duplicateCheckQuery);
+                    console.log('🔍 Verificação de duplicatas:', duplicateSnapshot.size, 'documentos encontrados');
+                    
+                    // Deletar todas as escalas existentes deste usuário neste evento (exceto a que vamos salvar)
+                    const deletePromises = [];
+                    duplicateSnapshot.forEach((docSnap) => {
+                        if (docSnap.id !== escalaId) {
+                            console.log('🗑️ Deletando escala duplicada:', docSnap.id);
+                            deletePromises.push(deleteDoc(doc(window.firebaseDb, 'escalas', docSnap.id)));
+                        }
+                    });
+                    
+                    if (deletePromises.length > 0) {
+                        await Promise.all(deletePromises);
+                        console.log('✅ Removidas', deletePromises.length, 'escalas duplicadas');
+                    }
                     
                     // Converter date (YYYY-MM-DD) e time (HH:MM) para Timestamp do Firestore
                     const eventDateTime = new Date(`${date}T${time}:00`);
@@ -4410,6 +4486,7 @@
                         time: time,
                         team: team,
                         eventName: eventName || '',
+                        eventValue: eventValue || `${date}|${time}`, // Valor completo do evento para identificação única
                         createdAt: new Date().toISOString(),
                         status: status,
                         requestedTeam: team,
@@ -6425,10 +6502,11 @@
                     availableDates.forEach((date) => {
                         const dateParts = date.value.split('|');
                         events.push({
-                            value: dateParts[0],
-                            time: dateParts[1],
+                            value: date.value, // Usar value completo para unicidade
+                            date: dateParts[0], // Data YYYY-MM-DD
+                            time: dateParts[1], // Horário HH:MM
                             text: date.text,
-                            eventName: dateParts.length > 2 ? dateParts[2] : ''
+                            eventName: dateParts.length > 2 ? dateParts.slice(2).join('|') : ''
                         });
                     });
                     
@@ -6469,9 +6547,9 @@
             }
 
             // Selecionar evento
-            function selectEventForManualScale(eventDate, eventTime) {
+            function selectEventForManualScale(eventValue, eventTime) {
                 try {
-                    const event = manualScaleState.allEvents.find(e => e.value === eventDate && e.time === eventTime);
+                    const event = manualScaleState.allEvents.find(e => e.value === eventValue);
                     
                     console.log('📅 Evento selecionado:', event.text);
                     
@@ -6595,21 +6673,22 @@
                     
                     const { doc, setDoc, Timestamp } = window.firestoreMethods;
                     
-                    // Gerar ID da escala
-                    const escalaId = `${selectedVolunteer.id}_${selectedEvent.value}_${selectedTeam}`;
+                    // Gerar ID da escala usando value completo para unicidade
+                    const escalaId = `${selectedVolunteer.id}_${selectedEvent.value.replace(/[^a-zA-Z0-9]/g, '_')}_${selectedTeam}`;
                     
                     // Converter data/hora para Timestamp
-                    const eventDateTime = new Date(`${selectedEvent.value}T${selectedEvent.time}:00`);
+                    const eventDateTime = new Date(`${selectedEvent.date}T${selectedEvent.time}:00`);
                     
                     // Criar documento da escala
                     const escalaData = {
                         userId: selectedVolunteer.id,
                         userName: selectedVolunteer.name,
                         userEmail: selectedVolunteer.email,
-                        date: selectedEvent.value,
+                        date: selectedEvent.date,
                         time: selectedEvent.time,
                         team: selectedTeam,
                         eventName: selectedEvent.eventName || '',
+                        eventValue: selectedEvent.value, // Valor completo do evento para identificação única
                         status: 'approved', // Escala manual é automaticamente aprovada
                         createdAt: new Date().toISOString(),
                         createdByAdmin: currentUser.uid,
@@ -7166,6 +7245,10 @@
                             const weekdayCapitalized = weekday.charAt(0).toUpperCase() + weekday.slice(1);
                             const newText = `${day}/${month} ${weekdayCapitalized} | ${newEvent} (chegar ${newTime})`;
                             
+                            console.log('✏️ Atualizando evento:');
+                            console.log('  Valor antigo (eventValue):', oldValue);
+                            console.log('  Valor novo (eventValue):', newValue);
+                            
                             // Atualizar no array com novos limites
                             availableDates[index] = {
                                 ...dateToEdit,
@@ -7185,14 +7268,14 @@
                                 lastUpdated: new Date().toISOString()
                             });
                             
-                            // 2. Atualizar todas as escalas desta data
+                            // 2. Atualizar todas as escalas DESTE EVENTO ESPECÍFICO (usando eventValue)
                             const q = query(
                                 collection(window.firebaseDb, 'escalas'),
-                                where('date', '==', oldDate)
+                                where('eventValue', '==', oldValue)
                             );
                             
                             const querySnapshot = await getDocs(q);
-                            console.log('📋 Atualizando escalas:', querySnapshot.size);
+                            console.log('📋 Atualizando escalas deste evento:', querySnapshot.size);
                             
                             const updatePromises = [];
                             querySnapshot.forEach((docSnapshot) => {
@@ -7201,6 +7284,7 @@
                                     date: newDate,
                                     time: newTime,
                                     eventName: newEvent,
+                                    eventValue: newValue, // Atualizar eventValue para o novo valor
                                     culto: newText, // Atualizar campo culto também
                                     updatedAt: new Date().toISOString()
                                 }));
@@ -7245,24 +7329,24 @@
                     }
                     
                     const dateToDelete = availableDates[index];
-                    const dateValue = dateToDelete.value.split('|')[0]; // Extrair apenas a data (YYYY-MM-DD)
+                    const eventValue = dateToDelete.value; // Usar value completo do evento
                     
-                    console.log('🗑️ Data a deletar:', dateToDelete.text);
-                    console.log('🗑️ Valor da data (YYYY-MM-DD):', dateValue);
-                    console.log('🗑️ Deletando data:', dateValue);
+                    console.log('🗑️ Evento a deletar:', dateToDelete.text);
+                    console.log('🗑️ Valor do evento (eventValue):', eventValue);
+                    console.log('🗑️ Deletando evento:', eventValue);
                     
-                    // 1. Buscar todas as escalas desta data
+                    // 1. Buscar todas as escalas DESTE EVENTO ESPECÍFICO (usando eventValue)
                     const { collection, query, where, getDocs, deleteDoc, doc, setDoc, addDoc } = window.firestoreMethods;
                     const q = query(
                         collection(window.firebaseDb, 'escalas'),
-                        where('date', '==', dateValue)
+                        where('eventValue', '==', eventValue)
                     );
                     
                     const querySnapshot = await getDocs(q);
                     console.log('📋 Escalas encontradas para deletar:', querySnapshot.size);
                     
                     if (querySnapshot.size > 0) {
-                        console.log('⚠️ CUIDADO: Deletando', querySnapshot.size, 'escalas da data', dateValue);
+                        console.log('⚠️ CUIDADO: Deletando', querySnapshot.size, 'escalas do evento', eventValue);
                     }
                     
                     // 2. CRIAR BACKUP antes de deletar
@@ -7280,7 +7364,7 @@
                     if (escalasBackup.length > 0) {
                         try {
                             // Salvar backup em coleção separada
-                            const backupId = `backup_${dateValue}_${Date.now()}`;
+                            const backupId = `backup_${eventValue.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}`;
                             await setDoc(doc(window.firebaseDb, 'escalas_backups', backupId), {
                                 backupId: backupId,
                                 dateDeleted: dateValue,
