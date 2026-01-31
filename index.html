@@ -4211,13 +4211,15 @@
 
                     // Verificar se falta menos de 24h para o evento OU se é time KIDS
                     // Permitir inscrição até 2h APÓS o início do evento (para última hora)
-                    const eventDateTime = new Date(`${date}T${time}`);
+                    const eventDateTime = new Date(`${date}T${time}:00`);
                     const eventEndTime = new Date(eventDateTime.getTime() + (2 * 60 * 60 * 1000)); // 2h após início
                     const now = new Date();
                     const hoursUntilEvent = (eventDateTime - now) / (1000 * 60 * 60);
                     const hoursUntilEventEnd = (eventEndTime - now) / (1000 * 60 * 60);
                     
                     console.log('⏰ Verificação 24h (com janela de 2h após início):');
+                    console.log('  CultoData completo:', cultoData);
+                    console.log('  Date:', date, '| Time:', time);
                     console.log('  Data/Hora evento:', eventDateTime);
                     console.log('  Data/Hora fim (evento + 2h):', eventEndTime);
                     console.log('  Data/Hora atual:', now);
@@ -4232,7 +4234,10 @@
                     const isDuringQuickEntryWindow = hoursUntilEvent < 0 && hoursUntilEventEnd > 0; // Evento iniciado, dentro de 2h
                     const isPending = team === 'kids' || ((hoursUntilEvent < 24 && hoursUntilEvent > 0) && !isDuringQuickEntryWindow);
                     console.log('  Está na janela de entrada rápida (2h após início)?', isDuringQuickEntryWindow);
-                    console.log('  É pendente (<24h ou Kids)?', isPending);
+                    console.log('  hoursUntilEvent < 24?', hoursUntilEvent < 24);
+                    console.log('  hoursUntilEvent > 0?', hoursUntilEvent > 0);
+                    console.log('  É time Kids?', team === 'kids');
+                    console.log('  DECISÃO FINAL - É pendente (<24h ou Kids)?', isPending);
                     
                     // Verificar se já existe escala deste usuário para este evento específico
                     // Usar cultoData completo para garantir unicidade entre eventos no mesmo dia/horário
