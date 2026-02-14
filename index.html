@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
@@ -34,58 +34,16 @@
         import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, query, where, getDocs, deleteDoc, orderBy, addDoc, updateDoc, limit, Timestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
         
-                console.log('🔥 Firebase imports carregados - versão com orderBy, addDoc, updateDoc e Storage');
-
-                /*
-                 External volunteers (collection: 'voluntarios')
-
-                 Rationale:
-                 - External volunteers are name-only records used so leaders can add people
-                     who do not (yet) have an auth account. Saving them in a separate
-                     collection avoids write-permission problems on the main 'users' collection.
-
-                 Stored fields (suggested):
-                 - displayName: string
-                 - email: string (optional/empty)
-                 - role: 'external'
-                 - external: true
-                 - createdAt: Timestamp
-
-                 Implementation notes:
-                 - The UI function `addExternalVolunteer(name)` writes to `voluntarios`.
-                 - When loading volunteers the app now merges `users` + `voluntarios`.
-
-                 Example Firestore rules (adjust to your security model):
-
-                 service cloud.firestore {
-                     match /databases/{database}/documents {
-                         match /voluntarios/{volId} {
-                             // Allow read to everyone (or restrict to authenticated users as you prefer)
-                             allow read: if true;
-
-                             // Allow create only for authenticated admins or team leaders
-                             allow create: if request.auth != null &&
-                                 (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'leader']);
-
-                             // Prevent client-side updates/deletes by default
-                             allow update, delete: if false;
-                         }
-                     }
-                 }
-
-                 Notes:
-                 - If you prefer server-side control, implement a Cloud Function to write
-                     to `/voluntarios` and call it from the client.
-                */
-
-                // Your web app's Firebase configuration (ATUALIZADA)
+        console.log('🔥 Firebase imports carregados - versão com orderBy, addDoc, updateDoc e Storage');
+        
+        // Your web app's Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyBlMfqUkpQQrLHD13Hq3UJ43D4N1U1JviE",
-            authDomain: "zele-teste.firebaseapp.com",
-            projectId: "zele-teste",
-            storageBucket: "zele-teste.firebasestorage.app",
-            messagingSenderId: "758471959826",
-            appId: "1:758471959826:web:374288feffb10f31fc7fcb"
+            apiKey: "AIzaSyBGMYUmA0hJs1v2IlU-fdFDucYFp6LZaCg",
+            authDomain: "z-ele-church-escalas.firebaseapp.com",
+            projectId: "z-ele-church-escalas",
+            storageBucket: "z-ele-church-escalas.firebasestorage.app",
+            messagingSenderId: "473523773124",
+            appId: "1:473523773124:web:9c57a51236a5a8fabc3391"
         };
         
         // Initialize Firebase
@@ -272,14 +230,6 @@
         }
         .period-btn:hover {
             transform: scale(1.05);
-        }
-        /* Remover / ocultar Onboarding (oculta o modal e o item de menu) */
-        #onboarding-modal,
-        #onboarding-confirm-modal,
-        #menu-edit-onboarding-btn {
-            display: none !important;
-            visibility: hidden !important;
-            pointer-events: none !important;
         }
     </style>
 </head>
@@ -2164,16 +2114,16 @@
                 const volunteersWithoutEscalas = Math.max(0, totalVolunteers - volunteersWithEscalas);
                 
                 // Atualizar o card com as estatísticas
-                const _statTotalVolunteers = document.getElementById('stat-total-volunteers'); if (_statTotalVolunteers) _statTotalVolunteers.textContent = totalVolunteers;
-                const _statTotalLeaders = document.getElementById('stat-total-leaders'); if (_statTotalLeaders) _statTotalLeaders.textContent = totalLeaders;
-                const _statActiveVolunteers = document.getElementById('stat-active-volunteers'); if (_statActiveVolunteers) _statActiveVolunteers.textContent = activeVolunteers;
-                const _statWithEscalas = document.getElementById('stat-volunteers-with-escalas'); if (_statWithEscalas) _statWithEscalas.textContent = volunteersWithEscalas;
-                const _statWithoutEscalas = document.getElementById('stat-volunteers-without-escalas'); if (_statWithoutEscalas) _statWithoutEscalas.textContent = volunteersWithoutEscalas;
+                document.getElementById('stat-total-volunteers').textContent = totalVolunteers;
+                document.getElementById('stat-total-leaders').textContent = totalLeaders;
+                document.getElementById('stat-active-volunteers').textContent = activeVolunteers;
+                document.getElementById('stat-volunteers-with-escalas').textContent = volunteersWithEscalas;
+                document.getElementById('stat-volunteers-without-escalas').textContent = volunteersWithoutEscalas;
                 
                 // Atualizar timestamp
                 const now_formatted = new Date();
                 const timeStr = now_formatted.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-                const _statUpdateTime = document.getElementById('stat-update-time'); if (_statUpdateTime) _statUpdateTime.textContent = timeStr;
+                document.getElementById('stat-update-time').textContent = timeStr;
                 
                 // Calcular estatísticas de onboarding (disponibilidade por time)
                 await calculateOnboardingStats(usersSnapshot);
@@ -2188,11 +2138,11 @@
                 
             } catch (error) {
                 console.error('❌ Erro ao carregar estatísticas:', error);
-                const __s1 = document.getElementById('stat-total-volunteers'); if (__s1) __s1.textContent = '?';
-                const __s2 = document.getElementById('stat-total-leaders'); if (__s2) __s2.textContent = '?';
-                const __s3 = document.getElementById('stat-active-volunteers'); if (__s3) __s3.textContent = '?';
-                const __s4 = document.getElementById('stat-volunteers-with-escalas'); if (__s4) __s4.textContent = '?';
-                const __s5 = document.getElementById('stat-volunteers-without-escalas'); if (__s5) __s5.textContent = '?';
+                document.getElementById('stat-total-volunteers').textContent = '?';
+                document.getElementById('stat-total-leaders').textContent = '?';
+                document.getElementById('stat-active-volunteers').textContent = '?';
+                document.getElementById('stat-volunteers-with-escalas').textContent = '?';
+                document.getElementById('stat-volunteers-without-escalas').textContent = '?';
             }
         }
 
@@ -3004,8 +2954,8 @@
             function showModal(message, showYesNo = false, onYes = null, isWarning = false, onClose = null, customEmoji = null) {
                 console.log('🔔 showModal chamado:', { showYesNo, hasOnYes: !!onYes, message: message.substring(0, 50) });
                 
-                // Usar innerHTML para suportar formatação HTML (guardado)
-                if (elements.modalMessage) elements.modalMessage.innerHTML = message;
+                // Usar innerHTML para suportar formatação HTML
+                elements.modalMessage.innerHTML = message;
                 
                 // Mudar emoji baseado no tipo de modal
                 const emojiDiv = elements.successModal.querySelector('.mb-4');
@@ -3020,7 +2970,7 @@
                 if (showYesNo && onYes) {
                     console.log('🔔 Modal Sim/Não criado');
                     // Modal com Sim/Não
-                    if (elements.modalButtons) elements.modalButtons.innerHTML = `
+                    elements.modalButtons.innerHTML = `
                         <button id="modal-no-btn" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-6 rounded-lg transition">
                             Não
                         </button>
@@ -3028,37 +2978,35 @@
                             Sim
                         </button>
                     `;
-                    if (document.getElementById('modal-yes-btn')) {
-                        document.getElementById('modal-yes-btn').addEventListener('click', () => {
-                            console.log('🔔 Botão SIM clicado');
-                            closeModal();
-                            onYes();
-                        });
-                    }
-                    if (document.getElementById('modal-no-btn')) {
-                        document.getElementById('modal-no-btn').addEventListener('click', () => {
-                            console.log('🔔 Botão NÃO clicado');
-                            closeModal();
-                            if (onClose) onClose();
-                        });
-                    }
+                    
+                    document.getElementById('modal-yes-btn').addEventListener('click', () => {
+                        console.log('🔔 Botão SIM clicado');
+                        closeModal();
+                        onYes();
+                    });
+                    
+                    document.getElementById('modal-no-btn').addEventListener('click', () => {
+                        console.log('🔔 Botão NÃO clicado');
+                        closeModal();
+                        if (onClose) onClose();
+                    });
                 } else {
                     console.log('🔔 Modal OK criado');
                     // Modal apenas com OK
-                    if (elements.modalButtons) elements.modalButtons.innerHTML = `
+                    elements.modalButtons.innerHTML = `
                         <button id="modal-close-btn" class="flex-1 zele-btn text-white font-bold py-3 px-6 rounded-lg">
                             OK
                         </button>
                     `;
-                    if (document.getElementById('modal-close-btn')) {
-                        document.getElementById('modal-close-btn').addEventListener('click', () => {
-                            console.log('🔔 Botão OK clicado');
-                            closeModal();
-                            if (onClose) onClose();
-                        });
-                    }
+                    
+                    document.getElementById('modal-close-btn').addEventListener('click', () => {
+                        console.log('🔔 Botão OK clicado');
+                        closeModal();
+                        if (onClose) onClose();
+                    });
                 }
-                if (elements.successModal) elements.successModal.classList.add('show');
+                
+                elements.successModal.classList.add('show');
             }
 
             function closeModal() {
@@ -3082,14 +3030,12 @@
                         </div>
                     `;
 
-                    if (elements.modalMessage) elements.modalMessage.innerHTML = `<h3 class="text-lg font-bold mb-4">${title}</h3>${modalHtml}`;
+                    elements.modalMessage.innerHTML = `<h3 class="text-lg font-bold mb-4">${title}</h3>${modalHtml}`;
+                    
+                    const emojiDiv = elements.successModal.querySelector('.mb-4');
+                    emojiDiv.textContent = '📝';
 
-                    if (elements.successModal) {
-                        const emojiDiv = elements.successModal.querySelector('.mb-4');
-                        if (emojiDiv) emojiDiv.textContent = '📝';
-                    }
-
-                    if (elements.modalButtons) elements.modalButtons.innerHTML = `
+                    elements.modalButtons.innerHTML = `
                         <button id="modal-cancel-btn" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-6 rounded-lg transition">
                             Cancelar
                         </button>
@@ -3097,6 +3043,7 @@
                             ${confirmButtonText}
                         </button>
                     `;
+
                     const inputEl = document.getElementById('custom-input');
                     
                     document.getElementById('modal-confirm-btn').addEventListener('click', () => {
@@ -4633,12 +4580,13 @@
                         allEscalas.push({ id: doc.id, ...doc.data() });
                     });
 
-                    // Filtrar apenas eventos futuros (data/hora ainda não chegou)
+                    // Filtrar eventos visíveis (até 2h após início)
                     const now = new Date();
                     
                     const escalas = allEscalas.filter(escala => {
                         const eventDateTime = new Date(escala.date + 'T' + escala.time);
-                        return eventDateTime > now; // Mostra enquanto for futuro
+                        const eventEndTime = new Date(eventDateTime.getTime() + (2 * 60 * 60 * 1000)); // 2h após início
+                        return eventEndTime > now; // Mostra até 2h após início
                     });
 
                     // Ordenar por data e horário (ordem crescente)
@@ -4878,15 +4826,16 @@
                             return date;
                         });
                         
-                        // Filtrar apenas eventos futuros (data/hora ainda não chegou)
+                        // Filtrar apenas eventos futuros (até 1h após o início)
                         const now = new Date();
                         console.log('🔍 DEBUG - Data/hora atual:', now.toISOString());
                         const initialCount = availableDates.length;
                         availableDates = availableDates.filter(d => {
                             const [date, time] = d.value.split('|');
                             const eventDateTime = new Date(date + 'T' + time);
-                            const isVisible = eventDateTime > now; // Visível enquanto for futuro (data/hora ainda não chegou)
-                            console.log(`🔍 DEBUG - Evento: ${d.text} (${d.value}) → ${eventDateTime.toISOString()} → Visível? ${isVisible}`);
+                            const eventEndTime = new Date(eventDateTime.getTime() + (2 * 60 * 60 * 1000)); // 2h após início
+                            const isVisible = eventEndTime > now; // Visível até 2h após início
+                            console.log(`🔍 DEBUG - Evento: ${d.text} (${d.value}) → ${eventDateTime.toISOString()} → Fim janela: ${eventEndTime.toISOString()} → Visível? ${isVisible}`);
                             return isVisible;
                         });
                         
@@ -5145,7 +5094,8 @@
                     availableDates.forEach(dateObj => {
                         const [date, time] = dateObj.value.split('|');
                         const eventDateTime = new Date(date + 'T' + time);
-                        const isVisible = eventDateTime > nowForAvailable; // evento ainda não chegou
+                        const eventEndTime = new Date(eventDateTime.getTime() + (1 * 60 * 60 * 1000));
+                        const isVisible = eventEndTime > nowForAvailable; // segue a regra de 1h após início
                         const key = `${date}_${time}`;
                         if (isVisible && !grouped[key]) {
                             grouped[key] = {
@@ -5161,16 +5111,17 @@
                         }
                     });
 
-                    // Filtrar eventos visíveis (apenas futuros: data/hora ainda não chegou) ANTES de armazenar
+                    // Filtrar eventos visíveis (até 1h após início) ANTES de armazenar
                     const now = new Date();
                     const filteredGrouped = {};
                     
                     Object.keys(grouped).forEach(key => {
                         const data = grouped[key];
                         const eventDateTime = new Date(data.date + 'T' + data.time);
-                        const isVisible = eventDateTime > now; // evento ainda não começou
+                        const eventEndTime = new Date(eventDateTime.getTime() + (1 * 60 * 60 * 1000)); // 1h após início
+                        const isVisible = eventEndTime > now;
                         
-                        // Incluir apenas eventos com data/hora no futuro
+                        // Incluir eventos até 1h após o início
                         if (isVisible) {
                             filteredGrouped[key] = data;
                         }
@@ -6450,13 +6401,10 @@
                     console.log('📋 Carregando voluntários...');
                     
                     const { collection, getDocs } = window.firestoreMethods;
-                    // Buscar usuários (contas reais)
-                    const usersSnapshot = await getDocs(collection(window.firebaseDb, 'users'));
-                    // Buscar voluntários externos (nome-only)
-                    const externalSnapshot = await getDocs(collection(window.firebaseDb, 'voluntarios'));
+                    const querySnapshot = await getDocs(collection(window.firebaseDb, 'users'));
                     
                     const volunteers = [];
-                    usersSnapshot.forEach((doc) => {
+                    querySnapshot.forEach((doc) => {
                         const userData = doc.data();
                         // Incluir todos os usuários (admins, super admins e voluntários)
                         volunteers.push({
@@ -6464,18 +6412,6 @@
                             name: userData.displayName || userData.email,
                             email: userData.email,
                             role: userData.role
-                        });
-                    });
-
-                    // Incluir voluntários externos (não têm conta)
-                    externalSnapshot.forEach((doc) => {
-                        const data = doc.data();
-                        volunteers.push({
-                            id: doc.id,
-                            name: data.displayName || 'Sem nome',
-                            email: data.email || '',
-                            role: data.role || 'external',
-                            external: true
                         });
                     });
                     
@@ -6674,26 +6610,6 @@
                             v.name.toLowerCase().includes(query) || v.email.toLowerCase().includes(query)
                         );
                         displayVolunteersForManualScale(filtered);
-                        // Se não houver resultados e o texto não estiver vazio, oferecer inclusão
-                        const list = document.getElementById('manual-scale-volunteers-list');
-                        if (!list) return;
-                        const rawQuery = e.target.value.trim();
-                        if (rawQuery !== '' && filtered.length === 0) {
-                            // Verificar se já não existe um voluntário com nome igual (case-insensitive)
-                            const exists = manualScaleState.allVolunteers.some(v => v.name.toLowerCase() === rawQuery.toLowerCase());
-                            if (!exists) {
-                                list.innerHTML = `
-                                    <div class="py-2 px-2">
-                                        <p class="text-sm text-gray-600 mb-2">Nenhum voluntário encontrado para "${escapeHtml(rawQuery)}".</p>
-                                        <button id="add-external-volunteer-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg">Incluir Voluntário: ${escapeHtml(rawQuery)}</button>
-                                    </div>
-                                `;
-
-                                document.getElementById('add-external-volunteer-btn')?.addEventListener('click', async () => {
-                                    await addExternalVolunteer(rawQuery);
-                                });
-                            }
-                        }
                     });
                 }
                 
@@ -6726,43 +6642,6 @@
                     confirmBtn.addEventListener('click', async () => {
                         await confirmManualScale();
                     });
-                }
-            }
-
-            // Função para adicionar um voluntário sem conta (nome apenas) na coleção 'users'
-            async function addExternalVolunteer(name) {
-                try {
-                    if (!name || !name.trim()) return;
-                    if (!window.firebaseDb) {
-                        showModal('❌ Firebase não inicializado.');
-                        return;
-                    }
-
-                    const { collection, addDoc, Timestamp } = window.firestoreMethods;
-                    const dataToSave = {
-                        displayName: name.trim(),
-                        email: '',
-                        role: 'external',
-                        external: true,
-                        createdAt: Timestamp ? Timestamp.now() : new Date().toISOString()
-                    };
-
-                    // Gravar em coleção separada para evitar conflitos de permissões com 'users'
-                    const colRef = collection(window.firebaseDb, 'voluntarios');
-                    const docRef = await addDoc(colRef, dataToSave);
-                    showModal(`✅ Voluntário "${escapeHtml(name)}" incluído com sucesso.`);
-
-                    // Atualizar estado local e listar novamente
-                    manualScaleState.allVolunteers.push({ id: docRef.id, name: dataToSave.displayName, email: '', role: 'external' });
-                    manualScaleState.allVolunteers.sort((a, b) => a.name.localeCompare(b.name));
-
-                    // Exibir lista filtrada pelo novo nome e selecionar automaticamente
-                    displayVolunteersForManualScale(manualScaleState.allVolunteers.filter(v => v.name.toLowerCase().includes(name.trim().toLowerCase())));
-                    const added = manualScaleState.allVolunteers.find(v => v.id === docRef.id);
-                    if (added) selectVolunteerForManualScale(added.id);
-                } catch (error) {
-                    console.error('❌ Erro ao incluir voluntário externo:', error);
-                    showModal('❌ Erro ao incluir voluntário. Tente novamente.');
                 }
             }
 
@@ -10047,10 +9926,14 @@
             // Validar se pode continuar
             function validateOnboarding() {
                 const btn = document.getElementById('confirm-onboarding-btn');
-                if (!btn) return; // Onboarding removido/oculto => nada a validar
                 const hasTeam = onboardingData.preferredTeam !== null;
                 const hasAvailability = Object.keys(onboardingData.availability).length > 0;
-                btn.disabled = !(hasTeam && hasAvailability);
+                
+                if (hasTeam && hasAvailability) {
+                    btn.disabled = false;
+                } else {
+                    btn.disabled = true;
+                }
             }
             
             // Carregar dados do onboarding no formulário
@@ -10151,8 +10034,7 @@
 
                     // Mostrar resumo no modal de confirmação
                     showOnboardingSummary();
-                    const _onboardingConfirmModal = document.getElementById('onboarding-confirm-modal');
-                    if (_onboardingConfirmModal) _onboardingConfirmModal.style.display = 'flex';
+                    document.getElementById('onboarding-confirm-modal').style.display = 'flex';
 
                 } catch (error) {
                     console.error('Erro ao carregar dados do onboarding:', error);
@@ -10163,10 +10045,8 @@
             // Abrir modal de confirmação
             document.getElementById('confirm-onboarding-btn')?.addEventListener('click', () => {
                 showOnboardingSummary();
-                const _onboardingModal = document.getElementById('onboarding-modal');
-                if (_onboardingModal) _onboardingModal.style.display = 'none';
-                const _onboardingConfirmModal2 = document.getElementById('onboarding-confirm-modal');
-                if (_onboardingConfirmModal2) _onboardingConfirmModal2.style.display = 'flex';
+                document.getElementById('onboarding-modal').style.display = 'none';
+                document.getElementById('onboarding-confirm-modal').style.display = 'flex';
             });
             
             // Mostrar resumo
@@ -10230,10 +10110,8 @@
             document.getElementById('edit-onboarding-btn')?.addEventListener('click', () => {
                 // Carregar dados atuais no formulário
                 loadOnboardingDataToForm();
-                    const _onboardingConfirmModal3 = document.getElementById('onboarding-confirm-modal');
-                    if (_onboardingConfirmModal3) _onboardingConfirmModal3.style.display = 'none';
-                    const _onboardingModal2 = document.getElementById('onboarding-modal');
-                    if (_onboardingModal2) _onboardingModal2.style.display = 'flex';
+                document.getElementById('onboarding-confirm-modal').style.display = 'none';
+                document.getElementById('onboarding-modal').style.display = 'flex';
             });
             
             // Salvar onboarding (com validações e proteção contra duplo clique)
@@ -11997,3 +11875,4 @@ PERGUNTA DO USUÁRIO: ${question}`;
     </script>
 </body>
 </html>
+
