@@ -1705,6 +1705,50 @@
         </div>
     </div>
 
+    <!-- Modal de Incluir Novo Voluntário -->
+    <div id="add-volunteer-modal" class="modal-overlay">
+        <div class="card-float rounded-2xl p-8 max-w-md w-full mx-4">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold" style="color: #151b29;">➕ Incluir Novo Voluntário</h2>
+                <button id="close-add-volunteer-modal" class="text-gray-600 hover:text-gray-800">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <p class="text-sm text-gray-600 mb-4">
+                Este voluntário será adicionado ao sistema e estará disponível para escalação imediatamente.
+            </p>
+            
+            <div class="mb-4">
+                <label class="block text-left text-sm font-semibold mb-2" style="color: #151b29;">Nome Completo *</label>
+                <input type="text" id="new-volunteer-name" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Ex: João Silva">
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-left text-sm font-semibold mb-2" style="color: #151b29;">Email *</label>
+                <input type="email" id="new-volunteer-email" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Ex: joao@email.com">
+                <p class="text-xs text-gray-500 mt-1">O voluntário receberá um convite para acessar o sistema.</p>
+            </div>
+            
+            <div class="bg-blue-50 p-3 rounded-lg mb-4 border-l-4 border-blue-500">
+                <p class="text-xs text-blue-900">
+                    <strong>Status:</strong> Este voluntário será marcado como "pré-cadastrado" até que faça o primeiro login.
+                </p>
+            </div>
+            
+            <div class="flex gap-3">
+                <button id="cancel-add-volunteer-btn" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition">
+                    Cancelar
+                </button>
+                <button id="confirm-add-volunteer-btn" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition">
+                    ✅ Incluir
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal de Instruções iOS -->
     <div id="ios-install-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
@@ -6365,6 +6409,7 @@
                     
                     // Event listeners
                     setupManualScaleListeners();
+                    setupAddVolunteerModalListeners();
                 } catch (error) {
                     console.error('❌ Erro ao inicializar painel:', error);
                     showModal('❌ Erro ao carregar painel');
@@ -6435,7 +6480,30 @@
                 if (!list) return;
                 
                 if (volunteers.length === 0) {
-                    list.innerHTML = '<p class="text-gray-500 text-center py-8">Nenhum voluntário encontrado</p>';
+                    const searchInput = document.getElementById('manual-scale-volunteer-search');
+                    const searchQuery = searchInput ? searchInput.value.trim() : '';
+                    
+                    if (searchQuery) {
+                        // Mostrar botão para incluir novo voluntário
+                        list.innerHTML = `
+                            <div class="text-center py-8">
+                                <p class="text-gray-500 mb-4">Nenhum voluntário encontrado com "${searchQuery}"</p>
+                                <button id="add-new-volunteer-btn" class="zele-btn text-white font-bold py-3 px-6 rounded-lg">
+                                    ➕ Incluir Novo Voluntário
+                                </button>
+                            </div>
+                        `;
+                        
+                        // Event listener para o botão de incluir
+                        const addBtn = document.getElementById('add-new-volunteer-btn');
+                        if (addBtn) {
+                            addBtn.addEventListener('click', () => {
+                                openAddNewVolunteerModal(searchQuery);
+                            });
+                        }
+                    } else {
+                        list.innerHTML = '<p class="text-gray-500 text-center py-8">Nenhum voluntário encontrado</p>';
+                    }
                     return;
                 }
                 
@@ -6719,6 +6787,190 @@
                 } catch (error) {
                     console.error('❌ Erro ao salvar escala:', error);
                     showModal('❌ Erro ao criar escala: ' + error.message);
+                }
+            }
+
+            // Abrir modal de adicionar novo voluntário
+            function openAddNewVolunteerModal(suggestedName = '') {
+                const modal = document.getElementById('add-volunteer-modal');
+                const nameInput = document.getElementById('new-volunteer-name');
+                const emailInput = document.getElementById('new-volunteer-email');
+                
+                if (!modal || !nameInput || !emailInput) return;
+                
+                // Preencher sugestão de nome se disponível
+                nameInput.value = suggestedName;
+                emailInput.value = '';
+                
+                // Mostrar modal
+                modal.classList.add('show');
+                
+                // Focar no campo apropriado
+                if (suggestedName) {
+                    emailInput.focus();
+                } else {
+                    nameInput.focus();
+                }
+            }
+            
+            // Fechar modal de adicionar voluntário
+            function closeAddNewVolunteerModal() {
+                const modal = document.getElementById('add-volunteer-modal');
+                if (modal) {
+                    modal.classList.remove('show');
+                }
+            }
+            
+            // Salvar novo voluntário no Firestore
+            async function saveNewVolunteer() {
+                try {
+                    const nameInput = document.getElementById('new-volunteer-name');
+                    const emailInput = document.getElementById('new-volunteer-email');
+                    
+                    if (!nameInput || !emailInput) return;
+                    
+                    const name = nameInput.value.trim();
+                    const email = emailInput.value.trim().toLowerCase();
+                    
+                    // Validar campos obrigatórios
+                    if (!name) {
+                        showModal('❌ Por favor, informe o nome do voluntário');
+                        nameInput.focus();
+                        return;
+                    }
+                    
+                    if (!email) {
+                        showModal('❌ Por favor, informe o email do voluntário');
+                        emailInput.focus();
+                        return;
+                    }
+                    
+                    // Validar formato de email
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(email)) {
+                        showModal('❌ Por favor, informe um email válido');
+                        emailInput.focus();
+                        return;
+                    }
+                    
+                    // Verificar se email já existe (buscar todos os usuários e comparar case-insensitive)
+                    const { collection, getDocs, doc: docRef, setDoc } = window.firestoreMethods;
+                    const usersRef = collection(window.firebaseDb, 'users');
+                    const allUsersSnapshot = await getDocs(usersRef);
+                    
+                    // Verificar se já existe um email igual (case-insensitive)
+                    let emailExists = false;
+                    allUsersSnapshot.forEach((doc) => {
+                        const userData = doc.data();
+                        if (userData.email && userData.email.toLowerCase() === email) {
+                            emailExists = true;
+                        }
+                    });
+                    
+                    if (emailExists) {
+                        showModal('❌ Já existe um voluntário cadastrado com este email');
+                        emailInput.focus();
+                        return;
+                    }
+                    
+                    console.log('💾 Salvando novo voluntário...');
+                    
+                    // Verificar se currentUser está disponível
+                    if (!currentUser || !currentUser.uid) {
+                        showModal('❌ Erro: sessão de usuário não encontrada. Por favor, faça login novamente.');
+                        return;
+                    }
+                    
+                    // Gerar ID único para o voluntário usando Firestore auto-generated ID
+                    const { collection, doc: docFunction, setDoc } = window.firestoreMethods;
+                    const newVolunteerRef = docFunction(collection(window.firebaseDb, 'users'));
+                    const volunteerId = newVolunteerRef.id;
+                    
+                    // Criar documento do voluntário
+                    const volunteerData = {
+                        displayName: name,
+                        email: email,
+                        role: 'volunteer',
+                        status: 'pre_registered', // Status especial para voluntários pré-cadastrados
+                        createdAt: new Date().toISOString(),
+                        createdBy: currentUser.uid,
+                        createdByEmail: currentUser.email,
+                        createdByName: currentUser.displayName
+                    };
+                    
+                    // Salvar no Firestore
+                    await setDoc(docFunction(window.firebaseDb, 'users', volunteerId), volunteerData);
+                    
+                    console.log('✅ Novo voluntário salvo com sucesso!');
+                    
+                    // Log de auditoria
+                    await logAudit('NEW_VOLUNTEER_ADDED', {
+                        volunteerName: name,
+                        volunteerEmail: email,
+                        volunteerId: volunteerId,
+                        addedBy: currentUser.displayName
+                    });
+                    
+                    // Fechar modal
+                    closeAddNewVolunteerModal();
+                    
+                    // Mostrar mensagem de sucesso
+                    showModal(
+                        `✅ Voluntário incluído com sucesso!<br><br><strong>${name}</strong> foi adicionado ao sistema e já pode ser escalado.`,
+                        false,
+                        null,
+                        false,
+                        async () => {
+                            // Recarregar lista de voluntários
+                            await loadVolunteersForManualScale();
+                            
+                            // Selecionar automaticamente o voluntário recém-criado
+                            selectVolunteerForManualScale(volunteerId);
+                        }
+                    );
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao salvar voluntário:', error);
+                    showModal('❌ Erro ao incluir voluntário: ' + error.message);
+                }
+            }
+            
+            // Setup dos event listeners para o modal de adicionar voluntário
+            function setupAddVolunteerModalListeners() {
+                const closeBtn = document.getElementById('close-add-volunteer-modal');
+                const cancelBtn = document.getElementById('cancel-add-volunteer-btn');
+                const confirmBtn = document.getElementById('confirm-add-volunteer-btn');
+                const modal = document.getElementById('add-volunteer-modal');
+                
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', closeAddNewVolunteerModal);
+                }
+                
+                if (cancelBtn) {
+                    cancelBtn.addEventListener('click', closeAddNewVolunteerModal);
+                }
+                
+                if (confirmBtn) {
+                    confirmBtn.addEventListener('click', saveNewVolunteer);
+                }
+                
+                // Fechar modal ao clicar fora
+                if (modal) {
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) {
+                            closeAddNewVolunteerModal();
+                        }
+                    });
+                }
+                
+                // Permitir Enter no email para salvar
+                const emailInput = document.getElementById('new-volunteer-email');
+                if (emailInput) {
+                    emailInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            saveNewVolunteer();
+                        }
+                    });
                 }
             }
 
@@ -10550,9 +10802,10 @@
                     setupInstallButton();
                     
                     // 4. Verificar onboarding (pode ser feito depois)
-                    setTimeout(async () => {
-                        await checkOnboarding(user);
-                    }, 500);
+                    // DISABLED: Modal de onboarding desabilitado
+                    // setTimeout(async () => {
+                    //     await checkOnboarding(user);
+                    // }, 500);
                     
                     // 5. Verificar check-in de voluntários (para líderes)
                     setTimeout(async () => {
