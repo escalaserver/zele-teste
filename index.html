@@ -34,9 +34,51 @@
         import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, query, where, getDocs, deleteDoc, orderBy, addDoc, updateDoc, limit, Timestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
         
-        console.log('🔥 Firebase imports carregados - versão com orderBy, addDoc, updateDoc e Storage');
-        
-        // Your web app's Firebase configuration (ATUALIZADA)
+                console.log('🔥 Firebase imports carregados - versão com orderBy, addDoc, updateDoc e Storage');
+
+                /*
+                 External volunteers (collection: 'voluntarios')
+
+                 Rationale:
+                 - External volunteers are name-only records used so leaders can add people
+                     who do not (yet) have an auth account. Saving them in a separate
+                     collection avoids write-permission problems on the main 'users' collection.
+
+                 Stored fields (suggested):
+                 - displayName: string
+                 - email: string (optional/empty)
+                 - role: 'external'
+                 - external: true
+                 - createdAt: Timestamp
+
+                 Implementation notes:
+                 - The UI function `addExternalVolunteer(name)` writes to `voluntarios`.
+                 - When loading volunteers the app now merges `users` + `voluntarios`.
+
+                 Example Firestore rules (adjust to your security model):
+
+                 service cloud.firestore {
+                     match /databases/{database}/documents {
+                         match /voluntarios/{volId} {
+                             // Allow read to everyone (or restrict to authenticated users as you prefer)
+                             allow read: if true;
+
+                             // Allow create only for authenticated admins or team leaders
+                             allow create: if request.auth != null &&
+                                 (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'leader']);
+
+                             // Prevent client-side updates/deletes by default
+                             allow update, delete: if false;
+                         }
+                     }
+                 }
+
+                 Notes:
+                 - If you prefer server-side control, implement a Cloud Function to write
+                     to `/voluntarios` and call it from the client.
+                */
+
+                // Your web app's Firebase configuration (ATUALIZADA)
         const firebaseConfig = {
             apiKey: "AIzaSyBlMfqUkpQQrLHD13Hq3UJ43D4N1U1JviE",
             authDomain: "zele-teste.firebaseapp.com",
@@ -6412,10 +6454,13 @@
                     console.log('📋 Carregando voluntários...');
                     
                     const { collection, getDocs } = window.firestoreMethods;
-                    const querySnapshot = await getDocs(collection(window.firebaseDb, 'users'));
+                    // Buscar usuários (contas reais)
+                    const usersSnapshot = await getDocs(collection(window.firebaseDb, 'users'));
+                    // Buscar voluntários externos (nome-only)
+                    const externalSnapshot = await getDocs(collection(window.firebaseDb, 'voluntarios'));
                     
                     const volunteers = [];
-                    querySnapshot.forEach((doc) => {
+                    usersSnapshot.forEach((doc) => {
                         const userData = doc.data();
                         // Incluir todos os usuários (admins, super admins e voluntários)
                         volunteers.push({
@@ -6423,6 +6468,18 @@
                             name: userData.displayName || userData.email,
                             email: userData.email,
                             role: userData.role
+                        });
+                    });
+
+                    // Incluir voluntários externos (não têm conta)
+                    externalSnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        volunteers.push({
+                            id: doc.id,
+                            name: data.displayName || 'Sem nome',
+                            email: data.email || '',
+                            role: data.role || 'external',
+                            external: true
                         });
                     });
                     
@@ -6694,7 +6751,8 @@
                         createdAt: Timestamp ? Timestamp.now() : new Date().toISOString()
                     };
 
-                    const colRef = collection(window.firebaseDb, 'users');
+                    // Gravar em coleção separada para evitar conflitos de permissões com 'users'
+                    const colRef = collection(window.firebaseDb, 'voluntarios');
                     const docRef = await addDoc(colRef, dataToSave);
                     showModal(`✅ Voluntário "${escapeHtml(name)}" incluído com sucesso.`);
 
