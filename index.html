@@ -36,7 +36,7 @@
         
         console.log('🔥 Firebase imports carregados - versão com orderBy, addDoc, updateDoc e Storage');
         
-        // Your web app's Firebase configuration
+        // Your web app's Firebase configuration (ATUALIZADA)
         const firebaseConfig = {
             apiKey: "AIzaSyBlMfqUkpQQrLHD13Hq3UJ43D4N1U1JviE",
             authDomain: "zele-teste.firebaseapp.com",
@@ -230,6 +230,14 @@
         }
         .period-btn:hover {
             transform: scale(1.05);
+        }
+        /* Remover / ocultar Onboarding (oculta o modal e o item de menu) */
+        #onboarding-modal,
+        #onboarding-confirm-modal,
+        #menu-edit-onboarding-btn {
+            display: none !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
         }
     </style>
 </head>
@@ -4218,8 +4226,6 @@
                     const hoursUntilEventEnd = (eventEndTime - now) / (1000 * 60 * 60);
                     
                     console.log('⏰ Verificação 24h (com janela de 2h após início):');
-                    console.log('  CultoData completo:', cultoData);
-                    console.log('  Date:', date, '| Time:', time);
                     console.log('  Data/Hora evento:', eventDateTime);
                     console.log('  Data/Hora fim (evento + 2h):', eventEndTime);
                     console.log('  Data/Hora atual:', now);
@@ -4234,10 +4240,7 @@
                     const isDuringQuickEntryWindow = hoursUntilEvent < 0 && hoursUntilEventEnd > 0; // Evento iniciado, dentro de 2h
                     const isPending = team === 'kids' || ((hoursUntilEvent < 24 && hoursUntilEvent > 0) && !isDuringQuickEntryWindow);
                     console.log('  Está na janela de entrada rápida (2h após início)?', isDuringQuickEntryWindow);
-                    console.log('  hoursUntilEvent < 24?', hoursUntilEvent < 24);
-                    console.log('  hoursUntilEvent > 0?', hoursUntilEvent > 0);
-                    console.log('  É time Kids?', team === 'kids');
-                    console.log('  DECISÃO FINAL - É pendente (<24h ou Kids)?', isPending);
+                    console.log('  É pendente (<24h ou Kids)?', isPending);
                     
                     // Verificar se já existe escala deste usuário para este evento específico
                     // Usar cultoData completo para garantir unicidade entre eventos no mesmo dia/horário
@@ -6615,6 +6618,26 @@
                             v.name.toLowerCase().includes(query) || v.email.toLowerCase().includes(query)
                         );
                         displayVolunteersForManualScale(filtered);
+                        // Se não houver resultados e o texto não estiver vazio, oferecer inclusão
+                        const list = document.getElementById('manual-scale-volunteers-list');
+                        if (!list) return;
+                        const rawQuery = e.target.value.trim();
+                        if (rawQuery !== '' && filtered.length === 0) {
+                            // Verificar se já não existe um voluntário com nome igual (case-insensitive)
+                            const exists = manualScaleState.allVolunteers.some(v => v.name.toLowerCase() === rawQuery.toLowerCase());
+                            if (!exists) {
+                                list.innerHTML = `
+                                    <div class="py-2 px-2">
+                                        <p class="text-sm text-gray-600 mb-2">Nenhum voluntário encontrado para "${escapeHtml(rawQuery)}".</p>
+                                        <button id="add-external-volunteer-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg">Incluir Voluntário: ${escapeHtml(rawQuery)}</button>
+                                    </div>
+                                `;
+
+                                document.getElementById('add-external-volunteer-btn')?.addEventListener('click', async () => {
+                                    await addExternalVolunteer(rawQuery);
+                                });
+                            }
+                        }
                     });
                 }
                 
@@ -6647,6 +6670,42 @@
                     confirmBtn.addEventListener('click', async () => {
                         await confirmManualScale();
                     });
+                }
+            }
+
+            // Função para adicionar um voluntário sem conta (nome apenas) na coleção 'users'
+            async function addExternalVolunteer(name) {
+                try {
+                    if (!name || !name.trim()) return;
+                    if (!window.firebaseDb) {
+                        showModal('❌ Firebase não inicializado.');
+                        return;
+                    }
+
+                    const { collection, addDoc, Timestamp } = window.firestoreMethods;
+                    const dataToSave = {
+                        displayName: name.trim(),
+                        email: '',
+                        role: 'external',
+                        external: true,
+                        createdAt: Timestamp ? Timestamp.now() : new Date().toISOString()
+                    };
+
+                    const colRef = collection(window.firebaseDb, 'users');
+                    const docRef = await addDoc(colRef, dataToSave);
+                    showModal(`✅ Voluntário "${escapeHtml(name)}" incluído com sucesso.`);
+
+                    // Atualizar estado local e listar novamente
+                    manualScaleState.allVolunteers.push({ id: docRef.id, name: dataToSave.displayName, email: '', role: 'external' });
+                    manualScaleState.allVolunteers.sort((a, b) => a.name.localeCompare(b.name));
+
+                    // Exibir lista filtrada pelo novo nome e selecionar automaticamente
+                    displayVolunteersForManualScale(manualScaleState.allVolunteers.filter(v => v.name.toLowerCase().includes(name.trim().toLowerCase())));
+                    const added = manualScaleState.allVolunteers.find(v => v.id === docRef.id);
+                    if (added) selectVolunteerForManualScale(added.id);
+                } catch (error) {
+                    console.error('❌ Erro ao incluir voluntário externo:', error);
+                    showModal('❌ Erro ao incluir voluntário. Tente novamente.');
                 }
             }
 
@@ -9931,14 +9990,10 @@
             // Validar se pode continuar
             function validateOnboarding() {
                 const btn = document.getElementById('confirm-onboarding-btn');
+                if (!btn) return; // Onboarding removido/oculto => nada a validar
                 const hasTeam = onboardingData.preferredTeam !== null;
                 const hasAvailability = Object.keys(onboardingData.availability).length > 0;
-                
-                if (hasTeam && hasAvailability) {
-                    btn.disabled = false;
-                } else {
-                    btn.disabled = true;
-                }
+                btn.disabled = !(hasTeam && hasAvailability);
             }
             
             // Carregar dados do onboarding no formulário
@@ -10039,7 +10094,7 @@
 
                     // Mostrar resumo no modal de confirmação
                     showOnboardingSummary();
-                    document.getElementById('onboarding-confirm-modal').style.display = 'flex';
+                    document.getElementById('onboarding-confirm-modal')?.style.display = 'flex';
 
                 } catch (error) {
                     console.error('Erro ao carregar dados do onboarding:', error);
@@ -10050,8 +10105,8 @@
             // Abrir modal de confirmação
             document.getElementById('confirm-onboarding-btn')?.addEventListener('click', () => {
                 showOnboardingSummary();
-                document.getElementById('onboarding-modal').style.display = 'none';
-                document.getElementById('onboarding-confirm-modal').style.display = 'flex';
+                document.getElementById('onboarding-modal')?.style.display = 'none';
+                document.getElementById('onboarding-confirm-modal')?.style.display = 'flex';
             });
             
             // Mostrar resumo
@@ -10115,8 +10170,8 @@
             document.getElementById('edit-onboarding-btn')?.addEventListener('click', () => {
                 // Carregar dados atuais no formulário
                 loadOnboardingDataToForm();
-                document.getElementById('onboarding-confirm-modal').style.display = 'none';
-                document.getElementById('onboarding-modal').style.display = 'flex';
+                    document.getElementById('onboarding-confirm-modal')?.style.display = 'none';
+                    document.getElementById('onboarding-modal')?.style.display = 'flex';
             });
             
             // Salvar onboarding (com validações e proteção contra duplo clique)
