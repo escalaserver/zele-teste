@@ -1845,14 +1845,20 @@
             </div>
             
             <div class="mb-4">
-                <label class="block text-left text-sm font-semibold mb-2" style="color: #151b29;">Email *</label>
-                <input type="email" id="new-volunteer-email" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Ex: joao@email.com">
-                <p class="text-xs text-gray-500 mt-1">O voluntário receberá um convite para acessar o sistema.</p>
+                <label class="block text-left text-sm font-semibold mb-2" style="color: #151b29;">
+                    Email 
+                    <span style="color: #999; font-size: 0.9em;">(opcional)</span>
+                </label>
+                <input type="email" id="new-volunteer-email" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Deixe vazio se o voluntário não for acessar o app">
+                <p class="text-xs text-gray-500 mt-1">
+                    💡 Se não informar email, você gerenciará a escala deste voluntário manualmente
+                </p>
             </div>
             
             <div class="bg-blue-50 p-3 rounded-lg mb-4 border-l-4 border-blue-500">
                 <p class="text-xs text-blue-900">
-                    <strong>Status:</strong> Este voluntário será marcado como "pré-cadastrado" até que faça o primeiro login.
+                    <strong>📋 Status:</strong> Voluntários com email serão marcados como "pré-cadastrado" até que façam o primeiro login. 
+                    Voluntários sem email só poderão ser escalados manualmente pelo administrador.
                 </p>
             </div>
             
@@ -2861,6 +2867,246 @@
                 console.error('❌ Modal não encontrado');
             }
         }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // FUNÇÃO DE DIAGNÓSTICO DO FIREBASE - DISPONÍVEL GLOBALMENTE
+        // ═══════════════════════════════════════════════════════════════════
+        function diagnosticarFirebase() {
+            console.clear();
+            console.log('═══════════════════════════════════════════');
+            console.log('🔬 DIAGNÓSTICO COMPLETO DO FIREBASE');
+            console.log('═══════════════════════════════════════════');
+            console.log('');
+            
+            // Informações do ambiente
+            console.group('🌐 AMBIENTE');
+            console.log('URL completa:', window.location.href);
+            console.log('Hostname:', window.location.hostname);
+            console.log('Protocol:', window.location.protocol);
+            console.log('Port:', window.location.port || 'padrão (80/443)');
+            console.log('Pathname:', window.location.pathname);
+            console.log('Origin:', window.location.origin);
+            console.groupEnd();
+            console.log('');
+            
+            // Informações do navegador
+            console.group('🖥️ NAVEGADOR');
+            console.log('User Agent:', navigator.userAgent);
+            console.log('Plataforma:', navigator.platform);
+            console.log('Cookies habilitados:', navigator.cookieEnabled ? '✅ Sim' : '❌ Não');
+            console.log('Online:', navigator.onLine ? '✅ Sim' : '❌ Não');
+            console.log('Idioma:', navigator.language);
+            console.log('Largura da tela:', window.screen.width + 'x' + window.screen.height);
+            console.groupEnd();
+            console.log('');
+            
+            // Configuração do Firebase
+            console.group('🔥 FIREBASE CONFIG');
+            try {
+                const auth = window.firebaseAuth;
+                if (auth && auth.app && auth.app.options) {
+                    const config = auth.app.options;
+                    console.log('✅ Firebase inicializado');
+                    console.log('Project ID:', config.projectId);
+                    console.log('Auth Domain:', config.authDomain);
+                    console.log('API Key:', config.apiKey ? '✅ Configurado (' + config.apiKey.substring(0, 10) + '...)' : '❌ Não configurado');
+                    console.log('Storage Bucket:', config.storageBucket || 'Não configurado');
+                    console.log('Messaging Sender ID:', config.messagingSenderId || 'Não configurado');
+                    console.log('App ID:', config.appId ? '✅ Configurado' : '❌ Não configurado');
+                } else {
+                    console.error('❌ Firebase não inicializado corretamente');
+                }
+            } catch (error) {
+                console.error('❌ Erro ao acessar Firebase config:', error.message);
+            }
+            console.groupEnd();
+            console.log('');
+            
+            // Estado de autenticação
+            console.group('🔐 AUTENTICAÇÃO');
+            try {
+                const auth = window.firebaseAuth;
+                const currentUser = auth?.currentUser;
+                
+                if (currentUser) {
+                    console.log('Status: ✅ LOGADO');
+                    console.log('');
+                    console.log('Informações do Usuário:');
+                    console.log('  👤 Nome:', currentUser.displayName || 'Não informado');
+                    console.log('  📧 Email:', currentUser.email || 'Não informado');
+                    console.log('  🆔 UID:', currentUser.uid);
+                    console.log('  📱 Telefone:', currentUser.phoneNumber || 'Não informado');
+                    console.log('  📸 Foto:', currentUser.photoURL ? '✅ Tem foto' : '❌ Sem foto');
+                    console.log('  ✅ Email verificado:', currentUser.emailVerified ? '✅ Sim' : '❌ Não');
+                    console.log('  🔐 Provider(s):', currentUser.providerData.map(p => p.providerId).join(', '));
+                    console.log('  📅 Criado em:', new Date(currentUser.metadata.creationTime).toLocaleString('pt-BR'));
+                    console.log('  🕒 Último login:', new Date(currentUser.metadata.lastSignInTime).toLocaleString('pt-BR'));
+                } else {
+                    console.log('Status: ❌ DESLOGADO');
+                    console.log('💡 Usuário precisa fazer login');
+                }
+                
+                console.log('');
+                console.log('Configuração do Auth:');
+                console.log('  Language Code:', auth?.languageCode || 'padrão (en)');
+                console.log('  Settings:', auth?.settings || 'padrão');
+                
+            } catch (error) {
+                console.error('❌ Erro ao verificar autenticação:', error.message);
+            }
+            console.groupEnd();
+            console.log('');
+            
+            // Verificar domínios autorizados
+            console.group('🌍 VERIFICAÇÃO DE DOMÍNIOS');
+            const hostname = window.location.hostname;
+            console.log('Domínio atual:', hostname);
+            console.log('');
+            
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                console.log('✅ Você está em localhost - certifique-se de que "localhost" está nos domínios autorizados');
+            } else {
+                console.log('📍 Você está em ambiente de produção');
+            }
+            
+            console.log('');
+            console.log('✅ Domínios que DEVEM estar autorizados no Firebase:');
+            console.log('   - localhost (para desenvolvimento)');
+            console.log('   - ' + hostname + ' (domínio atual)');
+            console.log('');
+            console.log('📋 Para verificar/adicionar domínios autorizados:');
+            
+            try {
+                const projectId = window.firebaseAuth?.app?.options?.projectId;
+                if (projectId) {
+                    const consoleUrl = 'https://console.firebase.google.com/project/' + projectId + '/authentication/settings';
+                    console.log('   ' + consoleUrl);
+                } else {
+                    console.log('   https://console.firebase.google.com (navegue até seu projeto)');
+                }
+            } catch (error) {
+                console.log('   https://console.firebase.google.com (navegue até seu projeto)');
+            }
+            
+            console.log('');
+            console.log('⚙️ No Firebase Console:');
+            console.log('   1. Clique em "Authentication"');
+            console.log('   2. Vá em "Settings" ou "Configurações"');
+            console.log('   3. Role até "Authorized domains" ou "Domínios autorizados"');
+            console.log('   4. Clique em "Add domain" ou "Adicionar domínio"');
+            console.log('   5. Adicione: ' + hostname);
+            console.groupEnd();
+            console.log('');
+            
+            // Verificar providers habilitados
+            console.group('🔑 PROVIDERS DE AUTENTICAÇÃO');
+            console.log('Para verificar quais providers estão habilitados:');
+            try {
+                const projectId = window.firebaseAuth?.app?.options?.projectId;
+                if (projectId) {
+                    const providersUrl = 'https://console.firebase.google.com/project/' + projectId + '/authentication/providers';
+                    console.log('   ' + providersUrl);
+                } else {
+                    console.log('   Acesse Firebase Console → Authentication → Sign-in method');
+                }
+            } catch (error) {
+                console.log('   Acesse Firebase Console → Authentication → Sign-in method');
+            }
+            console.log('');
+            console.log('✅ Certifique-se de que os seguintes providers estão HABILITADOS:');
+            console.log('   - Email/Password (se usar login por email)');
+            console.log('   - Google (se usar login com Google)');
+            console.groupEnd();
+            console.log('');
+            
+            // Testes de conectividade
+            console.group('🔌 CONECTIVIDADE');
+            console.log('Testando conexão com Firebase...');
+            
+            // Verificar se consegue acessar Firestore
+            try {
+                const db = window.firebaseDb;
+                if (db) {
+                    console.log('✅ Firestore inicializado');
+                } else {
+                    console.error('❌ Firestore não disponível');
+                }
+            } catch (error) {
+                console.error('❌ Erro ao acessar Firestore:', error.message);
+            }
+            
+            // Verificar se consegue acessar Auth
+            try {
+                const auth = window.firebaseAuth;
+                if (auth) {
+                    console.log('✅ Auth inicializado');
+                } else {
+                    console.error('❌ Auth não disponível');
+                }
+            } catch (error) {
+                console.error('❌ Erro ao acessar Auth:', error.message);
+            }
+            
+            console.groupEnd();
+            console.log('');
+            
+            // Resumo e próximos passos
+            console.group('📝 RESUMO E PRÓXIMOS PASSOS');
+            
+            const currentUser = window.firebaseAuth?.currentUser;
+            const hostname2 = window.location.hostname;
+            
+            if (currentUser) {
+                console.log('✅ Tudo OK! Você está logado como:', currentUser.displayName || currentUser.email);
+            } else {
+                console.log('ℹ️ Você não está logado');
+                console.log('');
+                console.log('Para fazer login:');
+                console.log('1. Certifique-se de que o domínio "' + hostname2 + '" está autorizado no Firebase');
+                console.log('2. Certifique-se de que o provider (Google/Email) está habilitado');
+                console.log('3. Tente fazer login novamente');
+                console.log('');
+                console.log('Se o erro persistir:');
+                console.log('- Limpe o cache do navegador (Ctrl+Shift+Delete)');
+                console.log('- Tente em modo anônimo/privado');
+                console.log('- Tente em outro navegador');
+                console.log('- Verifique se cookies de terceiros estão habilitados');
+            }
+            
+            console.groupEnd();
+            console.log('');
+            console.log('═══════════════════════════════════════════');
+            console.log('✅ Diagnóstico completo!');
+            console.log('═══════════════════════════════════════════');
+            
+            // Mostrar alert com resumo
+            let alertMessage = '✅ Diagnóstico Completo!\n\n';
+            alertMessage += '📊 RESUMO:\n';
+            alertMessage += '━━━━━━━━━━━━━━━━━━\n';
+            alertMessage += '🌐 URL: ' + window.location.hostname + '\n';
+            alertMessage += '🔥 Firebase: ' + (window.firebaseAuth ? '✅ OK' : '❌ Erro') + '\n';
+            alertMessage += '🔐 Status: ' + (currentUser ? '✅ Logado (' + (currentUser.displayName || currentUser.email) + ')' : '❌ Deslogado') + '\n';
+            alertMessage += '🍪 Cookies: ' + (navigator.cookieEnabled ? '✅ Habilitados' : '❌ Desabilitados') + '\n';
+            alertMessage += '\n📋 Verifique o CONSOLE para detalhes completos!\n';
+            alertMessage += '\n💡 Pressione F12 para abrir o console';
+            
+            alert(alertMessage);
+        }
+
+        // Tornar a função disponível globalmente
+        window.diagnosticarFirebase = diagnosticarFirebase;
+
+        console.log('✅ Função diagnosticarFirebase() carregada e disponível');
+
+        // Adicionar listener para Ctrl+Shift+D
+        document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey && event.shiftKey && event.key === 'D') {
+                event.preventDefault();
+                diagnosticarFirebase();
+            }
+        });
+
+        console.log('💡 Dica: Pressione Ctrl+Shift+D para diagnóstico rápido');
 
         // ========================================
         // 🚀 INICIALIZAÇÃO DO APP - v2.4.0
@@ -4012,81 +4258,6 @@
                         throw popupError;
                     }
                 }
-            }
-
-            // ═══════════════════════════════════════════════════════════════════
-            // FUNÇÃO DE DIAGNÓSTICO DO FIREBASE (TEMPORÁRIA PARA DEBUG)
-            // ═══════════════════════════════════════════════════════════════════
-            function diagnosticarFirebase() {
-                console.clear(); // Clear console for clean diagnostic output
-                console.log('═══════════════════════════════════════════');
-                console.log('🔬 DIAGNÓSTICO COMPLETO DO FIREBASE');
-                console.log('═══════════════════════════════════════════');
-                console.log('');
-                
-                // Informações do ambiente
-                console.group('🌐 AMBIENTE');
-                console.log('URL:', window.location.href);
-                console.log('Hostname:', window.location.hostname);
-                console.log('Protocol:', window.location.protocol);
-                console.log('Port:', window.location.port || 'padrão');
-                console.log('Pathname:', window.location.pathname);
-                console.groupEnd();
-                console.log('');
-                
-                // Informações do navegador
-                console.group('🖥️ NAVEGADOR');
-                console.log('User Agent:', navigator.userAgent);
-                console.log('Cookies habilitados:', navigator.cookieEnabled);
-                console.log('Online:', navigator.onLine);
-                console.log('Idioma:', navigator.language);
-                console.groupEnd();
-                console.log('');
-                
-                // Configuração do Firebase
-                console.group('🔥 FIREBASE CONFIG');
-                const auth = window.firebaseAuth;
-                if (auth && auth.app && auth.app.options) {
-                    const config = auth.app.options;
-                    console.log('Project ID:', config.projectId);
-                    console.log('Auth Domain:', config.authDomain);
-                    console.log('API Key:', config.apiKey ? '✅ Configurado' : '❌ Não configurado');
-                } else {
-                    console.log('❌ Firebase não inicializado corretamente');
-                }
-                console.groupEnd();
-                console.log('');
-                
-                // Estado de autenticação
-                console.group('🔐 AUTENTICAÇÃO');
-                const currentUser = window.firebaseAuth?.currentUser;
-                if (currentUser) {
-                    console.log('Status: ✅ LOGADO');
-                    console.log('Usuário:', currentUser.displayName);
-                    console.log('Email:', currentUser.email);
-                } else {
-                    console.log('Status: ❌ DESLOGADO');
-                }
-                console.groupEnd();
-                console.log('');
-                
-                // Verificar domínios autorizados
-                console.group('🌍 VERIFICAÇÃO DE DOMÍNIOS');
-                console.log('Domínio atual:', window.location.hostname);
-                console.log('');
-                console.log('✅ Domínios que DEVEM estar autorizados no Firebase:');
-                console.log('   - localhost');
-                console.log('   - ' + window.location.hostname);
-                console.log('');
-                console.log('📋 Para verificar/adicionar:');
-                const projectId = window.firebaseAuth?.app?.options?.projectId || 'zele-teste';
-                console.log('   https://console.firebase.google.com/project/' + projectId + '/authentication/settings');
-                console.groupEnd();
-                console.log('');
-                
-                console.log('═══════════════════════════════════════════');
-                
-                alert('✅ Diagnóstico completo!\n\nVerifique o console para detalhes.');
             }
 
             // Logout
@@ -7113,29 +7284,51 @@
                     const name = nameInput.value.trim();
                     const email = emailInput.value.trim().toLowerCase();
                     
-                    // Validar campos obrigatórios
+                    // Validar campos obrigatórios - apenas nome é obrigatório
                     if (!name) {
                         showModal('❌ Por favor, informe o nome do voluntário');
                         nameInput.focus();
                         return;
                     }
                     
-                    if (!email) {
-                        showModal('❌ Por favor, informe o email do voluntário');
-                        emailInput.focus();
-                        return;
+                    // Se email foi fornecido, validar formato
+                    if (email && email !== '') {
+                        // Validar formato de email
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!emailRegex.test(email)) {
+                            showModal('❌ Email inválido. Por favor, corrija ou deixe em branco.');
+                            emailInput.focus();
+                            return;
+                        }
                     }
                     
-                    // Validar formato de email
-                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    if (!emailRegex.test(email)) {
-                        showModal('❌ Por favor, informe um email válido');
-                        emailInput.focus();
-                        return;
+                    console.log('💾 Salvando novo voluntário...');
+                    
+                    const { collection, getDocs, doc, setDoc } = window.firestoreMethods;
+                    
+                    // Se email não foi fornecido, gerar email fictício
+                    let finalEmail = email;
+                    if (!email || email === '') {
+                        // Criar email fictício baseado no nome
+                        let namePart = name.toLowerCase()
+                            .normalize('NFD')
+                            .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+                            .replace(/\s+/g, '-') // Substitui espaços por hífens
+                            .replace(/[^a-z0-9-]/g, '') // Remove caracteres especiais
+                            .replace(/^-+|-+$/g, ''); // Remove hífens no início e fim
+                        
+                        // Fallback se o nome não produziu caracteres válidos
+                        if (!namePart || namePart === '') {
+                            namePart = 'voluntario';
+                        }
+                        
+                        // Adicionar timestamp para garantir unicidade
+                        const timestamp = Date.now();
+                        finalEmail = `${namePart}-${timestamp}@sem-email.local`;
+                        console.log('📧 Email não fornecido, usando fictício:', finalEmail);
                     }
                     
                     // Verificar se email já existe (buscar todos os usuários e comparar case-insensitive)
-                    const { collection, getDocs, doc, setDoc } = window.firestoreMethods;
                     const usersRef = collection(window.firebaseDb, 'users');
                     const allUsersSnapshot = await getDocs(usersRef);
                     
@@ -7143,7 +7336,7 @@
                     let emailExists = false;
                     allUsersSnapshot.forEach((doc) => {
                         const userData = doc.data();
-                        if (userData.email && userData.email.toLowerCase() === email) {
+                        if (userData.email && userData.email.toLowerCase() === finalEmail) {
                             emailExists = true;
                         }
                     });
@@ -7153,8 +7346,6 @@
                         emailInput.focus();
                         return;
                     }
-                    
-                    console.log('💾 Salvando novo voluntário...');
                     
                     // Verificar se currentUser está disponível
                     if (!currentUser || !currentUser.uid) {
@@ -7169,17 +7360,19 @@
                     // Criar documento do voluntário
                     const volunteerData = {
                         displayName: name,
-                        email: email,
+                        email: finalEmail,
                         role: 'volunteer',
                         status: 'pre_registered', // Status especial para voluntários pré-cadastrados
+                        hasEmailAccess: !!email, // Flag para saber se tem email real
+                        isManuallyCreated: true, // Flag para identificar cadastro manual
                         createdAt: new Date().toISOString(),
                         createdBy: currentUser.uid,
                         createdByEmail: currentUser.email,
                         createdByName: currentUser.displayName
                     };
                     
-                    // Salvar no Firestore
-                    await setDoc(docFunction(window.firebaseDb, 'users', volunteerId), volunteerData);
+                    // Salvar no Firestore - FIX: usar 'doc' em vez de 'docFunction'
+                    await setDoc(doc(window.firebaseDb, 'users', volunteerId), volunteerData);
                     
                     console.log('✅ Novo voluntário salvo com sucesso!');
                     
