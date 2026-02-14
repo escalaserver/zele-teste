@@ -4633,13 +4633,12 @@
                         allEscalas.push({ id: doc.id, ...doc.data() });
                     });
 
-                    // Filtrar eventos visíveis (até 2h após início)
+                    // Filtrar apenas eventos futuros (data/hora ainda não chegou)
                     const now = new Date();
                     
                     const escalas = allEscalas.filter(escala => {
                         const eventDateTime = new Date(escala.date + 'T' + escala.time);
-                        const eventEndTime = new Date(eventDateTime.getTime() + (2 * 60 * 60 * 1000)); // 2h após início
-                        return eventEndTime > now; // Mostra até 2h após início
+                        return eventDateTime > now; // Mostra enquanto for futuro
                     });
 
                     // Ordenar por data e horário (ordem crescente)
@@ -4879,16 +4878,15 @@
                             return date;
                         });
                         
-                        // Filtrar apenas eventos futuros (até 1h após o início)
+                        // Filtrar apenas eventos futuros (data/hora ainda não chegou)
                         const now = new Date();
                         console.log('🔍 DEBUG - Data/hora atual:', now.toISOString());
                         const initialCount = availableDates.length;
                         availableDates = availableDates.filter(d => {
                             const [date, time] = d.value.split('|');
                             const eventDateTime = new Date(date + 'T' + time);
-                            const eventEndTime = new Date(eventDateTime.getTime() + (2 * 60 * 60 * 1000)); // 2h após início
-                            const isVisible = eventEndTime > now; // Visível até 2h após início
-                            console.log(`🔍 DEBUG - Evento: ${d.text} (${d.value}) → ${eventDateTime.toISOString()} → Fim janela: ${eventEndTime.toISOString()} → Visível? ${isVisible}`);
+                            const isVisible = eventDateTime > now; // Visível enquanto for futuro (data/hora ainda não chegou)
+                            console.log(`🔍 DEBUG - Evento: ${d.text} (${d.value}) → ${eventDateTime.toISOString()} → Visível? ${isVisible}`);
                             return isVisible;
                         });
                         
@@ -5147,8 +5145,7 @@
                     availableDates.forEach(dateObj => {
                         const [date, time] = dateObj.value.split('|');
                         const eventDateTime = new Date(date + 'T' + time);
-                        const eventEndTime = new Date(eventDateTime.getTime() + (1 * 60 * 60 * 1000));
-                        const isVisible = eventEndTime > nowForAvailable; // segue a regra de 1h após início
+                        const isVisible = eventDateTime > nowForAvailable; // evento ainda não chegou
                         const key = `${date}_${time}`;
                         if (isVisible && !grouped[key]) {
                             grouped[key] = {
@@ -5164,17 +5161,16 @@
                         }
                     });
 
-                    // Filtrar eventos visíveis (até 1h após início) ANTES de armazenar
+                    // Filtrar eventos visíveis (apenas futuros: data/hora ainda não chegou) ANTES de armazenar
                     const now = new Date();
                     const filteredGrouped = {};
                     
                     Object.keys(grouped).forEach(key => {
                         const data = grouped[key];
                         const eventDateTime = new Date(data.date + 'T' + data.time);
-                        const eventEndTime = new Date(eventDateTime.getTime() + (1 * 60 * 60 * 1000)); // 1h após início
-                        const isVisible = eventEndTime > now;
+                        const isVisible = eventDateTime > now; // evento ainda não começou
                         
-                        // Incluir eventos até 1h após o início
+                        // Incluir apenas eventos com data/hora no futuro
                         if (isVisible) {
                             filteredGrouped[key] = data;
                         }
